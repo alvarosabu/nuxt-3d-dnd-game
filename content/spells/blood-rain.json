@@ -1,0 +1,8 @@
+{
+  "name": "Blood Rain",
+  "slug": "blood-rain",
+  "icon": "uil:raindrops-alt",
+  "description": "A rain of blood that falls from the sky, dealing damage to all enemies in the area.",
+  "level": 1,
+  "school": "Necromancy"
+}

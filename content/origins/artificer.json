@@ -1,0 +1,30 @@
+{
+  "name": "Artificer",
+  "key": "artificer",
+  "model": "/models/characters/artificer/Artificer.glb",
+  "title": "Master Inventor",
+  "description": "A brilliant inventor who combines arcane magic with mechanical ingenuity. Using tools and expertise, they create magical devices and enhance mundane items with supernatural effects.",
+  "race": "dwarf",
+  "class": "artificer",
+  "stats": {
+    "str": 12,
+    "dex": 13,
+    "con": 14,
+    "int": 17,
+    "wis": 12,
+    "cha": 8
+  },
+  "proficiencies": {
+    "weapons": ["Simple Weapons", "Hand Crossbows", "Heavy Crossbows"],
+    "armor": ["Light Armor", "Medium Armor", "Shields"],
+    "skills": ["Arcana", "Investigation", "History", "Tinker's Tools", "Smith's Tools"]
+  },
+  "spells": [
+    "mending",
+    "magical-tinkering"
+  ],
+  "cantrips": [
+    "fire-bolt",
+    "guidance"
+  ]
+}

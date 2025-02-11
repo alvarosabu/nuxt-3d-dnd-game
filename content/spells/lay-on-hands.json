@@ -1,0 +1,8 @@
+{
+  "name": "Lay on Hands",
+  "slug": "lay-on-hands",
+  "icon": "game-icons:healing",
+  "description": "Your blessed touch can heal wounds",
+  "level": 1,
+  "school": "Evocation"
+}

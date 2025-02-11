@@ -1,0 +1,10 @@
+{
+  "name": "Elf",
+  "slug": "elf",
+  "description": "Elves are a magical people of otherworldly grace, living in places of ethereal beauty.",
+  "features": [
+    "Darkvision",
+    "Keen Senses",
+    "Fey Ancestry"
+  ]
+}

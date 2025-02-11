@@ -1,0 +1,8 @@
+{
+  "name": "Charm Person",
+  "slug": "charm-person",
+  "icon": "i-heroicons-sparkles",
+  "description": "This spell beguiles a creature you can see within range. For the duration, the target has advantage on Wisdom saving throws against your spells and you make Charisma checks with it.",
+  "level": 1,
+  "school": "Enchantment"
+}

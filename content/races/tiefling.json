@@ -1,0 +1,10 @@
+{
+  "name": "Tiefling",
+  "slug": "tiefling",
+  "description": "Bearing the infernal legacy of their ancestors, tieflings combine human ambition with supernatural power.",
+  "features": [
+    "Darkvision",
+    "Hellish Resistance",
+    "Infernal Legacy"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Paladin",
+  "slug": "paladin",
+  "icon": "/icons/classes/palading.svg",
+  "description": "Whether sworn before a god's altar and the witness of a priest, in a sacred glade before nature spirits and fey beings, or in a moment of desperation and grief with the dead as the only witness, a paladin's oath is a powerful bond.",
+  "hitDie": "d10",
+  "primaryAbility": "Charisma",
+  "savingThrows": ["Wisdom", "Charisma"],
+  "features": [
+    "Divine Sense",
+    "Lay on Hands",
+    "Divine Smite"
+  ]
+}

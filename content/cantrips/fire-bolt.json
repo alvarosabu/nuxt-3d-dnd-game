@@ -1,0 +1,7 @@
+{
+  "name": "Fire Bolt",
+  "slug": "fire-bolt",
+  "icon": "solar:bolt-circle-bold",
+  "description": "Hurl a mote of fire at a creature or object",
+  "school": "Evocation"
+}

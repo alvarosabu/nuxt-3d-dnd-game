@@ -1,0 +1,24 @@
+{
+  "name": "Druid",
+  "key": "druid",
+  "model": "/models/characters/druid/Druid.glb",
+  "title": "Nature's Guardian",
+  "description": "A druid is a guardian of nature, a bridge between the natural world and the human world. Druids combine martial prowess with divine magic.",
+  "race": "human",
+  "class": "druid",
+  "stats": {
+    "str": 10,
+    "dex": 12,
+    "con": 13,
+    "int": 8,
+    "wis": 15,
+    "cha": 10
+  },
+  "proficiencies": {
+    "weapons": ["Clubs", "Daggers", "Javelins", "Maces", "Quarterstaffs", "Scimitars", "Sickles", "Spears", "Tridents"],
+    "armor": ["Light Armour", "Medium Armour", "Shields"],
+    "skills": ["Arcana", "History", "Investigation", "Nature", "Stealth", "Survival"]
+  },
+  "spells": [],
+  "cantrips": []
+}

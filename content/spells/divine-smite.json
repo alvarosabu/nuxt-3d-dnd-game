@@ -1,0 +1,8 @@
+{
+  "name": "Divine Smite",
+  "slug": "divine-smite",
+  "icon": "solar:sledgehammer-bold",
+  "description": "Channel divine energy into your weapon strikes",
+  "level": 1,
+  "school": "Evocation"
+}

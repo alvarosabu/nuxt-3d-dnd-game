@@ -1,0 +1,15 @@
+{
+  "name": "Artificer",
+  "slug": "artificer",
+  "icon": "/icons/classes/artificer.svg",
+  "description": "Masters of invention, artificers use ingenuity and magic to create marvelous inventions. They see magic as a complex system waiting to be decoded and controlled.",
+  "hitDie": "d8",
+  "primaryAbility": "Intelligence",
+  "savingThrows": ["Constitution", "Intelligence"],
+  "features": [
+    "Magical Tinkering",
+    "Infuse Item",
+    "The Right Tool for the Job",
+    "Tool Expertise"
+  ]
+}

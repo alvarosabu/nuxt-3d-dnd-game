@@ -1,0 +1,11 @@
+{
+  "name": "Dwarf",
+  "slug": "dwarf",
+  "description": "Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal.",
+  "features": [
+    "Darkvision",
+    "Dwarven Resilience",
+    "Stonecunning",
+    "Tool Proficiency"
+  ]
+}

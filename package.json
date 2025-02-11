@@ -1,0 +1,36 @@
+{
+  "name": "fardus-gate",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@nuxt/content": "^3.1.0",
+    "@nuxt/ui": "3.0.0-alpha.12",
+    "@pinia/nuxt": "^0.9.0",
+    "@tresjs/cientos": "^4.1.0",
+    "@tresjs/nuxt": "^3.0.7",
+    "@vueuse/core": "^12.5.0",
+    "@vueuse/nuxt": "^12.5.0",
+    "gsap": "^3.12.7",
+    "nuxt": "^3.15.4",
+    "pinia": "^2.3.1",
+    "three": "^0.173.0",
+    "three-stdlib": "^2.35.13",
+    "vue": "3.5.13",
+    "vue-router": "4.5.0"
+  },
+  "devDependencies": {
+    "@tresjs/eslint-config": "^1.4.0",
+    "@types/three": "^0.173.0",
+    "typescript": "^5.7.3",
+    "unocss": "^65.4.3"
+  }
+}

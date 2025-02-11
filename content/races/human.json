@@ -1,0 +1,10 @@
+{
+  "name": "Human",
+  "slug": "human",
+  "description": "The most common face in Faerûn, humans are known for their tenacity, creativity, and endless capacity for growth.",
+  "features": [
+    "Versatile",
+    "Extra Feat",
+    "Skilled"
+  ]
+}

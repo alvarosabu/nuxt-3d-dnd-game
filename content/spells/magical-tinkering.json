@@ -1,0 +1,8 @@
+{
+  "name": "Magical Tinkering",
+  "slug": "magical-tinkering",
+  "icon": "solar:wrench-bold",
+  "description": "Imbue tiny objects with minor magical effects",
+  "level": 1,
+  "school": "Transmutation"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Druid",
+  "slug": "druid",
+  "icon": "/icons/classes/druid.svg",
+  "description": "A druid is a guardian of nature, a bridge between the natural world and the human world. Druids combine martial prowess with divine magic.",
+  "hitDie": "d10",
+  "primaryAbility": "Strength",
+  "savingThrows": ["Dexterity", "Intelligence"],
+  "features": [
+
+  ]
+
+}

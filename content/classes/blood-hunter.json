@@ -1,0 +1,14 @@
+{
+  "name": "Blood Hunter",
+  "slug": "blood-hunter",
+  "icon": "/icons/classes/blood-hunter.svg",
+  "description": "Through the sacrifice of their own vitality and humanity, blood hunters can tap into dark powers to destroy the evil that plagues the realm.",
+  "hitDie": "d10",
+  "primaryAbility": "Strength",
+  "savingThrows": ["Dexterity", "Intelligence"],
+  "features": [
+    "Blood Curse",
+    "Crimson Rite",
+    "Blood Maledict"
+  ]
+}

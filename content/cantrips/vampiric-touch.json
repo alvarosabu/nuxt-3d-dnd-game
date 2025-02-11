@@ -1,0 +1,8 @@
+{
+  "name": "Vampiric Touch",
+  "slug": "vampiric-touch",
+  "icon": "i-heroicons-heart",
+  "description": "This spell drains the life force of a creature you touch, transferring it to your own life force.",
+  "level": 1,
+  "school": "Necromancy"
+}

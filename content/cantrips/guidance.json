@@ -1,0 +1,7 @@
+{
+  "name": "Guidance",
+  "slug": "guidance",
+  "icon": "solar:stars-bold",
+  "description": "Divine guidance improves a creature's ability checks",
+  "school": "Divination"
+}
