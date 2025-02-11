@@ -1,41 +1,51 @@
 import { defineStore } from 'pinia'
+import type { Player, Session } from '~/types'
 
-interface Player {
-  id: string
-  name: string
-  isHost: boolean
-}
+export const useMultiplayerStore = defineStore('multiplayer', () => {
+  // State
+  const sessionId = ref<string | null>(null)
+  const players = ref<Player[]>([])
+  const isHost = ref(false)
+  const connected = ref(false)
 
-interface MultiplayerState {
-  sessionId: string | null
-  players: Player[]
-  isHost: boolean
-  connected: boolean
-}
+  // Actions
+  function setSessionId(id: string) {
+    sessionId.value = id
+  }
 
-export const useMultiplayerStore = defineStore('multiplayer', {
-  state: (): MultiplayerState => ({
-    sessionId: null,
-    players: [],
-    isHost: false,
-    connected: false,
-  }),
+  function addPlayer(player: Player) {
+    players.value.push(player)
+  }
 
-  actions: {
-    setSessionId(id: string) {
-      this.sessionId = id
-    },
-    addPlayer(player: Player) {
-      this.players.push(player)
-    },
-    removePlayer(playerId: string) {
-      this.players = this.players.filter(p => p.id !== playerId)
-    },
-    setIsHost(isHost: boolean) {
-      this.isHost = isHost
-    },
-    setConnected(connected: boolean) {
-      this.connected = connected
-    },
-  },
+  function removePlayer(playerId: string) {
+    players.value = players.value.filter(p => p.id !== playerId)
+  }
+
+  function setIsHost(value: boolean) {
+    isHost.value = value
+  }
+
+  function setConnected(value: boolean) {
+    connected.value = value
+  }
+
+  function setPlayers(newPlayers: Player[]) {
+    players.value = newPlayers
+  }
+
+  // Return everything that should be exposed
+  return {
+    // State
+    sessionId,
+    players,
+    isHost,
+    connected,
+    // Actions
+    setSessionId,
+    addPlayer,
+    removePlayer,
+    setIsHost,
+    setConnected,
+    setPlayers,
+  }
 })

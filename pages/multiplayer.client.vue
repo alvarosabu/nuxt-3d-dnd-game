@@ -1,17 +1,35 @@
 <script setup lang="ts">
 import { useMultiplayerStore } from '~/stores/useMultiplayerStore'
+import { useGuestUser } from '~/composables/useGuestUser'
 import UiJoinRequestModal from '~/components/ui/JoinRequestModal.vue'
 
 const store = useMultiplayerStore()
-const playerName = ref('')
+const { username, userId, updateUsername } = useGuestUser()
+
+// Use username from guest user system
+const playerName = ref(username.value)
 const sessionId = ref('')
 const isCreatingSession = ref(false)
+const isEditingName = ref(false)
 
 // Join request modal state
 const modal = useModal()
 const pendingJoinRequest = ref<{ player: any, resolve: (value: boolean) => void } | null>(null)
 
 const { status, send, data } = useWebSocket('ws://localhost:3000/api/websocket')
+
+// Watch for changes in the guest username
+watch(username, (newUsername) => {
+  playerName.value = newUsername
+})
+
+// Handle username edit
+const handleUsernameEdit = (newUsername: string) => {
+  if (newUsername.trim()) {
+    updateUsername(newUsername)
+    isEditingName.value = false
+  }
+}
 
 // Create new session when name is entered
 watch(playerName, (newName) => {
@@ -45,14 +63,14 @@ watch(data, (newData) => {
       console.log('Session created:', message.session)
       store.setSessionId(message.session.id)
       store.setIsHost(true)
-      store.players = message.session.players
+      store.setPlayers(message.session.players)
       store.setConnected(true)
       break
 
     case 'SESSION_STATE':
       console.log('Received session state:', message.session)
       store.setSessionId(message.session.id)
-      store.players = message.session.players
+      store.setPlayers(message.session.players)
       break
 
     case 'JOIN_REQUEST':
@@ -76,7 +94,7 @@ watch(data, (newData) => {
       store.addPlayer(message.player)
       // Update full session state if provided
       if (message.session) {
-        store.players = message.session.players
+        store.setPlayers(message.session.players)
       }
       if (message.player.id === store.sessionId) {
         store.setConnected(true)
@@ -84,7 +102,7 @@ watch(data, (newData) => {
       break
 
     case 'JOIN_ACCEPTED':
-      store.players = message.session.players
+      store.setPlayers(message.session.players)
       store.setConnected(true)
       break
 
@@ -128,22 +146,37 @@ const joinSession = () => {
 <template>
   <div class="p-4">
     <!-- Connection Status -->
-    <div class="mb-4">
-      Connection Status: {{ status }}
+    <div class="mb-4 flex items-center justify-between">
+      <div>Connection Status: {{ status }}</div>
+
+      <!-- Username display/edit -->
+      <div class="flex items-center gap-2">
+        <template v-if="isEditingName">
+          <UInput
+            v-model="playerName"
+            placeholder="Enter your name"
+            @keyup.enter="handleUsernameEdit(playerName)"
+            @blur="handleUsernameEdit(playerName)"
+          />
+        </template>
+        <template v-else>
+          <span>Playing as: {{ playerName }}</span>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-pencil-square"
+            square
+            size="xs"
+            @click="isEditingName = true"
+          />
+        </template>
+      </div>
     </div>
 
     <div v-if="!store.connected" class="space-y-4">
       <!-- Create or Join Session Form -->
       <div class="max-w-md mx-auto bg-gray-100 p-6 rounded-lg">
         <h2 class="text-xl font-bold mb-4">Join Multiplayer Session</h2>
-
-        <UInput
-          v-model="playerName"
-          label="Your Name"
-          placeholder="Enter your name"
-          :help="isCreatingSession ? 'Enter your name to create session' : undefined"
-          class="mb-4"
-        />
 
         <div class="space-y-4">
           <!-- Host: Create New Session -->
@@ -152,10 +185,9 @@ const joinSession = () => {
             <UButton
               block
               color="primary"
-              :loading="isCreatingSession"
               @click="createSession"
             >
-              {{ isCreatingSession ? 'Enter Your Name...' : 'Create New Session' }}
+              Create New Session
             </UButton>
           </div>
 
