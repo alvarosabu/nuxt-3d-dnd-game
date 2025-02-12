@@ -7,35 +7,59 @@ const connectedPeers = new Map<string, any>()
 
 export default defineWebSocketHandler({
   open: (peer) => {
-    console.log('Client connected', peer.id)
+    console.log(`[WS] Client connected: ${peer.id}`)
     connectedPeers.set(peer.id, peer)
   },
 
   message: (peer, message) => {
-    console.log('Received message from client:', message)
     const data = JSON.parse(message as string)
+    console.log(`[WS] Message from ${peer.id}:`, data)
 
     switch (data.type) {
       case 'CREATE_SESSION':
-        console.log('Creating new session for:', data.playerName)
         const session: Session = {
-          id: Math.random().toString(36).substring(7),
+          id: data.lobby.id,
+          name: data.lobby.name,
           players: [{
             id: peer.id,
-            name: data.playerName,
+            name: data.lobby.hostName,
             isHost: true,
           }],
           hostId: peer.id,
+          maxPlayers: data.lobby.maxPlayers,
         }
+        console.log(`[WS] Session ${session.id} created by ${data.lobby.hostName}`)
         sessions.set(session.id, session)
         peer.subscribe(session.id)
+        console.log(`[WS] Subscribed ${peer.id} to session ${session.id}`)
         peer.send(JSON.stringify({
           type: 'SESSION_CREATED',
           session,
         }))
         break
 
+      case 'DELETE_SESSION':
+        const sessionToDelete = sessions.get(data.sessionId)
+        if (sessionToDelete && peer.id === sessionToDelete.hostId) {
+          // Notify all players in the session
+          sessionToDelete.players.forEach((player) => {
+            const playerPeer = connectedPeers.get(player.id)
+            if (playerPeer) {
+              playerPeer.send(JSON.stringify({
+                type: 'SESSION_DELETED',
+                sessionId: data.sessionId,
+              }))
+            }
+          })
+
+          // Delete the session
+          sessions.delete(data.sessionId)
+        }
+        break
+
       case 'JOIN_SESSION':
+        console.log(`[WS] Join request for session ${data.sessionId} from ${data.player.name}`)
+        console.log(`[WS] Sessions:`, sessions)
         const existingSession = sessions.get(data.sessionId)
         if (existingSession) {
           // Subscribe the joining peer to the session
@@ -43,18 +67,21 @@ export default defineWebSocketHandler({
 
           const joiningPlayer = {
             id: peer.id,
-            name: data.playerName,
+            name: data.player.name,
             isHost: false,
           }
 
           // Get host peer and send join request
           const hostPeer = connectedPeers.get(existingSession.hostId)
           if (hostPeer) {
-            console.log('Sending join request to host:', existingSession.hostId)
+            console.log(`[WS] Sending join request to host ${existingSession.hostId}`)
             hostPeer.send(JSON.stringify({
               type: 'JOIN_REQUEST',
               player: joiningPlayer,
             }))
+          }
+          else {
+            console.log(`[WS] Host ${existingSession.hostId} not found`)
           }
 
           peer.send(JSON.stringify({
@@ -107,7 +134,6 @@ export default defineWebSocketHandler({
   },
 
   close: (peer) => {
-    console.warn('Client disconnected', peer.id)
     connectedPeers.delete(peer.id)
     // Remove player from their session
     sessions.forEach((session, sessionId) => {

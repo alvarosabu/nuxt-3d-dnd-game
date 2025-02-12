@@ -8,11 +8,12 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/content',
+    'pinia-plugin-persistedstate/nuxt',
   ],
   css: ['~/assets/css/main.css'],
   routeRules: {
     '/': {
-      ssr: true,
+      ssr: false,
     },
     '/campaign/**': { ssr: true },
     '/character/**': { ssr: false },

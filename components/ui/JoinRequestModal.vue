@@ -7,16 +7,16 @@ defineProps<{
   }
 }>()
 
-const emit = defineEmits(['success', 'close'])
+const emit = defineEmits(['accept', 'reject'])
 const modal = useModal()
 
-function onSuccess() {
-  emit('success')
+function onAccept() {
+  emit('accept')
   modal.close()
 }
 
-function onClose() {
-  emit('close')
+function onReject() {
+  emit('reject')
   modal.close()
 }
 </script>
@@ -30,8 +30,8 @@ function onClose() {
     </template>
     <template #footer>
       <div class="flex gap-2">
-        <UButton color="neutral" label="Close" @click="onClose" />
-        <UButton label="Accept" @click="onSuccess" />
+        <UButton color="neutral" label="Reject" @click="onReject" />
+        <UButton label="Accept" @click="onAccept" />
       </div>
     </template>
   </UModal>
