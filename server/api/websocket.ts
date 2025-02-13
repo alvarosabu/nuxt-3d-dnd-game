@@ -96,6 +96,15 @@ function leaveLobby(lobbyId: string, peerId: string) {
   }
 }
 
+function playerReady(peer: any, lobbyId: string, value: boolean) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
+    if (player) {
+      player.ready = value
+    }
+  }
+}
 function broadcastMessage(message) {
   connectedPeers.forEach((p) => {
     p.send(JSON.stringify(message))
@@ -150,6 +159,9 @@ export default defineWebSocketHandler({
       FLUSH_LOBBIES: () => {
         flushLobbies()
       },
+      PLAYER_READY: (peer: any, data: any) => {
+        playerReady(peer, data.lobbyId, data.value)
+      },
     }
 
     // Handle the message using the handler map
@@ -160,6 +172,7 @@ export default defineWebSocketHandler({
       syncState()
     }
     else {
+      console.warn(`[WS], ${messageHandlers}`)
       console.warn(`[WS] Unknown message type: ${data.type}`)
     }
   },

@@ -2,6 +2,7 @@
 import { useUserStore } from '~/stores/useUserStore'
 
 import { useClipboard } from '@vueuse/core'
+import type { Player } from '~/types'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
@@ -112,8 +113,24 @@ const handleDeleteLobby = (lobbyId: string) => {
   }))
 }
 
+const togglePlayerReady = (player: Player) => {
+  send(JSON.stringify({
+    type: 'PLAYER_READY',
+    value: !player.ready,
+    playerId: player.id,
+    lobbyId: currentLobby.value?.id,
+  }))
+}
+
 const selectCurrentLobby = (lobbyId: string) => {
   lobbyStore.setCurrentLobby(lobbyId)
+}
+
+const handleStartGame = () => {
+  send(JSON.stringify({
+    type: 'START_GAME',
+    lobbyId: currentLobby.value?.id,
+  }))
 }
 
 // Cleanup on unmount
@@ -373,6 +390,14 @@ onBeforeUnmount(() => {
             </div>
             <div class="flex gap-2">
               <UButton
+                color="primary"
+                variant="soft"
+                icon="i-heroicons-link"
+                @click="copy(currentLobby?.id ?? '')"
+              >
+                {{ copied ? 'Copied!' : `${currentLobby?.id}` }}
+              </UButton>
+              <UButton
                 v-if="isCurrentPlayerHost"
                 color="error"
                 variant="soft"
@@ -397,7 +422,7 @@ onBeforeUnmount(() => {
             <h4 class="text-sm font-medium text-slate-400 mb-3">
               Players
             </h4>
-            <div class="grid grid-cols-4 gap-2">
+            <div v-if="currentLobby" class="grid grid-cols-4 gap-2">
               <UBadge
                 v-for="player in currentLobby?.players"
                 :key="player.id"
@@ -405,7 +430,7 @@ onBeforeUnmount(() => {
                 variant="subtle"
                 class="px-3 py-1"
               >
-                <div class="w-full flex flex-col items-center gap-2 p-8">
+                <div class="w-full flex flex-col justify-start items-center gap-2 p-8">
                   <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xl" />
                   <div class="flex items-center gap-2">
                     {{ player.name }} <span v-if="player.id === userStore.userId">(You)</span>
@@ -421,6 +446,7 @@ onBeforeUnmount(() => {
                     label="Ready"
                     :icon="player.ready ? 'i-heroicons-check' : null"
                     size="sm"
+                    @click="togglePlayerReady(player)"
                   />
                   <UBadge
                     v-else
@@ -433,26 +459,41 @@ onBeforeUnmount(() => {
                   </UBadge>
                 </div>
               </UBadge>
+              <UBadge
+                v-for="player in Array.from({ length: currentLobby?.maxPlayers - (currentLobby?.players?.length || 0) }, () => ({
+                  name: 'Open',
+                }))"
+                :key="player"
+                color="primary"
+                variant="subtle"
+                class="px-3 py-1"
+              >
+                <div class="w-full flex flex-col items-center gap-2 p-8">
+                  <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xl" />
+                  <div class="flex items-center gap-2">
+                    {{ player.name }} <span v-if="player.id === userStore.userId">(You)</span>
+                    <UIcon
+                      v-if="player.isHost"
+                      name="i-mdi-crown"
+                      class="text-primary"
+                    />
+                  </div>
+                </div>
+              </UBadge>
             </div>
           </div>
-
-          <div>
-            <h4 class="text-sm font-medium text-slate-400 mb-2">
-              Share Lobby
-            </h4>
-            <UButton
-              :text="currentLobby?.id"
-              class="w-full bg-slate-900/50"
-              variant="outline"
-              color="primary"
-              @click="copy(currentLobby?.id ?? '')"
-            >
-              <div class="flex items-center justify-center gap-2">
-                <UIcon name="i-heroicons-link" />
-                {{ copied ? 'Copied!' : `Copy Lobby ID: ${currentLobby?.id}` }}
-              </div>
-            </UButton>
-          </div>
+        </div>
+        <div class="space-y-4 p-8 flex items-center justify-center">
+          <UButton
+            v-if="currentLobby?.players.filter(player => player.ready).length === currentLobby?.maxPlayers && userStore.username === currentLobby?.hostName"
+            size="lg"
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-arrow-left-on-rectangle"
+            @click="handleStartGame"
+          >
+            Start Game
+          </UButton>
         </div>
       </UCard>
     </UContainer>

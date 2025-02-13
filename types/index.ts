@@ -88,6 +88,7 @@ export interface Player {
   id: string
   name: string
   isHost: boolean
+  ready: boolean
 }
 
 export interface Session {
