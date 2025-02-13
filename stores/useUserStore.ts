@@ -55,6 +55,7 @@ export const useUserStore = defineStore(
       avatar,
       isConnected,
       isEditingUsername,
+      peerId,
       // Actions
       setUsername,
       setPeerId,

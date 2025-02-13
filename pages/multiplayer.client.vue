@@ -4,22 +4,44 @@ import { useUserStore } from '~/stores/useUserStore'
 import { useClipboard } from '@vueuse/core'
 
 const userStore = useUserStore()
+const lobbyStore = useLobbyStore()
 
+const { availableLobbies, currentLobby } = storeToRefs(lobbyStore)
 // Websocket
 const { data, send, message, error, status, open, close } = useWebSocket('/api/websocket', {
   immediate: true,
   autoReconnect: true,
 })
 
+userStore.isConnected = false
+
+const handleUserConnection = () => {
+  send(JSON.stringify({
+    type: 'PLAYER_CONNECTION_REQUEST',
+    userId: userStore.userId,
+    username: userStore.username,
+  }))
+}
+
+const handleUserDisconnection = () => {
+  send(JSON.stringify({
+    type: 'PLAYER_DISCONNECTION_REQUEST',
+  }))
+  userStore.isConnected = false
+}
+
 watch(data, (newData) => {
   const data = JSON.parse(newData)
   if (data.type === 'CONNECTION_ESTABLISHED') {
     userStore.setPeerId(data.peerId)
+    handleUserConnection()
   }
-})
-
-watch(status, (newStatus) => {
-  userStore.isConnected = newStatus === 'OPEN'
+  if (data.type === 'PLAYER_CONNECTION_RESPONSE') {
+    userStore.isConnected = true
+  }
+  if (data.type === 'SYNC_STATE') {
+    lobbyStore.setLobbies(data.lobbies)
+  }
 })
 
 // Clipboard handling
@@ -45,7 +67,17 @@ const isCurrentPlayerHost = ref(false)
  * Creates a new lobby with current user as host
  */
 const handleCreateLobby = () => {
+  send(JSON.stringify({
+    type: 'CREATE_LOBBY',
+    lobbyName: lobbyFormState.lobbyName,
+    maxPlayers: lobbyFormState.maxPlayers,
+  }))
+}
 
+const handleFlushLobbies = () => {
+  send(JSON.stringify({
+    type: 'FLUSH_LOBBIES',
+  }))
 }
 
 /**
@@ -64,7 +96,7 @@ const handleDeleteLobby = (lobbyId: string) => {
 }
 
 const selectCurrentLobby = (lobbyId: string) => {
-
+  lobbyStore.setCurrentLobby(lobbyId)
 }
 
 // Cleanup on unmount
@@ -111,7 +143,7 @@ onBeforeUnmount(() => {
               color="primary"
               variant="soft"
               :icon="userStore.isConnected ? 'i-mdi-lan-disconnect' : 'i-mdi-lan-connect'"
-              @click="userStore.isConnected ? close(1000) : open()"
+              @click="userStore.isConnected ? handleUserDisconnection() : handleUserConnection()"
             />
           </div>
         </UCard>
@@ -139,6 +171,12 @@ onBeforeUnmount(() => {
                 >
                   {{ availableLobbies?.length }} Active
                 </UBadge>
+                <UButton
+                  color="primary"
+                  variant="ghost"
+                  icon="i-heroicons-trash"
+                  @click="handleFlushLobbies"
+                />
               </div>
             </template>
 
@@ -156,10 +194,17 @@ onBeforeUnmount(() => {
                         {{ lobby.name }}
                       </h3>
                       <div class="flex items-center gap-2 text-sm text-slate-400">
-                        <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${lobby.hostName}`" size="xs" />
                         <span>{{ lobby.hostName }}</span>
                       </div>
                     </div>
+                    <UAvatarGroup>
+                      <UAvatar
+                        v-for="player in lobby.players"
+                        :key="player.id"
+                        :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`"
+                        size="xs"
+                      />
+                    </UAvatarGroup>
                     <div class="flex items-center gap-3">
                       <UBadge color="warning" variant="subtle" class="px-2">
                         {{ lobby.players.length }}/{{ lobby.maxPlayers }}
@@ -342,13 +387,20 @@ onBeforeUnmount(() => {
                 variant="subtle"
                 class="px-3 py-1"
               >
-                <div class="flex items-center gap-2">
-                  <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xs" />
+                <div class="w-full flex flex-col items-center gap-2 p-8">
+                  <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xl" />
                   {{ player.name }}
                   <UIcon
                     v-if="player.isHost"
-                    name="i-heroicons-crown-20-solid"
+                    name="i-mdi-crown"
                     class="text-primary"
+                  />
+                  <UButton
+                    v-if="player.isHost"
+                    color="primary"
+                    label="Ready"
+                    :icon="player.ready ? 'i-heroicons-check' : null"
+                    size="sm"
                   />
                 </div>
               </UBadge>
