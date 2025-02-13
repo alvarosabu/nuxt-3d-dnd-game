@@ -48,11 +48,13 @@ export const useLobbyStore = defineStore(
     }
 
     const setLobbies = (syncedLobbies: Lobby[]) => {
+      lobbies.value = {}
       if (syncedLobbies.length > 0) {
         syncedLobbies.forEach((lobby) => {
           lobbies.value[lobby.id] = lobby
         })
       }
+      setCurrentLobby(syncedLobbies[0].id)
     }
 
     return {

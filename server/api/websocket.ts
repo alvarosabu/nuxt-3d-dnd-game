@@ -66,8 +66,34 @@ function createLobby(name: string, hostPeerId: string, maxPlayers = 4) {
   lobbies.set(id, lobby)
 }
 
+function deleteLobby(lobbyId: string) {
+  lobbies.delete(lobbyId)
+}
+
 function flushLobbies() {
   lobbies.clear()
+}
+
+function joinLobby(lobbyId: string, peerId: string) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    if (lobby.players.length < lobby.maxPlayers) {
+      lobby.players.push({
+        id: peerToPlayer.get(peerId),
+        name: players.get(peerToPlayer.get(peerId))?.username,
+        character: null,
+        isHost: false,
+        ready: false,
+      })
+    }
+  }
+}
+
+function leaveLobby(lobbyId: string, peerId: string) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    lobby.players = lobby.players.filter(player => player.id !== peerToPlayer.get(peerId))
+  }
 }
 
 function broadcastMessage(message) {
@@ -111,6 +137,15 @@ export default defineWebSocketHandler({
       },
       CREATE_LOBBY: (peer: any, data: any) => {
         createLobby(data.lobbyName, peer.id, data.maxPlayers)
+      },
+      DELETE_LOBBY: (peer: any, data: any) => {
+        deleteLobby(data.lobbyId)
+      },
+      JOIN_LOBBY_REQUEST: (peer: any, data: any) => {
+        joinLobby(data.lobbyId, peer.id)
+      },
+      LEAVE_LOBBY: (peer: any, data: any) => {
+        leaveLobby(data.lobbyId, peer.id)
       },
       FLUSH_LOBBIES: () => {
         flushLobbies()

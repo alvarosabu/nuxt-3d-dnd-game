@@ -27,6 +27,7 @@ export const useUserStore = defineStore(
      */
     const setUsername = (newUsername: string) => {
       username.value = newUsername
+      userId.value = Math.random().toString(36).substring(2, 15)
       updateAvatar()
     }
 

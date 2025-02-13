@@ -30,6 +30,13 @@ const handleUserDisconnection = () => {
   userStore.isConnected = false
 }
 
+const handleLeaveLobby = () => {
+  send(JSON.stringify({
+    type: 'LEAVE_LOBBY',
+    lobbyId: currentLobby.value?.id,
+  }))
+}
+
 watch(data, (newData) => {
   const data = JSON.parse(newData)
   if (data.type === 'CONNECTION_ESTABLISHED') {
@@ -40,6 +47,7 @@ watch(data, (newData) => {
     userStore.isConnected = true
   }
   if (data.type === 'SYNC_STATE') {
+    console.log('Syncing state', data)
     lobbyStore.setLobbies(data.lobbies)
   }
 })
@@ -84,15 +92,24 @@ const handleFlushLobbies = () => {
  * Joins an existing lobby by ID
  */
 const handleJoinLobby = (lobbyId: string) => {
-
+  send(JSON.stringify({
+    type: 'JOIN_LOBBY_REQUEST',
+    lobbyId,
+  }))
 }
 
 const handleJoinLobbyRequest = () => {
-
+  send(JSON.stringify({
+    type: 'JOIN_LOBBY_REQUEST',
+    lobbyId: lobbyIdToJoin.lobbyId,
+  }))
 }
 
 const handleDeleteLobby = (lobbyId: string) => {
-
+  send(JSON.stringify({
+    type: 'DELETE_LOBBY',
+    lobbyId,
+  }))
 }
 
 const selectCurrentLobby = (lobbyId: string) => {
@@ -197,12 +214,12 @@ onBeforeUnmount(() => {
                         <span>{{ lobby.hostName }}</span>
                       </div>
                     </div>
-                    <UAvatarGroup>
+                    <UAvatarGroup v-if="lobby.players.length > 0">
                       <UAvatar
                         v-for="player in lobby.players"
                         :key="player.id"
                         :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`"
-                        size="xs"
+                        :alt="player.name"
                       />
                     </UAvatarGroup>
                     <div class="flex items-center gap-3">
@@ -235,7 +252,7 @@ onBeforeUnmount(() => {
                 class="text-center py-12 px-4"
               >
                 <UIcon
-                  name="i-heroicons-globe-alt"
+                  name="i-mdi-lan"
                   class="text-4xl text-slate-600 mb-2 mx-auto"
                 />
                 <p class="text-slate-400 mb-1">
@@ -367,6 +384,7 @@ onBeforeUnmount(() => {
                 color="error"
                 variant="soft"
                 icon="i-heroicons-arrow-left-on-rectangle"
+                @click="handleLeaveLobby"
               >
                 Leave
               </UButton>
@@ -383,25 +401,36 @@ onBeforeUnmount(() => {
               <UBadge
                 v-for="player in currentLobby?.players"
                 :key="player.id"
-                :color="player.isHost ? 'primary' : 'secondary'"
+                :color="player.isHost ? 'primary' : player.id === userStore.userId ? 'success' : 'secondary'"
                 variant="subtle"
                 class="px-3 py-1"
               >
                 <div class="w-full flex flex-col items-center gap-2 p-8">
                   <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xl" />
-                  {{ player.name }}
-                  <UIcon
-                    v-if="player.isHost"
-                    name="i-mdi-crown"
-                    class="text-primary"
-                  />
+                  <div class="flex items-center gap-2">
+                    {{ player.name }} <span v-if="player.id === userStore.userId">(You)</span>
+                    <UIcon
+                      v-if="player.isHost"
+                      name="i-mdi-crown"
+                      class="text-primary"
+                    />
+                  </div>
                   <UButton
-                    v-if="player.isHost"
+                    v-if="player.id === userStore.userId"
                     color="primary"
                     label="Ready"
                     :icon="player.ready ? 'i-heroicons-check' : null"
                     size="sm"
                   />
+                  <UBadge
+                    v-else
+                    color="primary"
+                    variant="subtle"
+                    class="px-3 py-1"
+                    :icon="player.ready ? 'i-heroicons-check' : null"
+                  >
+                    Ready
+                  </UBadge>
                 </div>
               </UBadge>
             </div>
