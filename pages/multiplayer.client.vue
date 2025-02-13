@@ -1,10 +1,26 @@
 <script setup lang="ts">
 import { useUserStore } from '~/stores/useUserStore'
-import { useLobbyStore } from '~/stores/useLobbyStore'
+
 import { useClipboard } from '@vueuse/core'
-import { useMultiplayerSocket } from '~/composables/useMultiplayerSocket'
 
 const userStore = useUserStore()
+
+// Websocket
+const { data, send, message, error, status, open, close } = useWebSocket('/api/websocket', {
+  immediate: true,
+  autoReconnect: true,
+})
+
+watch(data, (newData) => {
+  const data = JSON.parse(newData)
+  if (data.type === 'CONNECTION_ESTABLISHED') {
+    userStore.setPeerId(data.peerId)
+  }
+})
+
+watch(status, (newStatus) => {
+  userStore.isConnected = newStatus === 'OPEN'
+})
 
 // Clipboard handling
 const { copy, copied } = useClipboard()
@@ -23,61 +39,37 @@ const lobbyIdToJoin = reactive({
 const isCreatingLobby = ref(false)
 const isJoiningLobby = ref(false)
 
-const lobbyStore = useLobbyStore()
-const {
-  joinLobby,
-  setCurrentLobby,
-  leaveLobby,
-  createLobby,
-  isCurrentPlayerHost,
-} = lobbyStore
-
-const { availableLobbies, currentLobby, currentLobbyId } = storeToRefs(lobbyStore)
-
-const { handleJoinRequest, deleteSession } = useMultiplayerSocket()
+const isCurrentPlayerHost = ref(false)
 
 /**
  * Creates a new lobby with current user as host
  */
 const handleCreateLobby = () => {
-  if (!lobbyFormState.lobbyName.trim()) { return }
-  createLobby(lobbyFormState.lobbyName.trim(), {
-    id: userStore.userId,
-    name: userStore.username,
-  }, lobbyFormState.maxPlayers)
-  lobbyFormState.lobbyName = ''
+
 }
 
 /**
  * Joins an existing lobby by ID
  */
 const handleJoinLobby = (lobbyId: string) => {
-  joinLobby(lobbyId, {
-    id: userStore.userId,
-    name: userStore.username,
-  })
 
-  lobbyIdToJoin.lobbyId = ''
 }
 
 const handleJoinLobbyRequest = () => {
-  handleJoinRequest(lobbyIdToJoin.lobbyId, {
-    id: userStore.userId,
-    name: userStore.username,
-  })
 
-  lobbyIdToJoin.lobbyId = ''
 }
 
 const handleDeleteLobby = (lobbyId: string) => {
-  deleteSession(lobbyId)
+
+}
+
+const selectCurrentLobby = (lobbyId: string) => {
+
 }
 
 // Cleanup on unmount
 onBeforeUnmount(() => {
-  if (currentLobbyId) {
-    leaveLobby(userStore.username)
-  }
+
 })
 </script>
 
@@ -99,15 +91,28 @@ onBeforeUnmount(() => {
           class="bg-slate-800/50 backdrop-blur ring-slate-700  border-slate-700"
         >
           <div class="flex items-center gap-3">
-            <UAvatar
-              :src="userStore.avatar"
-              size="sm"
-              class="ring-2 ring-gold-500/50"
-            />
+            <UChip
+              color="success"
+              :show="userStore.isConnected"
+              inset
+            >
+              <UAvatar
+                :src="userStore.avatar"
+                size="sm"
+                class="ring-2 ring-gold-500/50"
+              />
+            </UChip>
+
             <div class="flex flex-col">
               <span class="text-sm text-slate-300">Playing as</span>
               <span class="text-gold-500 font-medium">{{ userStore.username }}</span>
             </div>
+            <UButton
+              color="primary"
+              variant="soft"
+              :icon="userStore.isConnected ? 'i-mdi-lan-disconnect' : 'i-mdi-lan-connect'"
+              @click="userStore.isConnected ? close(1000) : open()"
+            />
           </div>
         </UCard>
       </div>
@@ -128,22 +133,22 @@ onBeforeUnmount(() => {
                   </h2>
                 </div>
                 <UBadge
-                  :color="availableLobbies.length ? 'warning' : 'error'"
+                  :color="availableLobbies?.length ? 'warning' : 'error'"
                   variant="subtle"
                   class="px-3 py-1"
                 >
-                  {{ availableLobbies.length }} Active
+                  {{ availableLobbies?.length }} Active
                 </UBadge>
               </div>
             </template>
 
             <div class="space-y-3">
-              <template v-if="availableLobbies.length">
+              <template v-if="availableLobbies?.length">
                 <UCard
                   v-for="lobby in availableLobbies"
                   :key="lobby.id"
                   class="bg-slate-800/30 hover:bg-slate-800/50 cursor-pointer ring-slate-700 hover:ring-gold-500/50 transition-all duration-300"
-                  @click="setCurrentLobby(lobby.id)"
+                  @click="selectCurrentLobby(lobby.id)"
                 >
                   <div class="flex items-center justify-between">
                     <div>
@@ -310,7 +315,6 @@ onBeforeUnmount(() => {
                 color="error"
                 variant="soft"
                 icon="i-heroicons-trash"
-                @click="deleteSession(currentLobby?.id)"
               >
                 Delete Lobby
               </UButton>
@@ -318,7 +322,6 @@ onBeforeUnmount(() => {
                 color="error"
                 variant="soft"
                 icon="i-heroicons-arrow-left-on-rectangle"
-                @click="leaveLobby(userStore.username)"
               >
                 Leave
               </UButton>

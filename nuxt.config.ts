@@ -23,7 +23,7 @@ export default defineNuxtConfig({
   },
   ui: {
     theme: {
-      colors: ['primary', 'secondary'],
+      colors: ['primary', 'secondary', 'success', 'error', 'warning'],
     },
   },
   nitro: {

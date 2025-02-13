@@ -10,6 +10,8 @@ export const useUserStore = defineStore(
     const userId = ref(Math.random().toString(36).substring(2, 15))
     const username = ref(`guest-${userId.value}`)
     const avatar = ref('')
+    const peerId = ref('')
+    const isConnected = ref(false)
     const isEditingUsername = ref(false)
 
     /**
@@ -35,6 +37,14 @@ export const useUserStore = defineStore(
       isEditingUsername.value = !isEditingUsername.value
     }
 
+    const setPeerId = (newPeerId: string) => {
+      peerId.value = newPeerId
+    }
+
+    const getPeerId = () => {
+      return peerId.value
+    }
+
     // Initialize avatar on store creation
     updateAvatar()
 
@@ -43,9 +53,12 @@ export const useUserStore = defineStore(
       userId,
       username,
       avatar,
+      isConnected,
       isEditingUsername,
       // Actions
       setUsername,
+      setPeerId,
+      getPeerId,
       updateAvatar,
       toggleEditUsername,
     }
