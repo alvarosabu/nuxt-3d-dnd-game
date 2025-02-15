@@ -1,47 +1,48 @@
 <script setup lang="ts">
 import { onKeyDown, onKeyUp } from '@vueuse/core'
-import { type AnimationAction, type AnimationClip, type AnimationMixer, type Object3D, Quaternion, Vector3 } from 'three'
+
+import type { Object3D } from 'three'
+import { Quaternion, Vector3 } from 'three'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'
 
 const props = defineProps<{
   player: Player
   isCurrentPlayer: boolean
+  index: number
 }>()
 
-const { getResource } = useResourcePreloader()
+const lobbyStore = useLobbyStore()
+
+// Inject websocket methods
+const { send, data } = useMultiplayer()
+
+watch(data, (newData) => {
+  if (!newData || props.isCurrentPlayer) { return }
+
+  const data = JSON.parse(newData)
+  if (data.type === 'PLAYER_POSITION') {
+    model.value?.position.set(data.position.x, data.position.y, data.position.z)
+  }
+})
+
+// Throttle position updates to reduce websocket messages
+const sendPosition = useDebounceFn((position: Vector3) => {
+  if (!props.isCurrentPlayer) { return }
+
+  send(JSON.stringify({
+    type: 'PLAYER_POSITION',
+    lobbyId: lobbyStore.currentLobby?.id,
+    position,
+  }))
+}, 50) // Adjust this value based on your needs
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
 
-interface CharacterState {
-  model: Object3D | null
-  weapon: Object3D | null
-  animations: AnimationClip[]
-  actions: Record<string, AnimationAction>
-  currentAction: AnimationAction | null
-  mixer: AnimationMixer | null
-  currentTime: number
-  // Movement
-  currentPressedKeys: Record<string, boolean>
-  isMoving: boolean
-  isRunning: boolean
-  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
-  acceleration: Vector3
-  decceleration: Vector3
-  velocity: Vector3
-  isJumping: boolean
-  verticalVelocity: number
-  isGrounded: boolean
-}
+const model = shallowRef<Object3D>()
 
-const state = shallowReactive<CharacterState>({
-  model: null,
-  weapon: null,
-  animations: [],
-  actions: {},
-  currentAction: null,
-  mixer: null,
-  currentTime: 0,
+const state = shallowReactive({
   // Movement
   currentPressedKeys: {},
   isMoving: false,
@@ -55,37 +56,14 @@ const state = shallowReactive<CharacterState>({
   isGrounded: true,
 })
 
-const { scene, nodes, animations, materials } = getResource('models', props.player.character)
-console.log(nodes)
-const { scene: weapon } = getResource('models', 'hammer')
-
-state.model = nodes.Rig
-
-console.log(state.model)
-
-// const handSlotR = findBoneByName(state.model, 'handslotr')
-
-const weaponRef = shallowRef<Object3D>()
-
-watch(weaponRef, (newVal) => {
-  if (handSlotR && newVal) {
-    newVal.position.set(0, 0, 0)
-    newVal.rotation.set(0, 0, 0)
-    handSlotR.add(newVal)
-  }
-})
-
-const { actions: animActions } = useAnimations(animations, state.model)
-state.actions = animActions
-state.currentAction = animActions.Idle
-state.currentAction.play()
-
 // Movement
 
 const { shift } = useMagicKeys()
 
 onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   if (shift.value) {
     state.isRunning = true
@@ -94,12 +72,16 @@ onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
 })
 
 onKeyUp(['w', 'W', 'ArrowUp'], () => {
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
   state.isRunning = false
 })
 
 onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   if (shift.value) {
     state.isRunning = true
@@ -108,43 +90,50 @@ onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
 })
 
 onKeyUp(['s', 'S', 'ArrowDown'], () => {
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
   state.isRunning = false
 })
 
 onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   state.direction = 'LEFT'
 })
 
-onKeyUp(['a', 'A', 'ArrowLeft'], () => {
+onKeyUp(['a', 'A', 'ArrowLeft'], (e) => {
+  e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
 })
 
 onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   state.direction = 'RIGHT'
 })
 
-onKeyUp(['d', 'D', 'ArrowRight'], () => {
+onKeyUp(['d', 'D', 'ArrowRight'], (e) => {
+  e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
 })
 
 onKeyDown([' '], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
   if (state.isGrounded) {
     state.isJumping = true
     state.isGrounded = false // Character is now in the air
   }
 })
-
-const updateCurrentTime = () => {
-  if (state.mixer && state.currentAction) {
-    state.currentTime = state.currentAction.time // Get current time of the animation
-  }
-}
 
 const { onBeforeRender } = useLoop()
 
@@ -162,7 +151,7 @@ onBeforeRender(({ delta }) => {
 
     const _Q = new Quaternion()
     const _A = new Vector3()
-    const _R = state.model?.quaternion.clone()
+    const _R = model.value?.quaternion.clone()
 
     const acceleration = state.acceleration.clone()
 
@@ -176,9 +165,9 @@ onBeforeRender(({ delta }) => {
         speed.z = Math.min(speed.z + acceleration.z * delta, 10) + (state.isRunning ? 0.15 : 0)
 
         // Scale the animation speed based on the character's movement speed
-        if (state.currentAction) {
+        /*  if (state.currentAction) {
           state.currentAction.timeScale = currentSpeedMagnitude / baseSpeed
-        }
+        } */
 
         break
       case 'DOWN':
@@ -196,36 +185,37 @@ onBeforeRender(({ delta }) => {
         break
     }
 
-    state.model?.quaternion.copy(_R)
+    model.value?.quaternion.copy(_R)
 
     const oldPosition = new Vector3()
-    oldPosition.copy(state.model?.position)
+    oldPosition.copy(model.value?.position)
 
     const forward = new Vector3(0, 0, 1)
-    forward.applyQuaternion(state.model?.quaternion as Quaternion)
+    forward.applyQuaternion(model.value?.quaternion as Quaternion)
     forward.normalize()
 
     const sideways = new Vector3(1, 0, 0)
-    sideways.applyQuaternion(state.model?.quaternion as Quaternion)
+    sideways.applyQuaternion(model.value?.quaternion as Quaternion)
     sideways.normalize()
 
     forward.multiplyScalar(speed.z * delta)
     sideways.multiplyScalar(speed.x * delta)
 
-    state.model?.position.add(forward)
-    state.model?.position.add(sideways)
+    model.value?.position.add(forward)
+    model.value?.position.add(sideways)
 
-    oldPosition.copy(state.model?.position)
+    oldPosition.copy(model.value?.position)
+    sendPosition(model.value?.position)
   }
   if (state.isJumping) {
     // Update the vertical position based on the current vertical velocity
     const gravity = GRAVITY // Gravity force, adjust as needed
-    state.model.position.y += state.verticalVelocity * delta
+    model.value.position.y += state.verticalVelocity * delta
     state.verticalVelocity += gravity * delta // Apply gravity to vertical velocity
 
     // Check if the character has landed
-    if (state.model.position.y <= 0) {
-      state.model.position.y = 0 // Reset position to ground level
+    if (model.value.position.y <= 0) {
+      model.value.position.y = 0 // Reset position to ground level
       state.isJumping = false
       state.isGrounded = true
       state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
@@ -235,34 +225,11 @@ onBeforeRender(({ delta }) => {
     updateCurrentTime() // Update the time each frame
   }
 })
-
-watch(() => state.isMoving, (value) => {
-  if (value && state.isGrounded) {
-    state.currentAction?.fadeOut(0.5)
-    if (state.direction === 'DOWN') {
-      state.currentAction = state.actions.Walking_Backwards
-    }
-    else {
-      if (state.isRunning) {
-        state.currentAction = state.actions.Running_A
-      }
-      else {
-        state.currentAction = state.actions.Walking_A
-      }
-    }
-  }
-  else {
-    state.currentAction?.fadeOut(0.5)
-    state.currentAction = state.actions.Idle
-  }
-  state.currentAction.reset()
-  state.currentAction.fadeIn(0.5)
-  state.currentAction.play()
-})
 </script>
 
 <template>
-  <primitive name="model" :object="state.model" />
-  <!--  <primitive ref="weaponRef" name="weapon" :object="weapon" /> -->
-  <TresSkeletonHelper :args="[state.model]" />
+  <TresMesh ref="model">
+    <TresBoxGeometry :args="[1, 1, 1]" />
+    <TresMeshStandardMaterial :color="isCurrentPlayer ? 'red' : 'blue'" />
+  </TresMesh>
 </template>

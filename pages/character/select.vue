@@ -3,9 +3,19 @@ import { useGameState } from '~/composables/game/useGameState'
 import { onKeyStroke } from '@vueuse/core'
 import CharacterInfoPanel from '~/components/character/CharacterInfoPanel.vue'
 import gsap from 'gsap'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
+
+definePageMeta({
+  middleware: ['character'],
+})
 
 const { gameState } = useGameState()
+const lobbyStore = useLobbyStore()
+
 const { preloadResources } = useResourcePreloader()
+const router = useRouter()
+
+const { send } = useMultiplayer()
 
 await preloadResources()
 // Get character templates from game state and ensure consistent order
@@ -79,6 +89,16 @@ onKeyStroke('ArrowLeft', selectPrevious)
 
 // Add character name with default value
 const characterName = ref('Tav')
+
+const handleSelectCharacter = () => {
+  send(JSON.stringify({
+    type: 'SELECT_CHARACTER',
+    characterName: characterName.value,
+    lobbyId: lobbyStore.currentLobby?.id,
+    character: selectedCharacter.value?.key,
+  }))
+  router.push('/game')
+}
 </script>
 
 <template>
@@ -143,6 +163,7 @@ const characterName = ref('Tav')
             <UButton
               variant="solid"
               color="primary"
+              @click="handleSelectCharacter"
             >
               Select Character
             </UButton>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { createGameState } from '~/composables/game/useGameState'
-
 const { init } = createGameState()
 
 await init()

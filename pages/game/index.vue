@@ -8,6 +8,10 @@ onMounted(async () => {
   // Actually load resources
   await preloadResources()
 })
+
+definePageMeta({
+  middleware: 'game',
+})
 </script>
 
 <template>
@@ -17,6 +21,8 @@ onMounted(async () => {
     message="Loading game assets..."
   />
   <div v-else>
-    <GameCanvas />
+    <GameProvider>
+      <GameCanvas />
+    </GameProvider>
   </div>
 </template>

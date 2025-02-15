@@ -1,4 +1,5 @@
 import type { OriginsCollectionItem } from '@nuxt/content'
+import type { Vector3 } from 'three'
 
 export interface Character {
   id: string
@@ -11,6 +12,7 @@ export interface Player {
   id: string
   name: string
   character: Character
+  position: Vector3
 }
 
 export interface CharacterTemplate {

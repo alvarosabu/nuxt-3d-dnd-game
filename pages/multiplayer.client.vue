@@ -3,16 +3,15 @@ import { useUserStore } from '~/stores/useUserStore'
 
 import { useClipboard } from '@vueuse/core'
 import type { Player } from '~/types'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
+const router = useRouter()
 
 const { availableLobbies, currentLobby } = storeToRefs(lobbyStore)
 // Websocket
-const { data, send, message, error, status, open, close } = useWebSocket('/api/websocket', {
-  immediate: true,
-  autoReconnect: true,
-})
+const { data, send } = useMultiplayer()
 
 userStore.isConnected = false
 
@@ -40,16 +39,8 @@ const handleLeaveLobby = () => {
 
 watch(data, (newData) => {
   const data = JSON.parse(newData)
-  if (data.type === 'CONNECTION_ESTABLISHED') {
-    userStore.setPeerId(data.peerId)
-    handleUserConnection()
-  }
-  if (data.type === 'PLAYER_CONNECTION_RESPONSE') {
-    userStore.isConnected = true
-  }
-  if (data.type === 'SYNC_STATE') {
-    console.log('Syncing state', data)
-    lobbyStore.setLobbies(data.lobbies)
+  if (data.type === 'GAME_STARTED') {
+    router.push('/game')
   }
 })
 
@@ -135,7 +126,10 @@ const handleStartGame = () => {
 
 // Cleanup on unmount
 onBeforeUnmount(() => {
-
+  /* send(JSON.stringify({
+    type: 'PAUSE_GAME',
+    lobbyId: currentLobby.value?.id,
+  })) */
 })
 </script>
 

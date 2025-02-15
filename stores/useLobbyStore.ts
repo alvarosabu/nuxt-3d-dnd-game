@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import type { Character } from '~/types'
 
 export interface Lobby {
   id: string
@@ -9,10 +10,10 @@ export interface Lobby {
     id: string
     name: string
     isHost: boolean
-    character: 'paladin'
+    character: Character
   }[]
   maxPlayers: number
-  status: 'waiting' | 'full' | 'in-game'
+  status: 'waiting' | 'playing '
   createdAt: string
 }
 

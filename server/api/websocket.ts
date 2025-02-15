@@ -1,3 +1,4 @@
+import type { Vector3 } from 'three'
 import type { Lobby } from '~/stores/useLobbyStore'
 import type { Player } from '~/types'
 
@@ -111,6 +112,48 @@ function broadcastMessage(message) {
   })
 }
 
+function startGame(lobbyId: string) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    lobby.status = 'playing'
+    broadcastMessage({
+      type: 'GAME_STARTED',
+      lobbyId,
+    })
+  }
+}
+
+function pauseGame(lobbyId: string) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    lobby.status = 'waiting'
+    lobby.players.forEach((player) => {
+      player.ready = false
+    })
+  }
+}
+
+function selectCharacter(peer: any, lobbyId: string, characterName: string, character: string) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
+    if (player) {
+      player.character = character
+      player.characterName = characterName
+    }
+  }
+}
+
+function setPlayerPosition(peer: any, lobbyId: string, position: Vector3) {
+  const lobby = lobbies.get(lobbyId)
+  if (lobby) {
+    const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
+    if (player) {
+      player.position.set(position.x, position.y, position.z)
+    }
+  }
+}
+
 function syncState() {
   console.log('Syncing state')
   broadcastMessage({
@@ -161,6 +204,18 @@ export default defineWebSocketHandler({
       },
       PLAYER_READY: (peer: any, data: any) => {
         playerReady(peer, data.lobbyId, data.value)
+      },
+      START_GAME: (peer: any, data: any) => {
+        startGame(data.lobbyId)
+      },
+      PAUSE_GAME: (peer: any, data: any) => {
+        pauseGame(data.lobbyId)
+      },
+      SELECT_CHARACTER: (peer: any, data: any) => {
+        selectCharacter(peer, data.lobbyId, data.characterName, data.character)
+      },
+      PLAYER_POSITION: (peer: any, data: any) => {
+        setPlayerPosition(peer, data.lobbyId, data.position)
       },
     }
 

@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
 
+import DebugCharacter from '~/components/character/DebugCharacter.vue'
+import type { Vector3 } from 'three'
+
+const userStore = useUserStore()
+const lobbyStore = useLobbyStore()
+const { currentLobby } = storeToRefs(lobbyStore)
+
+// Watch for player updates in the lobby
+const players = computed(() => currentLobby.value?.players || [])
 </script>
 
 <template>
@@ -23,7 +33,13 @@
 
     <TresGridHelper :args="[100, 100]" />
     <Suspense>
-      <Character />
+      <template v-for="(player, index) in players" :key="player.id">
+        <DebugCharacter
+          :player="player"
+          :is-current-player="player.id === userStore.userId"
+          :index="index"
+        />
+      </template>
     </Suspense>
   </TresCanvas>
 </template>
