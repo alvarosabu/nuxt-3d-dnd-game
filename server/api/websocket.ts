@@ -7,8 +7,8 @@ import type { Character, Player } from '~/types'
 interface PlayerStates {
   id: string
   name: string
-  position: Vector3
-  rotation: Quaternion
+  position: number[] // [x, y, z]
+  rotation: number[] // [x, y, z, w]
   lobbyId?: string
 }
 interface Peer {
@@ -29,8 +29,8 @@ function handlePlayerConnection(peer: Peer, userId: string, username: string) {
   const player = players.get(userId) || {
     id: userId,
     name: username,
-    position: new Vector3(0, 0, 0),
-    rotation: new Quaternion(),
+    position: [0, 0, 0],
+    rotation: [0, 0, 0, 1],
   }
   // Update player's peer connection
   players.set(userId, player)
@@ -89,8 +89,8 @@ function createLobby(name: string, hostPeer: Peer, maxPlayers = 4) {
   players.set(hostId, {
     id: hostId,
     name: hostName || '',
-    position: new Vector3(0, 0, 0),
-    rotation: new Quaternion(),
+    position: [0, 0, 0],
+    rotation: [0, 0, 0, 1],
     lobbyId: id,
   })
   hostPeer.subscribe(lobby.id)
@@ -119,8 +119,8 @@ function joinLobby(lobbyId: string, peer: Peer) {
       const player = players.get(playerId)
       if (player) {
         player.lobbyId = lobbyId
-        player.position = new Vector3(0, 0, 0)
-        player.rotation = new Quaternion()
+        player.position = [0, 0, 0]
+        player.rotation = [0, 0, 0, 1]
       }
       peer.subscribe(lobbyId)
     }
@@ -181,12 +181,16 @@ function selectCharacter(peer: Peer, lobbyId: string, characterName: string, cha
   }
 }
 
-function updatePlayerPosition(peer: Peer, lobbyId: string, position: Vector3) {
+function updatePlayerPosition(peer: Peer, lobbyId: string, position: number[]) {
   const lobby = lobbies.get(lobbyId)
   const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
   const player = players.get(playerId)
-  if (player) {
-    player.position.copy(position)
+  if (player && position.length === 3) {
+    if (position.every(component => Number.isFinite(component))) {
+      player.position = position
+    }
   }
   if (lobby) {
     broadcastMessage({
@@ -196,12 +200,16 @@ function updatePlayerPosition(peer: Peer, lobbyId: string, position: Vector3) {
   }
 }
 
-function updatePlayerRotation(peer: Peer, lobbyId: string, rotation: Quaternion) {
+function updatePlayerRotation(peer: Peer, lobbyId: string, rotation: number[]) {
   const lobby = lobbies.get(lobbyId)
   const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
   const player = players.get(playerId)
-  if (player) {
-    player.rotation.copy(rotation)
+  if (player && rotation.length === 4) {
+    if (rotation.every(component => Number.isFinite(component))) {
+      player.rotation = rotation
+    }
   }
   if (lobby) {
     broadcastMessage({
@@ -270,11 +278,11 @@ export default defineWebSocketHandler({
       SELECT_CHARACTER: (peer: Peer, data: { lobbyId: string, characterName: string, character: string }) => {
         selectCharacter(peer, data.lobbyId, data.characterName, data.character)
       },
-      UPDATE_PLAYER_POSITION: (peer: Peer, data: { lobbyId: string, position: Vector3 }) => {
+      UPDATE_PLAYER_POSITION: (peer: Peer, data: { lobbyId: string, position: number[] }) => {
         updatePlayerPosition(peer, data.lobbyId, data.position)
         return true
       },
-      UPDATE_PLAYER_ROTATION: (peer: Peer, data: { lobbyId: string, rotation: Quaternion }) => {
+      UPDATE_PLAYER_ROTATION: (peer: Peer, data: { lobbyId: string, rotation: number[] }) => {
         updatePlayerRotation(peer, data.lobbyId, data.rotation)
         return true
       },

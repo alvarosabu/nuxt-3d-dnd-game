@@ -23,9 +23,24 @@ watch(data, (newData) => {
   if (!newData || props.isCurrentPlayer) { return }
 
   const data = JSON.parse(newData)
-  if (data.type === 'PLAYER_UPDATE' && data.player.id === props.player.id) {
-    model.value?.position.set(data.player.position.x, data.player.position.y, data.player.position.z)
-    model.value?.quaternion.copy(data.player.rotation)
+  if (data.type === 'PLAYER_UPDATE' && data.player.id === props.player.id && model.value) {
+    // Handle position as array of components
+    if (data.player.position) {
+      model.value.position.set(
+        data.player.position[0], // x
+        data.player.position[1], // y
+        data.player.position[2], // z
+      )
+    }
+    // Handle rotation as array of components
+    if (data.player.rotation) {
+      model.value.quaternion.set(
+        data.player.rotation[0], // x
+        data.player.rotation[1], // y
+        data.player.rotation[2], // z
+        data.player.rotation[3], // w
+      )
+    }
   }
 })
 
@@ -33,20 +48,22 @@ watch(data, (newData) => {
 const sendPosition = (position: Vector3) => {
   if (!props.isCurrentPlayer) { return }
 
+  // Send position as array of components [x, y, z]
   send(JSON.stringify({
     type: 'UPDATE_PLAYER_POSITION',
     lobbyId: lobbyStore.currentLobby?.id,
-    position,
+    position: [position.x, position.y, position.z],
   }))
 }
 
 const sendRotation = (rotation: Quaternion) => {
   if (!props.isCurrentPlayer) { return }
 
+  // Send rotation as array of components [x, y, z, w]
   send(JSON.stringify({
     type: 'UPDATE_PLAYER_ROTATION',
     lobbyId: lobbyStore.currentLobby?.id,
-    rotation,
+    rotation: [rotation.x, rotation.y, rotation.z, rotation.w],
   }))
 }
 
@@ -164,24 +181,13 @@ onBeforeRender(({ delta }) => {
 
     const _Q = new Quaternion()
     const _A = new Vector3()
-    const _R = model.value?.quaternion.clone()
+    const _R = model.value.quaternion.clone()
 
     const acceleration = state.acceleration.clone()
 
-    const currentSpeedMagnitude = speed.length()
-    // Get the current speed magnitude
-
-    // Set a base speed (the speed at which the animation timing was originally intended)
-    const baseSpeed = 2.0 // This value might need tuning based on your original animation settings
     switch (state.direction) {
       case 'UP':
         speed.z = Math.min(speed.z + acceleration.z * delta, 10) + (state.isRunning ? 0.15 : 0)
-
-        // Scale the animation speed based on the character's movement speed
-        /*  if (state.currentAction) {
-          state.currentAction.timeScale = currentSpeedMagnitude / baseSpeed
-        } */
-
         break
       case 'DOWN':
         speed.z = Math.max(speed.z - acceleration.z * delta / 2, -10)
@@ -198,10 +204,11 @@ onBeforeRender(({ delta }) => {
         break
     }
 
-    model.value?.quaternion.copy(_R)
-
-    const oldPosition = new Vector3()
-    oldPosition.copy(model.value?.position)
+    // Ensure quaternion is valid before applying
+    if (Number.isFinite(_R.w) && Number.isFinite(_R.x)
+      && Number.isFinite(_R.y) && Number.isFinite(_R.z)) {
+      model.value.quaternion.copy(_R.normalize())
+    }
 
     const forward = new Vector3(0, 0, 1)
     forward.applyQuaternion(model.value.quaternion)
@@ -235,9 +242,6 @@ onBeforeRender(({ delta }) => {
       state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
     }
     sendPosition(model.value?.position)
-  }
-  if (state.mixer) {
-    updateCurrentTime() // Update the time each frame
   }
 })
 </script>
