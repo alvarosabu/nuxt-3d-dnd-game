@@ -4,13 +4,14 @@ import type { Character } from '~/types'
 export interface Lobby {
   id: string
   name: string
-  hostId: string
-  hostName: string
+  hostId: string | undefined
+  hostName: string | undefined
   players: {
     id: string
     name: string
     isHost: boolean
-    character: Character
+    character: Character | null
+    ready: boolean
   }[]
   maxPlayers: number
   status: 'waiting' | 'playing '

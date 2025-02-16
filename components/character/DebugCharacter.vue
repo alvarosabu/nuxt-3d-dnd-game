@@ -17,30 +17,41 @@ const lobbyStore = useLobbyStore()
 // Inject websocket methods
 const { send, data } = useMultiplayer()
 
+const model = shallowRef<Object3D>()
+
 watch(data, (newData) => {
   if (!newData || props.isCurrentPlayer) { return }
 
   const data = JSON.parse(newData)
-  if (data.type === 'PLAYER_POSITION') {
-    model.value?.position.set(data.position.x, data.position.y, data.position.z)
+  if (data.type === 'PLAYER_UPDATE' && data.player.id === props.player.id) {
+    model.value?.position.set(data.player.position.x, data.player.position.y, data.player.position.z)
+    model.value?.quaternion.copy(data.player.rotation)
   }
 })
 
 // Throttle position updates to reduce websocket messages
-const sendPosition = useDebounceFn((position: Vector3) => {
+const sendPosition = (position: Vector3) => {
   if (!props.isCurrentPlayer) { return }
 
   send(JSON.stringify({
-    type: 'PLAYER_POSITION',
+    type: 'UPDATE_PLAYER_POSITION',
     lobbyId: lobbyStore.currentLobby?.id,
     position,
   }))
-}, 50) // Adjust this value based on your needs
+}
+
+const sendRotation = (rotation: Quaternion) => {
+  if (!props.isCurrentPlayer) { return }
+
+  send(JSON.stringify({
+    type: 'UPDATE_PLAYER_ROTATION',
+    lobbyId: lobbyStore.currentLobby?.id,
+    rotation,
+  }))
+}
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
-
-const model = shallowRef<Object3D>()
 
 const state = shallowReactive({
   // Movement
@@ -138,6 +149,8 @@ onKeyDown([' '], (e) => {
 const { onBeforeRender } = useLoop()
 
 onBeforeRender(({ delta }) => {
+  if (!model.value) { return }
+
   if (state.isMoving) {
     const speed = state.velocity
     const frameDecceleration = new Vector3(
@@ -191,23 +204,24 @@ onBeforeRender(({ delta }) => {
     oldPosition.copy(model.value?.position)
 
     const forward = new Vector3(0, 0, 1)
-    forward.applyQuaternion(model.value?.quaternion as Quaternion)
+    forward.applyQuaternion(model.value.quaternion)
     forward.normalize()
 
     const sideways = new Vector3(1, 0, 0)
-    sideways.applyQuaternion(model.value?.quaternion as Quaternion)
+    sideways.applyQuaternion(model.value.quaternion)
     sideways.normalize()
 
     forward.multiplyScalar(speed.z * delta)
     sideways.multiplyScalar(speed.x * delta)
 
-    model.value?.position.add(forward)
-    model.value?.position.add(sideways)
+    model.value.position.add(forward)
+    model.value.position.add(sideways)
 
-    oldPosition.copy(model.value?.position)
-    sendPosition(model.value?.position)
+    sendPosition(model.value.position)
+    sendRotation(model.value.quaternion)
   }
-  if (state.isJumping) {
+
+  if (state.isJumping && model.value) {
     // Update the vertical position based on the current vertical velocity
     const gravity = GRAVITY // Gravity force, adjust as needed
     model.value.position.y += state.verticalVelocity * delta
@@ -220,6 +234,7 @@ onBeforeRender(({ delta }) => {
       state.isGrounded = true
       state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
     }
+    sendPosition(model.value?.position)
   }
   if (state.mixer) {
     updateCurrentTime() // Update the time each frame
@@ -229,7 +244,8 @@ onBeforeRender(({ delta }) => {
 
 <template>
   <TresMesh ref="model">
-    <TresBoxGeometry :args="[1, 1, 1]" />
-    <TresMeshStandardMaterial :color="isCurrentPlayer ? 'red' : 'blue'" />
+    <TresBoxGeometry v-if="player.name === 'meteora_2590'" :args="[1, 1, 1]" />
+    <TresSphereGeometry v-else :args="[0.5, 16, 16]" />
+    <TresMeshStandardMaterial />
   </TresMesh>
 </template>

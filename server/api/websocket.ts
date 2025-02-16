@@ -1,24 +1,40 @@
-import type { Vector3 } from 'three'
-import type { Lobby } from '~/stores/useLobbyStore'
-import type { Player } from '~/types'
+/* eslint-disable no-console */
 
+import { Quaternion, Vector3 } from 'three'
+import type { Lobby } from '~/stores/useLobbyStore'
+import type { Character, Player } from '~/types'
+
+interface PlayerStates {
+  id: string
+  name: string
+  position: Vector3
+  rotation: Quaternion
+  lobbyId?: string
+}
+interface Peer {
+  id: string
+  send: (message: string) => void
+  subscribe: (topic: string) => void
+  publish: (topic: string, message: string) => void
+}
 const connectedPeers = new Map<string, any>()
 const global = 'GLOBAL'
 const lobbies = new Map<string, Lobby>()
 // Add new Maps for player tracking
-const players = new Map<string, Player>() // userId -> Player
+const players = new Map<string, PlayerStates>() // userId -> Player
 const peerToPlayer = new Map<string, string>() // peerId -> userId
 
-function handlePlayerConnection(peer: any, userId: string, username: string) {
+function handlePlayerConnection(peer: Peer, userId: string, username: string) {
   console.log(`[WS] Player connected: ${peer.id} - ${userId} - ${username}`)
   const player = players.get(userId) || {
-    userId,
-    username,
+    id: userId,
+    name: username,
+    position: new Vector3(0, 0, 0),
+    rotation: new Quaternion(),
   }
   // Update player's peer connection
   players.set(userId, player)
   peerToPlayer.set(peer.id, userId)
-
   // Send player connection response to the peer
   peer.send(JSON.stringify({
     type: 'PLAYER_CONNECTION_RESPONSE',
@@ -26,7 +42,7 @@ function handlePlayerConnection(peer: any, userId: string, username: string) {
   }))
 }
 
-function handlePlayerDisconnection(peer: any) {
+function handlePlayerDisconnection(peer: Peer) {
   const userId = peerToPlayer.get(peer.id)
   if (userId) {
     const player = players.get(userId)
@@ -34,7 +50,6 @@ function handlePlayerDisconnection(peer: any) {
       players.set(userId, player)
     }
     peerToPlayer.delete(peer.id)
-
     // Broadcast player disconnection
     broadcastMessage({
       type: 'PLAYER_DISCONNECTED',
@@ -44,18 +59,24 @@ function handlePlayerDisconnection(peer: any) {
   }
 }
 
-function createLobby(name: string, hostPeerId: string, maxPlayers = 4) {
+function createLobby(name: string, hostPeer: Peer, maxPlayers = 4) {
   const id = Math.random().toString(36).substring(7)
+  const hostId = peerToPlayer.get(hostPeer.id)
+  if (!hostId) {
+    console.error('Host ID not found')
+    return
+  }
+  const hostName = players.get(hostId)?.name
   const lobby: Lobby = {
     id,
     name,
-    hostId: peerToPlayer.get(hostPeerId),
-    hostName: players.get(peerToPlayer.get(hostPeerId))?.username,
+    hostId,
+    hostName,
     maxPlayers,
     players: [
       {
-        id: peerToPlayer.get(hostPeerId),
-        name: players.get(peerToPlayer.get(hostPeerId))?.username,
+        id: hostId,
+        name: hostName || '',
         character: null,
         isHost: true,
         ready: false,
@@ -65,6 +86,14 @@ function createLobby(name: string, hostPeerId: string, maxPlayers = 4) {
     createdAt: new Date().toISOString(),
   }
   lobbies.set(id, lobby)
+  players.set(hostId, {
+    id: hostId,
+    name: hostName || '',
+    position: new Vector3(0, 0, 0),
+    rotation: new Quaternion(),
+    lobbyId: id,
+  })
+  hostPeer.subscribe(lobby.id)
 }
 
 function deleteLobby(lobbyId: string) {
@@ -75,17 +104,25 @@ function flushLobbies() {
   lobbies.clear()
 }
 
-function joinLobby(lobbyId: string, peerId: string) {
+function joinLobby(lobbyId: string, peer: Peer) {
   const lobby = lobbies.get(lobbyId)
-  if (lobby) {
+  const playerId = peerToPlayer.get(peer.id)
+  if (lobby && playerId) {
     if (lobby.players.length < lobby.maxPlayers) {
       lobby.players.push({
-        id: peerToPlayer.get(peerId),
-        name: players.get(peerToPlayer.get(peerId))?.username,
+        id: playerId,
+        name: players.get(playerId)?.name || '',
         character: null,
         isHost: false,
         ready: false,
       })
+      const player = players.get(playerId)
+      if (player) {
+        player.lobbyId = lobbyId
+        player.position = new Vector3(0, 0, 0)
+        player.rotation = new Quaternion()
+      }
+      peer.subscribe(lobbyId)
     }
   }
 }
@@ -97,7 +134,7 @@ function leaveLobby(lobbyId: string, peerId: string) {
   }
 }
 
-function playerReady(peer: any, lobbyId: string, value: boolean) {
+function playerReady(peer: Peer, lobbyId: string, value: boolean) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
     const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
@@ -133,7 +170,7 @@ function pauseGame(lobbyId: string) {
   }
 }
 
-function selectCharacter(peer: any, lobbyId: string, characterName: string, character: string) {
+function selectCharacter(peer: Peer, lobbyId: string, characterName: string, character: string) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
     const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
@@ -144,13 +181,33 @@ function selectCharacter(peer: any, lobbyId: string, characterName: string, char
   }
 }
 
-function setPlayerPosition(peer: any, lobbyId: string, position: Vector3) {
+function updatePlayerPosition(peer: Peer, lobbyId: string, position: Vector3) {
   const lobby = lobbies.get(lobbyId)
+  const playerId = peerToPlayer.get(peer.id)
+  const player = players.get(playerId)
+  if (player) {
+    player.position.copy(position)
+  }
   if (lobby) {
-    const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
-    if (player) {
-      player.position.set(position.x, position.y, position.z)
-    }
+    broadcastMessage({
+      type: 'PLAYER_UPDATE',
+      player,
+    })
+  }
+}
+
+function updatePlayerRotation(peer: Peer, lobbyId: string, rotation: Quaternion) {
+  const lobby = lobbies.get(lobbyId)
+  const playerId = peerToPlayer.get(peer.id)
+  const player = players.get(playerId)
+  if (player) {
+    player.rotation.copy(rotation)
+  }
+  if (lobby) {
+    broadcastMessage({
+      type: 'PLAYER_UPDATE',
+      player,
+    })
   }
 }
 
@@ -159,7 +216,6 @@ function syncState() {
   broadcastMessage({
     type: 'SYNC_STATE',
     lobbies: Array.from(lobbies.values()),
-    players: Array.from(players.values()),
   })
 }
 export default defineWebSocketHandler({
@@ -180,51 +236,58 @@ export default defineWebSocketHandler({
 
     const data = JSON.parse(message.text())
     // Create a map of message handlers for better organization and maintainability
-    const messageHandlers = {
-      PLAYER_CONNECTION_REQUEST: (peer: any, data: any) => {
+    const messageHandlers: Record<string, (peer: Peer, data: any) => void | boolean> = {
+      PLAYER_CONNECTION_REQUEST: (peer: Peer, data: { userId: string, username: string }) => {
         handlePlayerConnection(peer, data.userId, data.username)
       },
-      PLAYER_DISCONNECTION_REQUEST: (peer: any) => {
+      PLAYER_DISCONNECTION_REQUEST: (peer: Peer) => {
         handlePlayerDisconnection(peer)
       },
-      CREATE_LOBBY: (peer: any, data: any) => {
-        createLobby(data.lobbyName, peer.id, data.maxPlayers)
+      CREATE_LOBBY: (peer: Peer, data: { lobbyName: string, maxPlayers: number }) => {
+        createLobby(data.lobbyName, peer, data.maxPlayers)
       },
-      DELETE_LOBBY: (peer: any, data: any) => {
+      DELETE_LOBBY: (peer: Peer, data: { lobbyId: string }) => {
         deleteLobby(data.lobbyId)
       },
-      JOIN_LOBBY_REQUEST: (peer: any, data: any) => {
-        joinLobby(data.lobbyId, peer.id)
+      JOIN_LOBBY_REQUEST: (peer: Peer, data: { lobbyId: string }) => {
+        joinLobby(data.lobbyId, peer)
       },
-      LEAVE_LOBBY: (peer: any, data: any) => {
+      LEAVE_LOBBY: (peer: Peer, data: { lobbyId: string }) => {
         leaveLobby(data.lobbyId, peer.id)
       },
       FLUSH_LOBBIES: () => {
         flushLobbies()
       },
-      PLAYER_READY: (peer: any, data: any) => {
+      PLAYER_READY: (peer: Peer, data: { lobbyId: string, value: boolean }) => {
         playerReady(peer, data.lobbyId, data.value)
       },
-      START_GAME: (peer: any, data: any) => {
+      START_GAME: (peer: Peer, data: { lobbyId: string }) => {
         startGame(data.lobbyId)
       },
-      PAUSE_GAME: (peer: any, data: any) => {
+      PAUSE_GAME: (peer: Peer, data: { lobbyId: string }) => {
         pauseGame(data.lobbyId)
       },
-      SELECT_CHARACTER: (peer: any, data: any) => {
+      SELECT_CHARACTER: (peer: Peer, data: { lobbyId: string, characterName: string, character: string }) => {
         selectCharacter(peer, data.lobbyId, data.characterName, data.character)
       },
-      PLAYER_POSITION: (peer: any, data: any) => {
-        setPlayerPosition(peer, data.lobbyId, data.position)
+      UPDATE_PLAYER_POSITION: (peer: Peer, data: { lobbyId: string, position: Vector3 }) => {
+        updatePlayerPosition(peer, data.lobbyId, data.position)
+        return true
+      },
+      UPDATE_PLAYER_ROTATION: (peer: Peer, data: { lobbyId: string, rotation: Quaternion }) => {
+        updatePlayerRotation(peer, data.lobbyId, data.rotation)
+        return true
       },
     }
 
     // Handle the message using the handler map
     const handler = messageHandlers[data.type]
     if (handler) {
-      handler(peer, data)
-      // Sync state after any state-changing operation
-      syncState()
+      const skipSync = handler(peer, data)
+      if (!skipSync) {
+        // Sync state after any state-changing operation
+        syncState()
+      }
     }
     else {
       console.warn(`[WS], ${messageHandlers}`)

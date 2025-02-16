@@ -11,7 +11,7 @@ export interface Character {
 export interface Player {
   id: string
   name: string
-  character: Character
+  character: Character | null
   position: Vector3
 }
 
