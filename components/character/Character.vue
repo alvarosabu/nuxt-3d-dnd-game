@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { onKeyDown, onKeyUp } from '@vueuse/core'
 import { type AnimationAction, type AnimationClip, type AnimationMixer, type Object3D, Quaternion, Vector3 } from 'three'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'
+import { Html } from '@tresjs/cientos'
 
 const props = defineProps<{
   player: Player
   isCurrentPlayer: boolean
+  index: number
 }>()
 
 const { getResource } = useResourcePreloader()
+const lobbyStore = useLobbyStore()
+
+// Inject websocket methods
+const { send, data } = useMultiplayer()
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
@@ -59,21 +66,68 @@ const { scene, nodes, animations, materials } = getResource('models', props.play
 console.log(nodes)
 const { scene: weapon } = getResource('models', 'hammer')
 
-state.model = nodes.Rig
-
-console.log(state.model)
-
+// Find the node with key containing 'Rig' in the nodes object
+state.model = Object.values(nodes).find(node => node.name.includes('Rig'))
+state.model.position.set(props.index * 1.5, 0, 0)
 // const handSlotR = findBoneByName(state.model, 'handslotr')
 
 const weaponRef = shallowRef<Object3D>()
 
-watch(weaponRef, (newVal) => {
+/* watch(weaponRef, (newVal) => {
   if (handSlotR && newVal) {
     newVal.position.set(0, 0, 0)
     newVal.rotation.set(0, 0, 0)
     handSlotR.add(newVal)
   }
+}) */
+
+watch(data, (newData) => {
+  if (!newData || props.isCurrentPlayer) { return }
+
+  const data = JSON.parse(newData)
+  if (data.type === 'PLAYER_UPDATE' && data.player.id === props.player.id && state.model) {
+    // Handle position as array of components
+    if (data.player.position) {
+      state.model.position.set(
+        data.player.position[0], // x
+        data.player.position[1], // y
+        data.player.position[2], // z
+      )
+    }
+    // Handle rotation as array of components
+    if (data.player.rotation) {
+      state.model.quaternion.set(
+        data.player.rotation[0], // x
+        data.player.rotation[1], // y
+        data.player.rotation[2], // z
+        data.player.rotation[3], // w
+      )
+    }
+  }
 })
+
+// Throttle position updates to reduce websocket messages
+const sendPosition = (position: Vector3) => {
+  if (!props.isCurrentPlayer) { return }
+
+  // Send position as array of components [x, y, z]
+  send(JSON.stringify({
+    type: 'UPDATE_PLAYER_POSITION',
+    lobbyId: lobbyStore.currentLobby?.id,
+    position: [position.x, position.y, position.z],
+  }))
+}
+
+const sendRotation = (rotation: Quaternion) => {
+  if (!props.isCurrentPlayer) { return }
+
+  // Send rotation as array of components [x, y, z, w]
+  send(JSON.stringify({
+    type: 'UPDATE_PLAYER_ROTATION',
+    lobbyId: lobbyStore.currentLobby?.id,
+    rotation: [rotation.x, rotation.y, rotation.z, rotation.w],
+  }))
+}
 
 const { actions: animActions } = useAnimations(animations, state.model)
 state.actions = animActions
@@ -86,6 +140,8 @@ const { shift } = useMagicKeys()
 
 onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   if (shift.value) {
     state.isRunning = true
@@ -94,12 +150,16 @@ onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
 })
 
 onKeyUp(['w', 'W', 'ArrowUp'], () => {
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
   state.isRunning = false
 })
 
 onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   if (shift.value) {
     state.isRunning = true
@@ -108,32 +168,45 @@ onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
 })
 
 onKeyUp(['s', 'S', 'ArrowDown'], () => {
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
   state.isRunning = false
 })
 
 onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   state.direction = 'LEFT'
 })
 
-onKeyUp(['a', 'A', 'ArrowLeft'], () => {
+onKeyUp(['a', 'A', 'ArrowLeft'], (e) => {
+  e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
 })
 
 onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = true
   state.direction = 'RIGHT'
 })
 
-onKeyUp(['d', 'D', 'ArrowRight'], () => {
+onKeyUp(['d', 'D', 'ArrowRight'], (e) => {
+  e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
+
   state.isMoving = false
 })
 
 onKeyDown([' '], (e) => {
   e.preventDefault()
+  if (!props.isCurrentPlayer) { return }
   if (state.isGrounded) {
     state.isJumping = true
     state.isGrounded = false // Character is now in the air
@@ -216,6 +289,9 @@ onBeforeRender(({ delta }) => {
     state.model?.position.add(sideways)
 
     oldPosition.copy(state.model?.position)
+
+    sendPosition(state.model?.position)
+    sendRotation(state.model?.quaternion)
   }
   if (state.isJumping) {
     // Update the vertical position based on the current vertical velocity
@@ -230,6 +306,7 @@ onBeforeRender(({ delta }) => {
       state.isGrounded = true
       state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
     }
+    sendPosition(state.model?.position)
   }
   if (state.mixer) {
     updateCurrentTime() // Update the time each frame
@@ -262,7 +339,20 @@ watch(() => state.isMoving, (value) => {
 </script>
 
 <template>
-  <primitive name="model" :object="state.model" />
-  <!--  <primitive ref="weaponRef" name="weapon" :object="weapon" /> -->
-  <TresSkeletonHelper :args="[state.model]" />
+  <TresGroup>
+    <primitive name="modelRef" :object="state.model">
+      <Html
+        center
+        transform
+        :distance-factor="4"
+        :position="[0, 3, 0]"
+      >
+        <div class="p-1 rounded-xl bg-white text-black text-sm">
+          {{ player.name }}
+        </div>
+      </Html>
+    </primitive>
+    <!--  <primitive ref="weaponRef" name="weapon" :object="weapon" /> -->
+    <TresSkeletonHelper :args="[state.model]" />
+  </TresGroup>
 </template>

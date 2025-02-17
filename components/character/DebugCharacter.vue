@@ -5,12 +5,15 @@ import type { Object3D } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'
+import { Html } from '@tresjs/cientos'
 
 const props = defineProps<{
   player: Player
   isCurrentPlayer: boolean
   index: number
 }>()
+
+const { getResource } = useResourcePreloader()
 
 const lobbyStore = useLobbyStore()
 
@@ -82,6 +85,12 @@ const state = shallowReactive({
   isJumping: false,
   verticalVelocity: JUMP_HEIGHT,
   isGrounded: true,
+})
+
+watch(model, (newModel) => {
+  if (!newModel) { return }
+  newModel.position.set(props.index * 1.5, 0, 0)
+  sendPosition(newModel.position)
 })
 
 // Movement
@@ -251,5 +260,15 @@ onBeforeRender(({ delta }) => {
     <TresBoxGeometry v-if="player.name === 'meteora_2590'" :args="[1, 1, 1]" />
     <TresSphereGeometry v-else :args="[0.5, 16, 16]" />
     <TresMeshStandardMaterial />
+    <Html
+      center
+      transform
+      :distance-factor="4"
+      :position="[0, 1.5, 0]"
+    >
+      <div class="p-4 rounded-xl bg-white text-black">
+        {{ player.name }} {{ index }} {{ player.character }}
+      </div>
+    </Html>
   </TresMesh>
 </template>

@@ -31,7 +31,7 @@ export const useLobbyStore = defineStore(
     // Getters
     const availableLobbies = computed(() =>
       Object.values(lobbies.value)
-        .filter(lobby => lobby.status === 'waiting')
+        .filter(lobby => lobby.status === 'waiting' || lobby.status === 'playing')
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     )
 

@@ -34,7 +34,7 @@ const players = computed(() => currentLobby.value?.players || [])
     <TresGridHelper :args="[100, 100]" />
     <Suspense>
       <template v-for="(player, index) in players" :key="player.id">
-        <DebugCharacter
+        <Character
           :player="player"
           :is-current-player="player.id === userStore.userId"
           :index="index"
