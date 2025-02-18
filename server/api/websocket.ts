@@ -10,6 +10,12 @@ interface PlayerStates {
   position: number[] // [x, y, z]
   rotation: number[] // [x, y, z, w]
   lobbyId?: string
+  // Character state
+  isMoving: boolean
+  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
+  isRunning: boolean
+  isJumping: boolean
+  isGrounded: boolean
 }
 interface Peer {
   id: string
@@ -31,6 +37,12 @@ function handlePlayerConnection(peer: Peer, userId: string, username: string) {
     name: username,
     position: [0, 0, 0],
     rotation: [0, 0, 0, 1],
+    // Initial character state
+    isMoving: false,
+    direction: 'UP',
+    isRunning: false,
+    isJumping: false,
+    isGrounded: true,
   }
   // Update player's peer connection
   players.set(userId, player)
@@ -92,6 +104,11 @@ function createLobby(name: string, hostPeer: Peer, maxPlayers = 4) {
     position: [0, 0, 0],
     rotation: [0, 0, 0, 1],
     lobbyId: id,
+    isMoving: false,
+    direction: 'UP',
+    isRunning: false,
+    isJumping: false,
+    isGrounded: true,
   })
   hostPeer.subscribe(lobby.id)
 }
@@ -226,6 +243,30 @@ function syncState() {
     lobbies: Array.from(lobbies.values()),
   })
 }
+
+// Add new function to handle character state updates
+function updatePlayerState(peer: Peer, lobbyId: string, state: Partial<PlayerStates>) {
+  const lobby = lobbies.get(lobbyId)
+  const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
+  const player = players.get(playerId)
+  if (player) {
+    // Update only the provided state properties
+    if (typeof state.isMoving === 'boolean') { player.isMoving = state.isMoving }
+    if (state.direction) { player.direction = state.direction }
+    if (typeof state.isRunning === 'boolean') { player.isRunning = state.isRunning }
+    if (typeof state.isJumping === 'boolean') { player.isJumping = state.isJumping }
+    if (typeof state.isGrounded === 'boolean') { player.isGrounded = state.isGrounded }
+  }
+  if (lobby) {
+    broadcastMessage({
+      type: 'PLAYER_UPDATE',
+      player,
+    })
+  }
+}
+
 export default defineWebSocketHandler({
   open: (peer) => {
     console.warn(`[WS] Client connected: ${peer.id}`)
@@ -284,6 +325,10 @@ export default defineWebSocketHandler({
       },
       UPDATE_PLAYER_ROTATION: (peer: Peer, data: { lobbyId: string, rotation: number[] }) => {
         updatePlayerRotation(peer, data.lobbyId, data.rotation)
+        return true
+      },
+      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Partial<PlayerStates> }) => {
+        updatePlayerState(peer, data.lobbyId, data.state)
         return true
       },
     }

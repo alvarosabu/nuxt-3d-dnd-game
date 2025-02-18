@@ -22,6 +22,40 @@ const { send, data } = useMultiplayer()
 
 const model = shallowRef<Object3D>()
 
+const JUMP_HEIGHT = 5
+const GRAVITY = -9.81
+
+const state = shallowReactive({
+  // Movement
+  currentPressedKeys: {},
+  isMoving: false,
+  isRunning: false,
+  direction: 'UP',
+  acceleration: new Vector3(0.25, 0.25, 25.0),
+  decceleration: new Vector3(-0.0005, -0.0001, -5.0),
+  velocity: new Vector3(0, 0, 0),
+  isJumping: false,
+  verticalVelocity: JUMP_HEIGHT,
+  isGrounded: true,
+})
+
+// Function to send state updates
+const sendStateUpdate = () => {
+  if (!props.isCurrentPlayer) { return }
+
+  send(JSON.stringify({
+    type: 'UPDATE_PLAYER_STATE',
+    lobbyId: lobbyStore.currentLobby?.id,
+    state: {
+      isMoving: state.isMoving,
+      direction: state.direction,
+      isRunning: state.isRunning,
+      isJumping: state.isJumping,
+      isGrounded: state.isGrounded,
+    },
+  }))
+}
+
 watch(data, (newData) => {
   if (!newData || props.isCurrentPlayer) { return }
 
@@ -44,6 +78,12 @@ watch(data, (newData) => {
         data.player.rotation[3], // w
       )
     }
+    // Update character state
+    if (typeof data.player.isMoving === 'boolean') { state.isMoving = data.player.isMoving }
+    if (data.player.direction) { state.direction = data.player.direction }
+    if (typeof data.player.isRunning === 'boolean') { state.isRunning = data.player.isRunning }
+    if (typeof data.player.isJumping === 'boolean') { state.isJumping = data.player.isJumping }
+    if (typeof data.player.isGrounded === 'boolean') { state.isGrounded = data.player.isGrounded }
   }
 })
 
@@ -70,23 +110,6 @@ const sendRotation = (rotation: Quaternion) => {
   }))
 }
 
-const JUMP_HEIGHT = 5
-const GRAVITY = -9.81
-
-const state = shallowReactive({
-  // Movement
-  currentPressedKeys: {},
-  isMoving: false,
-  isRunning: false,
-  direction: 'UP',
-  acceleration: new Vector3(0.25, 0.25, 25.0),
-  decceleration: new Vector3(-0.0005, -0.0001, -5.0),
-  velocity: new Vector3(0, 0, 0),
-  isJumping: false,
-  verticalVelocity: JUMP_HEIGHT,
-  isGrounded: true,
-})
-
 watch(model, (newModel) => {
   if (!newModel) { return }
   newModel.position.set(props.index * 1.5, 0, 0)
@@ -106,6 +129,7 @@ onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
     state.isRunning = true
   }
   state.direction = 'UP'
+  sendStateUpdate()
 })
 
 onKeyUp(['w', 'W', 'ArrowUp'], () => {
@@ -113,6 +137,7 @@ onKeyUp(['w', 'W', 'ArrowUp'], () => {
 
   state.isMoving = false
   state.isRunning = false
+  sendStateUpdate()
 })
 
 onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
@@ -124,6 +149,7 @@ onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
     state.isRunning = true
   }
   state.direction = 'DOWN'
+  sendStateUpdate()
 })
 
 onKeyUp(['s', 'S', 'ArrowDown'], () => {
@@ -131,6 +157,7 @@ onKeyUp(['s', 'S', 'ArrowDown'], () => {
 
   state.isMoving = false
   state.isRunning = false
+  sendStateUpdate()
 })
 
 onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
@@ -139,6 +166,7 @@ onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
 
   state.isMoving = true
   state.direction = 'LEFT'
+  sendStateUpdate()
 })
 
 onKeyUp(['a', 'A', 'ArrowLeft'], (e) => {
@@ -146,6 +174,7 @@ onKeyUp(['a', 'A', 'ArrowLeft'], (e) => {
   if (!props.isCurrentPlayer) { return }
 
   state.isMoving = false
+  sendStateUpdate()
 })
 
 onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
@@ -154,6 +183,7 @@ onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
 
   state.isMoving = true
   state.direction = 'RIGHT'
+  sendStateUpdate()
 })
 
 onKeyUp(['d', 'D', 'ArrowRight'], (e) => {
@@ -161,6 +191,7 @@ onKeyUp(['d', 'D', 'ArrowRight'], (e) => {
   if (!props.isCurrentPlayer) { return }
 
   state.isMoving = false
+  sendStateUpdate()
 })
 
 onKeyDown([' '], (e) => {
@@ -168,7 +199,8 @@ onKeyDown([' '], (e) => {
   if (!props.isCurrentPlayer) { return }
   if (state.isGrounded) {
     state.isJumping = true
-    state.isGrounded = false // Character is now in the air
+    state.isGrounded = false
+    sendStateUpdate()
   }
 })
 
@@ -239,18 +271,19 @@ onBeforeRender(({ delta }) => {
 
   if (state.isJumping && model.value) {
     // Update the vertical position based on the current vertical velocity
-    const gravity = GRAVITY // Gravity force, adjust as needed
+    const gravity = GRAVITY
     model.value.position.y += state.verticalVelocity * delta
-    state.verticalVelocity += gravity * delta // Apply gravity to vertical velocity
+    state.verticalVelocity += gravity * delta
 
     // Check if the character has landed
     if (model.value.position.y <= 0) {
-      model.value.position.y = 0 // Reset position to ground level
+      model.value.position.y = 0
       state.isJumping = false
       state.isGrounded = true
-      state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
+      state.verticalVelocity = JUMP_HEIGHT
+      sendStateUpdate() // Send state update when landing
     }
-    sendPosition(model.value?.position)
+    sendPosition(model.value.position)
   }
 })
 </script>

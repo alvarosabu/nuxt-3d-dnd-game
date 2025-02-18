@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onKeyDown, onKeyUp } from '@vueuse/core'
-import { type AnimationAction, type AnimationClip, type AnimationMixer, type Object3D, Quaternion, Vector3 } from 'three'
+import { type AnimationAction, type AnimationClip, type AnimationMixer, type Object3D, Quaternion, type SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'
 import { Html } from '@tresjs/cientos'
+import { useLobbyStore, useResourcePreloader } from '#imports'
+import { computed } from 'vue'
 
 const props = defineProps<{
   player: Player
@@ -62,24 +64,43 @@ const state = shallowReactive<CharacterState>({
   isGrounded: true,
 })
 
-const { scene, nodes, animations, materials } = getResource('models', props.player.character)
-console.log(nodes)
-const { scene: weapon } = getResource('models', 'hammer')
-
-// Find the node with key containing 'Rig' in the nodes object
-state.model = Object.values(nodes).find(node => node.name.includes('Rig'))
-state.model.position.set(props.index * 1.5, 0, 0)
-// const handSlotR = findBoneByName(state.model, 'handslotr')
-
-const weaponRef = shallowRef<Object3D>()
-
-/* watch(weaponRef, (newVal) => {
-  if (handSlotR && newVal) {
-    newVal.position.set(0, 0, 0)
-    newVal.rotation.set(0, 0, 0)
-    handSlotR.add(newVal)
+// Load character model and weapon
+const characterResource = computed(() => {
+  if (!props.player.character) { return null }
+  return getResource('models', props.player.character) as unknown as {
+    scene: Object3D
+    nodes: Record<string, Object3D>
+    animations: AnimationClip[]
+    materials: Record<string, any>
   }
-}) */
+})
+
+// Initialize model from character resource
+if (characterResource.value) {
+  const rigNode = Object.values(characterResource.value.nodes).find(node => node.name.includes('Rig'))
+  if (rigNode) {
+    state.model = rigNode as SkinnedMesh
+    state.model.position.set(props.index * 1.5, 0, 0)
+    state.animations = characterResource.value.animations
+  }
+}
+
+// Function to send state updates
+const sendStateUpdate = () => {
+  if (!props.isCurrentPlayer) { return }
+
+  send(JSON.stringify({
+    type: 'UPDATE_PLAYER_STATE',
+    lobbyId: lobbyStore.currentLobby?.id,
+    state: {
+      isMoving: state.isMoving,
+      direction: state.direction,
+      isRunning: state.isRunning,
+      isJumping: state.isJumping,
+      isGrounded: state.isGrounded,
+    },
+  }))
+}
 
 watch(data, (newData) => {
   if (!newData || props.isCurrentPlayer) { return }
@@ -103,6 +124,12 @@ watch(data, (newData) => {
         data.player.rotation[3], // w
       )
     }
+    // Update character state
+    if (typeof data.player.isMoving === 'boolean') { state.isMoving = data.player.isMoving }
+    if (data.player.direction) { state.direction = data.player.direction }
+    if (typeof data.player.isRunning === 'boolean') { state.isRunning = data.player.isRunning }
+    if (typeof data.player.isJumping === 'boolean') { state.isJumping = data.player.isJumping }
+    if (typeof data.player.isGrounded === 'boolean') { state.isGrounded = data.player.isGrounded }
   }
 })
 
@@ -129,7 +156,7 @@ const sendRotation = (rotation: Quaternion) => {
   }))
 }
 
-const { actions: animActions } = useAnimations(animations, state.model)
+const { actions: animActions } = useAnimations(state.animations, state.model)
 state.actions = animActions
 state.currentAction = animActions.Idle
 state.currentAction.play()
@@ -147,6 +174,7 @@ onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
     state.isRunning = true
   }
   state.direction = 'UP'
+  sendStateUpdate()
 })
 
 onKeyUp(['w', 'W', 'ArrowUp'], () => {
@@ -154,6 +182,7 @@ onKeyUp(['w', 'W', 'ArrowUp'], () => {
 
   state.isMoving = false
   state.isRunning = false
+  sendStateUpdate()
 })
 
 onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
@@ -165,6 +194,7 @@ onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
     state.isRunning = true
   }
   state.direction = 'DOWN'
+  sendStateUpdate()
 })
 
 onKeyUp(['s', 'S', 'ArrowDown'], () => {
@@ -172,6 +202,7 @@ onKeyUp(['s', 'S', 'ArrowDown'], () => {
 
   state.isMoving = false
   state.isRunning = false
+  sendStateUpdate()
 })
 
 onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
@@ -180,6 +211,7 @@ onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
 
   state.isMoving = true
   state.direction = 'LEFT'
+  sendStateUpdate()
 })
 
 onKeyUp(['a', 'A', 'ArrowLeft'], (e) => {
@@ -187,6 +219,7 @@ onKeyUp(['a', 'A', 'ArrowLeft'], (e) => {
   if (!props.isCurrentPlayer) { return }
 
   state.isMoving = false
+  sendStateUpdate()
 })
 
 onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
@@ -195,6 +228,7 @@ onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
 
   state.isMoving = true
   state.direction = 'RIGHT'
+  sendStateUpdate()
 })
 
 onKeyUp(['d', 'D', 'ArrowRight'], (e) => {
@@ -202,6 +236,7 @@ onKeyUp(['d', 'D', 'ArrowRight'], (e) => {
   if (!props.isCurrentPlayer) { return }
 
   state.isMoving = false
+  sendStateUpdate()
 })
 
 onKeyDown([' '], (e) => {
@@ -209,7 +244,8 @@ onKeyDown([' '], (e) => {
   if (!props.isCurrentPlayer) { return }
   if (state.isGrounded) {
     state.isJumping = true
-    state.isGrounded = false // Character is now in the air
+    state.isGrounded = false
+    sendStateUpdate()
   }
 })
 
@@ -222,6 +258,8 @@ const updateCurrentTime = () => {
 const { onBeforeRender } = useLoop()
 
 onBeforeRender(({ delta }) => {
+  if (!state.model) { return }
+
   if (state.isMoving) {
     const speed = state.velocity
     const frameDecceleration = new Vector3(
@@ -235,24 +273,13 @@ onBeforeRender(({ delta }) => {
 
     const _Q = new Quaternion()
     const _A = new Vector3()
-    const _R = state.model?.quaternion.clone()
+    const _R = state.model.quaternion.clone()
 
     const acceleration = state.acceleration.clone()
 
-    const currentSpeedMagnitude = speed.length()
-    // Get the current speed magnitude
-
-    // Set a base speed (the speed at which the animation timing was originally intended)
-    const baseSpeed = 2.0 // This value might need tuning based on your original animation settings
     switch (state.direction) {
       case 'UP':
         speed.z = Math.min(speed.z + acceleration.z * delta, 10) + (state.isRunning ? 0.15 : 0)
-
-        // Scale the animation speed based on the character's movement speed
-        if (state.currentAction) {
-          state.currentAction.timeScale = currentSpeedMagnitude / baseSpeed
-        }
-
         break
       case 'DOWN':
         speed.z = Math.max(speed.z - acceleration.z * delta / 2, -10)
@@ -269,45 +296,47 @@ onBeforeRender(({ delta }) => {
         break
     }
 
-    state.model?.quaternion.copy(_R)
-
-    const oldPosition = new Vector3()
-    oldPosition.copy(state.model?.position)
+    // Ensure quaternion is valid before applying
+    if (_R && Number.isFinite(_R.w) && Number.isFinite(_R.x)
+      && Number.isFinite(_R.y) && Number.isFinite(_R.z)) {
+      state.model.quaternion.copy(_R.normalize())
+    }
 
     const forward = new Vector3(0, 0, 1)
-    forward.applyQuaternion(state.model?.quaternion as Quaternion)
+    forward.applyQuaternion(state.model.quaternion)
     forward.normalize()
 
     const sideways = new Vector3(1, 0, 0)
-    sideways.applyQuaternion(state.model?.quaternion as Quaternion)
+    sideways.applyQuaternion(state.model.quaternion)
     sideways.normalize()
 
     forward.multiplyScalar(speed.z * delta)
     sideways.multiplyScalar(speed.x * delta)
 
-    state.model?.position.add(forward)
-    state.model?.position.add(sideways)
+    state.model.position.add(forward)
+    state.model.position.add(sideways)
 
-    oldPosition.copy(state.model?.position)
-
-    sendPosition(state.model?.position)
-    sendRotation(state.model?.quaternion)
+    sendPosition(state.model.position)
+    sendRotation(state.model.quaternion)
   }
-  if (state.isJumping) {
+
+  if (state.isJumping && state.model) {
     // Update the vertical position based on the current vertical velocity
-    const gravity = GRAVITY // Gravity force, adjust as needed
+    const gravity = GRAVITY
     state.model.position.y += state.verticalVelocity * delta
-    state.verticalVelocity += gravity * delta // Apply gravity to vertical velocity
+    state.verticalVelocity += gravity * delta
 
     // Check if the character has landed
     if (state.model.position.y <= 0) {
-      state.model.position.y = 0 // Reset position to ground level
+      state.model.position.y = 0
       state.isJumping = false
       state.isGrounded = true
-      state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
+      state.verticalVelocity = JUMP_HEIGHT
+      sendStateUpdate() // Send state update when landing
     }
-    sendPosition(state.model?.position)
+    sendPosition(state.model.position)
   }
+
   if (state.mixer) {
     updateCurrentTime() // Update the time each frame
   }
