@@ -6,10 +6,7 @@ import type { Vector3 } from 'three'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
-const { currentLobby } = storeToRefs(lobbyStore)
-
-// Watch for player updates in the lobby
-const players = computed(() => currentLobby.value?.players || [])
+const { currentLobby, currentLobbyPlayers } = storeToRefs(lobbyStore)
 </script>
 
 <template>
@@ -33,7 +30,7 @@ const players = computed(() => currentLobby.value?.players || [])
 
     <TresGridHelper :args="[100, 100]" />
     <Suspense>
-      <template v-for="(player, index) in players" :key="player.id">
+      <template v-for="(player, index) in currentLobbyPlayers" :key="player.id">
         <Character
           :player="player"
           :is-current-player="player.id === userStore.userId"

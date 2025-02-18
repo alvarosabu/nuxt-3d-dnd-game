@@ -55,19 +55,20 @@ export const useLobbyStore = defineStore(
         syncedLobbies.forEach((lobby) => {
           lobbies.value[lobby.id] = lobby
         })
+        setCurrentLobby(syncedLobbies[0].id)
       }
-      setCurrentLobby(syncedLobbies[0].id)
     }
 
     const currentLobbyPlayers = computed(() => {
       if (!currentLobby.value) { return [] }
-      return currentLobby.value.players.filter(player => player.character !== null)
+      return currentLobby.value.players.filter(player => player.character !== null && player.ready)
     })
 
     return {
       // State
       lobbies,
       currentLobbyId,
+      currentLobbyPlayers,
       // Getters
       availableLobbies,
       currentLobby,
@@ -75,7 +76,6 @@ export const useLobbyStore = defineStore(
       // Actions
       setCurrentLobby,
       setLobbies,
-      currentLobbyPlayers,
     }
   },
 )

@@ -29,7 +29,11 @@ export const useMultiplayer = () => {
       if (data.type === 'PLAYER_CONNECTION_RESPONSE') {
         userStore.isConnected = true
       }
+      if (data.type === 'PLAYER_DISCONNECTED') {
+        console.log('PLAYER_DISCONNECTED', data)
+      }
       if (data.type === 'SYNC_STATE') {
+        console.log('SYNC_STATE', data)
         lobbyStore.setLobbies(data.lobbies)
       }
     })

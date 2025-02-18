@@ -372,11 +372,11 @@ watch(() => state.isMoving, (value) => {
     <primitive name="modelRef" :object="state.model">
       <Html
         center
-        transform
         :distance-factor="4"
+        :scale="2"
         :position="[0, 3, 0]"
       >
-        <div class="p-1 rounded-xl bg-white text-black text-sm">
+        <div class="p-1 rounded-xl bg-white text-black text-lg">
           {{ player.name }}
         </div>
       </Html>

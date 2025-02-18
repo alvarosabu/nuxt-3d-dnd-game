@@ -5,6 +5,11 @@ import { useClipboard } from '@vueuse/core'
 import type { Player } from '~/types'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 
+// For Nuxt 3
+definePageMeta({
+  colorMode: 'dark',
+})
+
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
 const router = useRouter()
@@ -131,6 +136,18 @@ onBeforeUnmount(() => {
     lobbyId: currentLobby.value?.id,
   })) */
 })
+
+const showStartGameButton = computed(() => {
+  return currentLobby.value?.status === 'waiting' && currentLobby.value?.players.filter(player => player.ready).length === currentLobby.value?.maxPlayers && userStore.username === currentLobby.value?.hostName
+})
+
+const showJoinStartedGameButton = computed(() => {
+  return currentLobby.value?.status === 'playing'
+})
+
+const handleJoinStartedGame = () => {
+  router.push('/game')
+}
 </script>
 
 <template>
@@ -479,7 +496,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="space-y-4 p-8 flex items-center justify-center">
           <UButton
-            v-if="currentLobby?.players.filter(player => player.ready).length === currentLobby?.maxPlayers && userStore.username === currentLobby?.hostName"
+            v-if="showStartGameButton"
             size="lg"
             color="primary"
             variant="soft"
@@ -487,6 +504,16 @@ onBeforeUnmount(() => {
             @click="handleStartGame"
           >
             Start Game
+          </UButton>
+          <UButton
+            v-if="showJoinStartedGameButton"
+            size="lg"
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-arrow-left-on-rectangle"
+            @click="handleJoinStartedGame"
+          >
+            Join Started Game
           </UButton>
         </div>
       </UCard>

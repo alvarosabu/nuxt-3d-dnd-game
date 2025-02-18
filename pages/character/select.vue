@@ -7,6 +7,7 @@ import { useMultiplayer } from '~/composables/game/useMultiplayer'
 
 definePageMeta({
   middleware: ['character'],
+  colorMode: 'dark',
 })
 
 const { gameState } = useGameState()
