@@ -1,6 +1,8 @@
+import type { UseWebSocketReturn } from '@vueuse/core'
+
 export const useMultiplayer = () => {
   // Create a singleton instance of the WebSocket connection
-  let wsInstance
+  let wsInstance: UseWebSocketReturn<any>
   if (!wsInstance) {
     wsInstance = useWebSocket('/api/websocket', {
       immediate: true,
@@ -39,5 +41,15 @@ export const useMultiplayer = () => {
     })
   }
 
-  return wsInstance
+  function sendMsg(message: Record<string, any>) {
+    wsInstance.send(JSON.stringify(message))
+  }
+
+  return {
+    send: wsInstance.send,
+    on: wsInstance.on,
+    off: wsInstance.off,
+    data: wsInstance.data,
+    sendMsg,
+  }
 }

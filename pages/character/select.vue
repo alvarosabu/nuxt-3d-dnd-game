@@ -92,13 +92,13 @@ onKeyStroke('ArrowLeft', selectPrevious)
 const characterName = ref('Tav')
 
 const handleSelectCharacter = () => {
+  navigateTo('/game')
   send(JSON.stringify({
     type: 'SELECT_CHARACTER',
     characterName: characterName.value,
     lobbyId: lobbyStore.currentLobby?.id,
     character: selectedCharacter.value?.key,
   }))
-  router.push('/game')
 }
 </script>
 

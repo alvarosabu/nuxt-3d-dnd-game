@@ -1,22 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Character } from '~/types'
-
-export interface Lobby {
-  id: string
-  name: string
-  hostId: string | undefined
-  hostName: string | undefined
-  players: {
-    id: string
-    name: string
-    isHost: boolean
-    character: Character | null
-    ready: boolean
-  }[]
-  maxPlayers: number
-  status: 'waiting' | 'playing '
-  createdAt: string
-}
+import type { Character, Lobby } from '~/types'
 
 /**
  * Store to manage multiplayer lobbies
@@ -31,8 +14,7 @@ export const useLobbyStore = defineStore(
     // Getters
     const availableLobbies = computed(() =>
       Object.values(lobbies.value)
-        .filter(lobby => lobby.status === 'waiting' || lobby.status === 'playing')
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+        .filter(lobby => lobby.status === 'waiting' || lobby.status === 'playing'),
     )
 
     const currentLobby = computed(() =>
@@ -61,7 +43,7 @@ export const useLobbyStore = defineStore(
 
     const currentLobbyPlayers = computed(() => {
       if (!currentLobby.value) { return [] }
-      return currentLobby.value.players.filter(player => player.character !== null && player.ready)
+      return currentLobby.value.players.filter(player => player.character && player.character !== null && player.ready && player.status === 'in-game')
     })
 
     return {

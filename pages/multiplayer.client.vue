@@ -16,34 +16,40 @@ const router = useRouter()
 
 const { availableLobbies, currentLobby } = storeToRefs(lobbyStore)
 // Websocket
-const { data, send } = useMultiplayer()
+const { data, sendMsg } = useMultiplayer()
 
 userStore.isConnected = false
 
 const handleUserConnection = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'PLAYER_CONNECTION_REQUEST',
     userId: userStore.userId,
     username: userStore.username,
-  }))
+  })
 }
 
 const handleUserDisconnection = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'PLAYER_DISCONNECTION_REQUEST',
-  }))
+  })
   userStore.isConnected = false
 }
 
 const handleLeaveLobby = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'LEAVE_LOBBY',
     lobbyId: currentLobby.value?.id,
-  }))
+  })
 }
 
 watch(data, (newData) => {
   const data = JSON.parse(newData)
+  if (data.type === 'PLAYER_CONNECTION_RESPONSE') {
+    sendMsg({
+      type: 'UPDATE_PLAYER_STATUS',
+      status: 'lobby',
+    })
+  }
   if (data.type === 'GAME_STARTED') {
     router.push('/game')
   }
@@ -72,50 +78,49 @@ const isCurrentPlayerHost = ref(false)
  * Creates a new lobby with current user as host
  */
 const handleCreateLobby = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'CREATE_LOBBY',
     lobbyName: lobbyFormState.lobbyName,
     maxPlayers: lobbyFormState.maxPlayers,
-  }))
+  })
 }
 
 const handleFlushLobbies = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'FLUSH_LOBBIES',
-  }))
+  })
 }
 
 /**
  * Joins an existing lobby by ID
  */
 const handleJoinLobby = (lobbyId: string) => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'JOIN_LOBBY_REQUEST',
     lobbyId,
-  }))
+  })
 }
 
 const handleJoinLobbyRequest = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'JOIN_LOBBY_REQUEST',
     lobbyId: lobbyIdToJoin.lobbyId,
-  }))
+  })
 }
 
 const handleDeleteLobby = (lobbyId: string) => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'DELETE_LOBBY',
     lobbyId,
-  }))
+  })
 }
 
 const togglePlayerReady = (player: Player) => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'PLAYER_READY',
     value: !player.ready,
-    playerId: player.id,
     lobbyId: currentLobby.value?.id,
-  }))
+  })
 }
 
 const selectCurrentLobby = (lobbyId: string) => {
@@ -123,22 +128,16 @@ const selectCurrentLobby = (lobbyId: string) => {
 }
 
 const handleStartGame = () => {
-  send(JSON.stringify({
+  sendMsg({
     type: 'START_GAME',
     lobbyId: currentLobby.value?.id,
-  }))
+  })
 }
 
-// Cleanup on unmount
-onBeforeUnmount(() => {
-  /* send(JSON.stringify({
-    type: 'PAUSE_GAME',
-    lobbyId: currentLobby.value?.id,
-  })) */
-})
-
 const showStartGameButton = computed(() => {
-  return currentLobby.value?.status === 'waiting' && currentLobby.value?.players.filter(player => player.ready).length === currentLobby.value?.maxPlayers && userStore.username === currentLobby.value?.hostName
+  return currentLobby.value?.status === 'waiting'
+    && currentLobby.value?.players.filter(player => player.ready).length === currentLobby.value?.maxPlayers
+    && currentLobby.value?.hostId === userStore.userId
 })
 
 const showJoinStartedGameButton = computed(() => {
@@ -146,8 +145,15 @@ const showJoinStartedGameButton = computed(() => {
 })
 
 const handleJoinStartedGame = () => {
-  router.push('/game')
+  navigateTo('/game')
 }
+
+onBeforeUnmount(() => {
+  sendMsg({
+    type: 'UPDATE_PLAYER_STATUS',
+    status: 'offline',
+  })
+})
 </script>
 
 <template>

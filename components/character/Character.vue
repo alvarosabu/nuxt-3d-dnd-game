@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { onKeyDown, onKeyUp } from '@vueuse/core'
-import { type AnimationAction, type AnimationClip, type AnimationMixer, type Object3D, Quaternion, type SkinnedMesh, Vector3 } from 'three'
+import { type AnimationAction, type AnimationClip, type AnimationMixer, type Object3D, Quaternion, SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'
 import { Html } from '@tresjs/cientos'
 import { useLobbyStore, useResourcePreloader } from '#imports'
-import { computed } from 'vue'
+import { SkeletonUtils } from 'three-stdlib'
 
 const props = defineProps<{
   player: Player
@@ -64,25 +64,25 @@ const state = shallowReactive<CharacterState>({
   isGrounded: true,
 })
 
-// Load character model and weapon
-const characterResource = computed(() => {
-  if (!props.player.character) { return null }
-  return getResource('models', props.player.character) as unknown as {
-    scene: Object3D
-    nodes: Record<string, Object3D>
-    animations: AnimationClip[]
-    materials: Record<string, any>
-  }
-})
+const { scene, animations } = getResource('models', props.player.character)
 
-// Initialize model from character resource
-if (characterResource.value) {
-  const rigNode = Object.values(characterResource.value.nodes).find(node => node.name.includes('Rig'))
-  if (rigNode) {
-    state.model = rigNode as SkinnedMesh
-    state.model.position.set(props.index * 1.5, 0, 0)
-    state.animations = characterResource.value.animations
+const clonedScene = SkeletonUtils.clone(scene)
+const { nodes } = useGraph(clonedScene)
+
+const rigNode = Object.values(nodes).find(node => node.name.includes('Rig'))
+if (rigNode) {
+  // Create a proper clone of the rigged mesh
+  const clonedRig = rigNode // Deep clone
+
+  // Ensure the skeleton is properly cloned and bound
+  if (clonedRig instanceof SkinnedMesh) {
+    clonedRig.skeleton = (rigNode as SkinnedMesh).skeleton.clone()
+    clonedRig.bind(clonedRig.skeleton)
   }
+
+  state.model = clonedRig
+  state.model.position.set(props.index * 1.5, 0, 0)
+  state.animations = animations
 }
 
 // Function to send state updates
@@ -365,6 +365,17 @@ watch(() => state.isMoving, (value) => {
   state.currentAction.fadeIn(0.5)
   state.currentAction.play()
 })
+
+onBeforeUnmount(() => {
+  state.currentAction?.stop()
+  state.currentAction = null
+  state.mixer?.stop()
+  state.mixer = null
+  state.model = null
+  state.animations = []
+  state.actions = {}
+  state.currentAction = null
+})
 </script>
 
 <template>
@@ -381,7 +392,5 @@ watch(() => state.isMoving, (value) => {
         </div>
       </Html>
     </primitive>
-    <!--  <primitive ref="weaponRef" name="weapon" :object="weapon" /> -->
-    <TresSkeletonHelper :args="[state.model]" />
   </TresGroup>
 </template>

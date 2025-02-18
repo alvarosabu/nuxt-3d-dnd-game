@@ -17,6 +17,7 @@
     "@pinia-plugin-persistedstate/nuxt": "^1.2.1",
     "@pinia/nuxt": "^0.10.0",
     "@tresjs/cientos": "^4.1.0",
+    "@tresjs/leches": "https://pkg.pr.new/@tresjs/leches@9ad0cd3",
     "@tresjs/nuxt": "^3.0.7",
     "@vueuse/core": "^12.5.0",
     "@vueuse/nuxt": "^12.5.0",

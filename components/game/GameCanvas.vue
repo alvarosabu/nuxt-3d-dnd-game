@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useMultiplayer } from '~/composables/game/useMultiplayer'
-
-import DebugCharacter from '~/components/character/DebugCharacter.vue'
-import type { Vector3 } from 'three'
-
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
-const { currentLobby, currentLobbyPlayers } = storeToRefs(lobbyStore)
+const { currentLobbyPlayers } = storeToRefs(lobbyStore)
+
+const { showCharacter } = useControls({
+  showCharacter: true,
+})
 </script>
 
 <template>
+  <TresLeches />
   <TresCanvas clear-color="#000000" window-size>
     <Suspense>
       <Environment preset="sunset" :blur="1" background />
@@ -32,6 +32,7 @@ const { currentLobby, currentLobbyPlayers } = storeToRefs(lobbyStore)
     <Suspense>
       <template v-for="(player, index) in currentLobbyPlayers" :key="player.id">
         <Character
+          v-if="showCharacter"
           :player="player"
           :is-current-player="player.id === userStore.userId"
           :index="index"

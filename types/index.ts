@@ -9,10 +9,38 @@ export interface Character {
 }
 
 export interface Player {
+  // Base data
   id: string
   name: string
-  character: Character | null
-  position: Vector3
+  status?: 'offline' | 'lobby' | 'in-game'
+
+  // Lobby related
+  lobbyId?: string
+  isHost?: boolean
+  ready?: boolean
+
+  // Game related
+  character?: string
+  characterName?: string
+  position: number[] // [x, y, z]
+  rotation: number[] // [x, y, z, w]
+  // Character state
+  isMoving: boolean
+  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
+  isRunning: boolean
+  isJumping: boolean
+  isGrounded: boolean
+}
+
+export interface Lobby {
+  id: string
+  name: string
+  hostId: string | undefined
+  hostName: string | undefined
+  playersIds: string[]
+  maxPlayers: number
+  status: 'waiting' | 'playing'
+  createdAt: string
 }
 
 export interface CharacterTemplate {
@@ -84,13 +112,6 @@ export interface Cantrip {
   icon: string
   description: string
   school: string
-}
-
-export interface Player {
-  id: string
-  name: string
-  isHost: boolean
-  ready: boolean
 }
 
 export interface Session {

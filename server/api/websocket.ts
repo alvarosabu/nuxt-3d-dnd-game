@@ -1,22 +1,7 @@
 /* eslint-disable no-console */
 
-import { Quaternion, Vector3 } from 'three'
-import type { Lobby } from '~/stores/useLobbyStore'
-import type { Character, Player } from '~/types'
+import type { Character, Lobby, Player } from '~/types'
 
-interface PlayerStates {
-  id: string
-  name: string
-  position: number[] // [x, y, z]
-  rotation: number[] // [x, y, z, w]
-  lobbyId?: string
-  // Character state
-  isMoving: boolean
-  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
-  isRunning: boolean
-  isJumping: boolean
-  isGrounded: boolean
-}
 interface Peer {
   id: string
   send: (message: string) => void
@@ -27,22 +12,23 @@ const connectedPeers = new Map<string, any>()
 const global = 'GLOBAL'
 const lobbies = new Map<string, Lobby>()
 // Add new Maps for player tracking
-const players = new Map<string, PlayerStates>() // userId -> Player
+const players = new Map<string, Player>() // userId -> Player
 const peerToPlayer = new Map<string, string>() // peerId -> userId
 
 function handlePlayerConnection(peer: Peer, userId: string, username: string) {
   console.log(`[WS] Player connected: ${peer.id} - ${userId} - ${username}`)
   const player = players.get(userId) || {
+    // Base data
     id: userId,
     name: username,
     position: [0, 0, 0],
     rotation: [0, 0, 0, 1],
-    // Initial character state
     isMoving: false,
     direction: 'UP',
     isRunning: false,
     isJumping: false,
     isGrounded: true,
+    ready: false,
   }
   // Update player's peer connection
   players.set(userId, player)
@@ -79,27 +65,10 @@ function createLobby(name: string, hostPeer: Peer, maxPlayers = 4) {
     return
   }
   const hostName = players.get(hostId)?.name
-  const lobby: Lobby = {
-    id,
-    name,
-    hostId,
-    hostName,
-    maxPlayers,
-    players: [
-      {
-        id: hostId,
-        name: hostName || '',
-        character: null,
-        isHost: true,
-        ready: false,
-      },
-    ],
-    status: 'waiting',
-    createdAt: new Date().toISOString(),
-  }
-  lobbies.set(id, lobby)
   players.set(hostId, {
     id: hostId,
+    isHost: true,
+    ready: false,
     name: hostName || '',
     position: [0, 0, 0],
     rotation: [0, 0, 0, 1],
@@ -110,6 +79,18 @@ function createLobby(name: string, hostPeer: Peer, maxPlayers = 4) {
     isJumping: false,
     isGrounded: true,
   })
+  const lobby: Lobby = {
+    id,
+    name,
+    hostId,
+    hostName,
+    maxPlayers,
+    playersIds: [hostId],
+    status: 'waiting',
+    createdAt: new Date().toISOString(),
+  }
+  lobbies.set(id, lobby)
+
   hostPeer.subscribe(lobby.id)
 }
 
@@ -125,19 +106,12 @@ function joinLobby(lobbyId: string, peer: Peer) {
   const lobby = lobbies.get(lobbyId)
   const playerId = peerToPlayer.get(peer.id)
   if (lobby && playerId) {
-    if (lobby.players.length < lobby.maxPlayers) {
-      lobby.players.push({
-        id: playerId,
-        name: players.get(playerId)?.name || '',
-        character: null,
-        isHost: false,
-        ready: false,
-      })
+    if (lobby.playersIds.length < lobby.maxPlayers) {
+      lobby.playersIds.push(playerId)
+
       const player = players.get(playerId)
       if (player) {
         player.lobbyId = lobbyId
-        player.position = [0, 0, 0]
-        player.rotation = [0, 0, 0, 1]
       }
       peer.subscribe(lobbyId)
     }
@@ -147,16 +121,19 @@ function joinLobby(lobbyId: string, peer: Peer) {
 function leaveLobby(lobbyId: string, peerId: string) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
-    lobby.players = lobby.players.filter(player => player.id !== peerToPlayer.get(peerId))
+    lobby.playersIds = lobby.playersIds.filter(playerId => playerId !== peerToPlayer.get(peerId))
   }
 }
 
 function playerReady(peer: Peer, lobbyId: string, value: boolean) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
-    const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
-    if (player) {
-      player.ready = value
+    const playerId = peerToPlayer.get(peer.id)
+    if (playerId) {
+      const player = players.get(playerId)
+      if (player) {
+        player.ready = value
+      }
     }
   }
 }
@@ -181,8 +158,11 @@ function pauseGame(lobbyId: string) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
     lobby.status = 'waiting'
-    lobby.players.forEach((player) => {
-      player.ready = false
+    lobby.playersIds.forEach((playerId) => {
+      const player = players.get(playerId)
+      if (player) {
+        player.ready = false
+      }
     })
   }
 }
@@ -190,10 +170,13 @@ function pauseGame(lobbyId: string) {
 function selectCharacter(peer: Peer, lobbyId: string, characterName: string, character: string) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
-    const player = lobby.players.find(player => player.id === peerToPlayer.get(peer.id))
-    if (player) {
-      player.character = character
-      player.characterName = characterName
+    const playerId = peerToPlayer.get(peer.id)
+    if (playerId) {
+      const player = players.get(playerId)
+      if (player) {
+        player.character = character
+        player.characterName = characterName
+      }
     }
   }
 }
@@ -240,12 +223,16 @@ function syncState() {
   console.log('Syncing state')
   broadcastMessage({
     type: 'SYNC_STATE',
-    lobbies: Array.from(lobbies.values()),
+    lobbies: Array.from(lobbies.values()).map(lobby => ({
+      ...lobby,
+      players: lobby.playersIds.map(playerId => players.get(playerId)),
+    })),
+    players: Array.from(players.values()),
   })
 }
 
 // Add new function to handle character state updates
-function updatePlayerState(peer: Peer, lobbyId: string, state: Partial<PlayerStates>) {
+function updatePlayerState(peer: Peer, lobbyId: string, state: Partial<Player>) {
   const lobby = lobbies.get(lobbyId)
   const playerId = peerToPlayer.get(peer.id)
   if (!playerId) { return }
@@ -264,6 +251,16 @@ function updatePlayerState(peer: Peer, lobbyId: string, state: Partial<PlayerSta
       type: 'PLAYER_UPDATE',
       player,
     })
+  }
+}
+
+function updatePlayerStatus(peer: Peer, status: string) {
+  const playerId = peerToPlayer.get(peer.id)
+  if (playerId) {
+    const player = players.get(playerId)
+    if (player) {
+      player.status = status as 'offline' | 'lobby' | 'in-game'
+    }
   }
 }
 
@@ -327,9 +324,13 @@ export default defineWebSocketHandler({
         updatePlayerRotation(peer, data.lobbyId, data.rotation)
         return true
       },
-      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Partial<PlayerStates> }) => {
+      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Partial<Player> }) => {
         updatePlayerState(peer, data.lobbyId, data.state)
         return true
+      },
+      UPDATE_PLAYER_STATUS: (peer: Peer, data: { status: string }) => {
+        console.log('UPDATE_PLAYER_STATUS', data)
+        updatePlayerStatus(peer, data.status)
       },
     }
 
