@@ -373,7 +373,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Current Lobby Modal with improved styling -->
-      <UCard class="bg-slate-800/95 backdrop-blur ring-slate-700">
+      <UCard v-if="currentLobby" class="bg-slate-800/95 backdrop-blur ring-slate-700">
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">

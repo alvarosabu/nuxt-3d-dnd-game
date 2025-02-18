@@ -59,6 +59,11 @@ export const useLobbyStore = defineStore(
       setCurrentLobby(syncedLobbies[0].id)
     }
 
+    const currentLobbyPlayers = computed(() => {
+      if (!currentLobby.value) { return [] }
+      return currentLobby.value.players.filter(player => player.character !== null)
+    })
+
     return {
       // State
       lobbies,
@@ -70,6 +75,7 @@ export const useLobbyStore = defineStore(
       // Actions
       setCurrentLobby,
       setLobbies,
+      currentLobbyPlayers,
     }
   },
 )
