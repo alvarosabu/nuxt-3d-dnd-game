@@ -23,11 +23,6 @@ function handlePlayerConnection(peer: Peer, userId: string, username: string) {
     name: username,
     position: [0, 0, 0],
     rotation: [0, 0, 0, 1],
-    isMoving: false,
-    direction: 'UP',
-    isRunning: false,
-    isJumping: false,
-    isGrounded: true,
     ready: false,
   }
   // Update player's peer connection
@@ -187,28 +182,10 @@ function updatePlayerPosition(peer: Peer, lobbyId: string, position: number[]) {
   if (!playerId) { return }
 
   const player = players.get(playerId)
+  console.log('updatePlayerPosition', position)
   if (player && position.length === 3) {
     if (position.every(component => Number.isFinite(component))) {
       player.position = position
-    }
-  }
-  if (lobby) {
-    broadcastMessage({
-      type: 'PLAYER_UPDATE',
-      player,
-    })
-  }
-}
-
-function updatePlayerRotation(peer: Peer, lobbyId: string, rotation: number[]) {
-  const lobby = lobbies.get(lobbyId)
-  const playerId = peerToPlayer.get(peer.id)
-  if (!playerId) { return }
-
-  const player = players.get(playerId)
-  if (player && rotation.length === 4) {
-    if (rotation.every(component => Number.isFinite(component))) {
-      player.rotation = rotation
     }
   }
   if (lobby) {
@@ -229,29 +206,6 @@ function syncState() {
     })),
     players: Array.from(players.values()),
   })
-}
-
-// Add new function to handle character state updates
-function updatePlayerState(peer: Peer, lobbyId: string, state: Partial<Player>) {
-  const lobby = lobbies.get(lobbyId)
-  const playerId = peerToPlayer.get(peer.id)
-  if (!playerId) { return }
-
-  const player = players.get(playerId)
-  if (player) {
-    // Update only the provided state properties
-    if (typeof state.isMoving === 'boolean') { player.isMoving = state.isMoving }
-    if (state.direction) { player.direction = state.direction }
-    if (typeof state.isRunning === 'boolean') { player.isRunning = state.isRunning }
-    if (typeof state.isJumping === 'boolean') { player.isJumping = state.isJumping }
-    if (typeof state.isGrounded === 'boolean') { player.isGrounded = state.isGrounded }
-  }
-  if (lobby) {
-    broadcastMessage({
-      type: 'PLAYER_UPDATE',
-      player,
-    })
-  }
 }
 
 function updatePlayerStatus(peer: Peer, status: string) {
@@ -318,14 +272,6 @@ export default defineWebSocketHandler({
       },
       UPDATE_PLAYER_POSITION: (peer: Peer, data: { lobbyId: string, position: number[] }) => {
         updatePlayerPosition(peer, data.lobbyId, data.position)
-        return true
-      },
-      UPDATE_PLAYER_ROTATION: (peer: Peer, data: { lobbyId: string, rotation: number[] }) => {
-        updatePlayerRotation(peer, data.lobbyId, data.rotation)
-        return true
-      },
-      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Partial<Player> }) => {
-        updatePlayerState(peer, data.lobbyId, data.state)
         return true
       },
       UPDATE_PLAYER_STATUS: (peer: Peer, data: { status: string }) => {

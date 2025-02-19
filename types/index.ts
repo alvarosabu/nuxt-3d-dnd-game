@@ -23,13 +23,7 @@ export interface Player {
   character?: string
   characterName?: string
   position: number[] // [x, y, z]
-  rotation: number[] // [x, y, z, w]
-  // Character state
-  isMoving: boolean
-  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
-  isRunning: boolean
-  isJumping: boolean
-  isGrounded: boolean
+
 }
 
 export interface Lobby {

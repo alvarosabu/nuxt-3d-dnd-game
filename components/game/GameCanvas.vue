@@ -1,11 +1,24 @@
 <script setup lang="ts">
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
+
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
 const { currentLobbyPlayers } = storeToRefs(lobbyStore)
 
+const { sendMsg } = useMultiplayer()
+
+useControls('fpsgraph')
 const { showCharacter } = useControls({
   showCharacter: true,
 })
+
+const handleFloorClick = (e) => {
+  sendMsg({
+    type: 'UPDATE_PLAYER_POSITION',
+    lobbyId: lobbyStore.currentLobbyId,
+    position: [e.point.x, 0, e.point.z],
+  })
+}
 </script>
 
 <template>
@@ -39,5 +52,9 @@ const { showCharacter } = useControls({
         />
       </template>
     </Suspense>
+    <TresMesh :rotation-x="-Math.PI / 2" @click="handleFloorClick">
+      <TresPlaneGeometry :args="[100, 100]" />
+      <TresMeshBasicMaterial color="#f0f0f0" />
+    </TresMesh>
   </TresCanvas>
 </template>
