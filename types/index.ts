@@ -1,4 +1,5 @@
 import type { OriginsCollectionItem } from '@nuxt/content'
+import type { Vector3 } from 'three'
 
 export interface Character {
   id: string
@@ -8,9 +9,32 @@ export interface Character {
 }
 
 export interface Player {
+  // Base data
   id: string
   name: string
-  character: Character
+  status?: 'offline' | 'lobby' | 'in-game'
+
+  // Lobby related
+  lobbyId?: string
+  isHost?: boolean
+  ready?: boolean
+
+  // Game related
+  character?: string
+  characterName?: string
+  position: number[] // [x, y, z]
+
+}
+
+export interface Lobby {
+  id: string
+  name: string
+  hostId: string | undefined
+  hostName: string | undefined
+  playersIds: string[]
+  maxPlayers: number
+  status: 'waiting' | 'playing'
+  createdAt: string
 }
 
 export interface CharacterTemplate {
@@ -82,12 +106,6 @@ export interface Cantrip {
   icon: string
   description: string
   school: string
-}
-
-export interface Player {
-  id: string
-  name: string
-  isHost: boolean
 }
 
 export interface Session {

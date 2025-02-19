@@ -1,11 +1,30 @@
 <script setup lang="ts">
-import { onKeyDown, onKeyUp } from '@vueuse/core'
-import { type AnimationAction, type AnimationClip, type AnimationMixer, type AnimationObjectGroup, type Group, type Object3D, Quaternion, type StaticReadUsage, Vector3 } from 'three'
+import type { AnimationAction, AnimationClip, AnimationMixer, Object3D, Quaternion } from 'three'
+import { SkinnedMesh, Vector3 } from 'three'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
+import type { Player } from '~/types'
+import { Html } from '@tresjs/cientos'
+import { useLobbyStore, useResourcePreloader } from '#imports'
+import { SkeletonUtils } from 'three-stdlib'
+import { dispose } from '@tresjs/core'
+
+const props = defineProps<{
+  player: Player
+  isCurrentPlayer: boolean
+  index: number
+}>()
 
 const { getResource } = useResourcePreloader()
+const lobbyStore = useLobbyStore()
+
+const MOVEMENT_SPEED = 0.032
+
+// Inject websocket methods
+const { send, data } = useMultiplayer()
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
+const serverPosition = ref<Vector3>(new Vector3(props.index * 1.5, 0, 0))
 
 interface CharacterState {
   model: Object3D | null
@@ -15,17 +34,10 @@ interface CharacterState {
   currentAction: AnimationAction | null
   mixer: AnimationMixer | null
   currentTime: number
-  // Movement
-  currentPressedKeys: Record<string, boolean>
   isMoving: boolean
-  isRunning: boolean
-  direction: 'UP' | 'DOWN' | 'LEFT' | 'RIGHT'
-  acceleration: Vector3
-  decceleration: Vector3
-  velocity: Vector3
   isJumping: boolean
-  verticalVelocity: number
   isGrounded: boolean
+  verticalVelocity: number
 }
 
 const state = shallowReactive<CharacterState>({
@@ -36,101 +48,63 @@ const state = shallowReactive<CharacterState>({
   currentAction: null,
   mixer: null,
   currentTime: 0,
-  // Movement
-  currentPressedKeys: {},
   isMoving: false,
-  isRunning: false,
-  direction: 'UP',
-  acceleration: new Vector3(0.25, 0.25, 25.0),
-  decceleration: new Vector3(-0.0005, -0.0001, -5.0),
-  velocity: new Vector3(0, 0, 0),
   isJumping: false,
-  verticalVelocity: JUMP_HEIGHT,
   isGrounded: true,
+  verticalVelocity: JUMP_HEIGHT,
 })
 
-const { scene, nodes, animations, materials } = getResource('models', 'paladin-storyblok')
+const { scene, animations } = getResource('models', props.player.character)
 
-const { scene: weapon } = getResource('models', 'hammer')
+const clonedScene = SkeletonUtils.clone(scene)
+const { nodes } = useGraph(clonedScene)
 
-state.model = nodes.Rig
+const rigNode = Object.values(nodes).find(node => node.name.includes('Rig'))
+if (rigNode) {
+  // Create a proper clone of the rigged mesh
+  const clonedRig = rigNode // Deep clone
 
-const handSlotR = findBoneByName(state.model, 'handslotr')
+  // Ensure the skeleton is properly cloned and bound
+  if (clonedRig instanceof SkinnedMesh) {
+    clonedRig.skeleton = (rigNode as SkinnedMesh).skeleton.clone()
+    clonedRig.bind(clonedRig.skeleton)
+  }
 
-const weaponRef = shallowRef<Object3D>()
+  state.model = clonedRig
+  state.model.position.set(props.index * 1.5, 0, 0)
+  state.animations = animations
+}
 
-watch(weaponRef, (newVal) => {
-  if (handSlotR && newVal) {
-    newVal.position.set(0, 0, 0)
-    newVal.rotation.set(0, 0, 0)
-    handSlotR.add(newVal)
+watch(data, (newData) => {
+  const data = JSON.parse(newData)
+  if (data.type === 'PLAYER_UPDATE') {
+    // Handle position as array of components
+    if (data.player.position && data.player.id === props.player.id) {
+      serverPosition.value.set(
+        data.player.position[0], // x
+        data.player.position[1], // y
+        data.player.position[2], // z
+      )
+    }
   }
 })
 
-const { actions: animActions } = useAnimations(animations, state.model)
+// Throttle position updates to reduce websocket messages
+const sendPosition = (position: Vector3) => {
+  if (!props.isCurrentPlayer) { return }
+
+  // Send position as array of components [x, y, z]
+  send(JSON.stringify({
+    type: 'UPDATE_PLAYER_POSITION',
+    lobbyId: lobbyStore.currentLobby?.id,
+    position: [position.x, position.y, position.z],
+  }))
+}
+
+const { actions: animActions } = useAnimations(state.animations, state.model)
 state.actions = animActions
 state.currentAction = animActions.Idle
 state.currentAction.play()
-
-// Movement
-
-const { shift } = useMagicKeys()
-
-onKeyDown(['w', 'W', 'ArrowUp'], (e) => {
-  e.preventDefault()
-  state.isMoving = true
-  if (shift.value) {
-    state.isRunning = true
-  }
-  state.direction = 'UP'
-})
-
-onKeyUp(['w', 'W', 'ArrowUp'], () => {
-  state.isMoving = false
-  state.isRunning = false
-})
-
-onKeyDown(['s', 'S', 'ArrowDown'], (e) => {
-  e.preventDefault()
-  state.isMoving = true
-  if (shift.value) {
-    state.isRunning = true
-  }
-  state.direction = 'DOWN'
-})
-
-onKeyUp(['s', 'S', 'ArrowDown'], () => {
-  state.isMoving = false
-  state.isRunning = false
-})
-
-onKeyDown(['a', 'A', 'ArrowLeft'], (e) => {
-  e.preventDefault()
-  state.isMoving = true
-  state.direction = 'LEFT'
-})
-
-onKeyUp(['a', 'A', 'ArrowLeft'], () => {
-  state.isMoving = false
-})
-
-onKeyDown(['d', 'D', 'ArrowRight'], (e) => {
-  e.preventDefault()
-  state.isMoving = true
-  state.direction = 'RIGHT'
-})
-
-onKeyUp(['d', 'D', 'ArrowRight'], () => {
-  state.isMoving = false
-})
-
-onKeyDown([' '], (e) => {
-  e.preventDefault()
-  if (state.isGrounded) {
-    state.isJumping = true
-    state.isGrounded = false // Character is now in the air
-  }
-})
 
 const updateCurrentTime = () => {
   if (state.mixer && state.currentAction) {
@@ -141,107 +115,48 @@ const updateCurrentTime = () => {
 const { onBeforeRender } = useLoop()
 
 onBeforeRender(({ delta }) => {
-  if (state.isMoving) {
-    const speed = state.velocity
-    const frameDecceleration = new Vector3(
-      speed.x * state.decceleration.x,
-      speed.y * state.decceleration.y,
-      speed.z * state.decceleration.z,
-    )
-    frameDecceleration.multiplyScalar(delta)
-    frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(Math.abs(frameDecceleration.z), Math.abs(speed.z))
-    speed.add(frameDecceleration)
+  if (!state.model) { return }
 
-    const _Q = new Quaternion()
-    const _A = new Vector3()
-    const _R = state.model?.quaternion.clone()
+  if (state.model.position.distanceTo(serverPosition.value) > 0.1) {
+    const direction = state.model.position
+      .clone()
+      .sub(serverPosition.value)
+      .normalize()
+      .multiplyScalar(MOVEMENT_SPEED)
 
-    const acceleration = state.acceleration.clone()
-
-    const currentSpeedMagnitude = speed.length()
-    // Get the current speed magnitude
-
-    // Set a base speed (the speed at which the animation timing was originally intended)
-    const baseSpeed = 2.0 // This value might need tuning based on your original animation settings
-    switch (state.direction) {
-      case 'UP':
-        speed.z = Math.min(speed.z + acceleration.z * delta, 10) + (state.isRunning ? 0.15 : 0)
-
-        // Scale the animation speed based on the character's movement speed
-        if (state.currentAction) {
-          state.currentAction.timeScale = currentSpeedMagnitude / baseSpeed
-        }
-
-        break
-      case 'DOWN':
-        speed.z = Math.max(speed.z - acceleration.z * delta / 2, -10)
-        break
-      case 'LEFT':
-        _A.set(0, 1, 0)
-        _Q.setFromAxisAngle(_A, 4.0 * Math.PI * delta * acceleration.y)
-        _R.multiply(_Q)
-        break
-      case 'RIGHT':
-        _A.set(0, 1, 0)
-        _Q.setFromAxisAngle(_A, 4.0 * -Math.PI * delta * acceleration.y)
-        _R.multiply(_Q)
-        break
-    }
-
-    state.model?.quaternion.copy(_R)
-
-    const oldPosition = new Vector3()
-    oldPosition.copy(state.model?.position)
-
-    const forward = new Vector3(0, 0, 1)
-    forward.applyQuaternion(state.model?.quaternion as Quaternion)
-    forward.normalize()
-
-    const sideways = new Vector3(1, 0, 0)
-    sideways.applyQuaternion(state.model?.quaternion as Quaternion)
-    sideways.normalize()
-
-    forward.multiplyScalar(speed.z * delta)
-    sideways.multiplyScalar(speed.x * delta)
-
-    state.model?.position.add(forward)
-    state.model?.position.add(sideways)
-
-    oldPosition.copy(state.model?.position)
+    state.model.position.sub(direction)
+    state.model.lookAt(serverPosition.value)
+    state.isMoving = true
   }
-  if (state.isJumping) {
+  else {
+    state.isMoving = false
+  }
+
+  if (state.isJumping && state.model) {
     // Update the vertical position based on the current vertical velocity
-    const gravity = GRAVITY // Gravity force, adjust as needed
+    const gravity = GRAVITY
     state.model.position.y += state.verticalVelocity * delta
-    state.verticalVelocity += gravity * delta // Apply gravity to vertical velocity
+    state.verticalVelocity += gravity * delta
 
     // Check if the character has landed
     if (state.model.position.y <= 0) {
-      state.model.position.y = 0 // Reset position to ground level
+      state.model.position.y = 0
       state.isJumping = false
       state.isGrounded = true
-      state.verticalVelocity = JUMP_HEIGHT // Reset vertical velocity
+      state.verticalVelocity = JUMP_HEIGHT
     }
+    sendPosition(state.model.position)
   }
+
   if (state.mixer) {
     updateCurrentTime() // Update the time each frame
   }
 })
 
 watch(() => state.isMoving, (value) => {
-  if (value && state.isGrounded) {
+  if (value) {
     state.currentAction?.fadeOut(0.5)
-    if (state.direction === 'DOWN') {
-      state.currentAction = state.actions.Walking_Backwards
-    }
-    else {
-      if (state.isRunning) {
-        state.currentAction = state.actions.Running_A
-      }
-      else {
-        state.currentAction = state.actions.Walking_A
-      }
-    }
+    state.currentAction = state.actions.Walking_A
   }
   else {
     state.currentAction?.fadeOut(0.5)
@@ -251,10 +166,33 @@ watch(() => state.isMoving, (value) => {
   state.currentAction.fadeIn(0.5)
   state.currentAction.play()
 })
+
+onBeforeUnmount(() => {
+  state.currentAction?.stop()
+  state.currentAction = null
+  state.mixer?.stop()
+  state.mixer = null
+  dispose(state.model)
+  state.model = null
+  state.animations = []
+  state.actions = {}
+  state.currentAction = null
+})
 </script>
 
 <template>
-  <primitive name="model" :object="state.model" />
-  <primitive ref="weaponRef" name="weapon" :object="weapon" />
-  <TresSkeletonHelper :args="[state.model]" />
+  <TresGroup>
+    <primitive name="modelRef" :object="state.model">
+      <Html
+        center
+        :distance-factor="4"
+        :scale="2"
+        :position="[0, 3, 0]"
+      >
+        <div class="p-1 rounded-xl bg-white text-black text-lg">
+          {{ player.name }} {{ player.id }}
+        </div>
+      </Html>
+    </primitive>
+  </TresGroup>
 </template>

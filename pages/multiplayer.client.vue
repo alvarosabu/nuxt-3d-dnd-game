@@ -1,10 +1,59 @@
 <script setup lang="ts">
 import { useUserStore } from '~/stores/useUserStore'
-import { useLobbyStore } from '~/stores/useLobbyStore'
+
 import { useClipboard } from '@vueuse/core'
-import { useMultiplayerSocket } from '~/composables/useMultiplayerSocket'
+import type { Player } from '~/types'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
+
+// For Nuxt 3
+definePageMeta({
+  colorMode: 'dark',
+})
 
 const userStore = useUserStore()
+const lobbyStore = useLobbyStore()
+const router = useRouter()
+
+const { availableLobbies, currentLobby } = storeToRefs(lobbyStore)
+// Websocket
+const { data, sendMsg } = useMultiplayer()
+
+userStore.isConnected = false
+
+const handleUserConnection = () => {
+  sendMsg({
+    type: 'PLAYER_CONNECTION_REQUEST',
+    userId: userStore.userId,
+    username: userStore.username,
+  })
+}
+
+const handleUserDisconnection = () => {
+  sendMsg({
+    type: 'PLAYER_DISCONNECTION_REQUEST',
+  })
+  userStore.isConnected = false
+}
+
+const handleLeaveLobby = () => {
+  sendMsg({
+    type: 'LEAVE_LOBBY',
+    lobbyId: currentLobby.value?.id,
+  })
+}
+
+watch(data, (newData) => {
+  const data = JSON.parse(newData)
+  if (data.type === 'PLAYER_CONNECTION_RESPONSE') {
+    sendMsg({
+      type: 'UPDATE_PLAYER_STATUS',
+      status: 'lobby',
+    })
+  }
+  if (data.type === 'GAME_STARTED') {
+    router.push('/game')
+  }
+})
 
 // Clipboard handling
 const { copy, copied } = useClipboard()
@@ -23,61 +72,87 @@ const lobbyIdToJoin = reactive({
 const isCreatingLobby = ref(false)
 const isJoiningLobby = ref(false)
 
-const lobbyStore = useLobbyStore()
-const {
-  joinLobby,
-  setCurrentLobby,
-  leaveLobby,
-  createLobby,
-  isCurrentPlayerHost,
-} = lobbyStore
-
-const { availableLobbies, currentLobby, currentLobbyId } = storeToRefs(lobbyStore)
-
-const { handleJoinRequest, deleteSession } = useMultiplayerSocket()
+const isCurrentPlayerHost = ref(false)
 
 /**
  * Creates a new lobby with current user as host
  */
 const handleCreateLobby = () => {
-  if (!lobbyFormState.lobbyName.trim()) { return }
-  createLobby(lobbyFormState.lobbyName.trim(), {
-    id: userStore.userId,
-    name: userStore.username,
-  }, lobbyFormState.maxPlayers)
-  lobbyFormState.lobbyName = ''
+  sendMsg({
+    type: 'CREATE_LOBBY',
+    lobbyName: lobbyFormState.lobbyName,
+    maxPlayers: lobbyFormState.maxPlayers,
+  })
+}
+
+const handleFlushLobbies = () => {
+  sendMsg({
+    type: 'FLUSH_LOBBIES',
+  })
 }
 
 /**
  * Joins an existing lobby by ID
  */
 const handleJoinLobby = (lobbyId: string) => {
-  joinLobby(lobbyId, {
-    id: userStore.userId,
-    name: userStore.username,
+  sendMsg({
+    type: 'JOIN_LOBBY_REQUEST',
+    lobbyId,
   })
-
-  lobbyIdToJoin.lobbyId = ''
 }
 
 const handleJoinLobbyRequest = () => {
-  handleJoinRequest(lobbyIdToJoin.lobbyId, {
-    id: userStore.userId,
-    name: userStore.username,
+  sendMsg({
+    type: 'JOIN_LOBBY_REQUEST',
+    lobbyId: lobbyIdToJoin.lobbyId,
   })
-
-  lobbyIdToJoin.lobbyId = ''
 }
 
 const handleDeleteLobby = (lobbyId: string) => {
-  deleteSession(lobbyId)
+  sendMsg({
+    type: 'DELETE_LOBBY',
+    lobbyId,
+  })
 }
 
-// Cleanup on unmount
+const togglePlayerReady = (player: Player) => {
+  sendMsg({
+    type: 'PLAYER_READY',
+    value: !player.ready,
+    lobbyId: currentLobby.value?.id,
+  })
+}
+
+const selectCurrentLobby = (lobbyId: string) => {
+  lobbyStore.setCurrentLobby(lobbyId)
+}
+
+const handleStartGame = () => {
+  sendMsg({
+    type: 'START_GAME',
+    lobbyId: currentLobby.value?.id,
+  })
+}
+
+const showStartGameButton = computed(() => {
+  return currentLobby.value?.status === 'waiting'
+    && currentLobby.value?.players.filter(player => player.ready).length === currentLobby.value?.maxPlayers
+    && currentLobby.value?.hostId === userStore.userId
+})
+
+const showJoinStartedGameButton = computed(() => {
+  return currentLobby.value?.status === 'playing'
+})
+
+const handleJoinStartedGame = () => {
+  navigateTo('/game')
+}
+
 onBeforeUnmount(() => {
-  if (currentLobbyId) {
-    leaveLobby(userStore.username)
-  }
+  sendMsg({
+    type: 'UPDATE_PLAYER_STATUS',
+    status: 'offline',
+  })
 })
 </script>
 
@@ -99,15 +174,28 @@ onBeforeUnmount(() => {
           class="bg-slate-800/50 backdrop-blur ring-slate-700  border-slate-700"
         >
           <div class="flex items-center gap-3">
-            <UAvatar
-              :src="userStore.avatar"
-              size="sm"
-              class="ring-2 ring-gold-500/50"
-            />
+            <UChip
+              color="success"
+              :show="userStore.isConnected"
+              inset
+            >
+              <UAvatar
+                :src="userStore.avatar"
+                size="sm"
+                class="ring-2 ring-gold-500/50"
+              />
+            </UChip>
+
             <div class="flex flex-col">
               <span class="text-sm text-slate-300">Playing as</span>
               <span class="text-gold-500 font-medium">{{ userStore.username }}</span>
             </div>
+            <UButton
+              color="primary"
+              variant="soft"
+              :icon="userStore.isConnected ? 'i-mdi-lan-disconnect' : 'i-mdi-lan-connect'"
+              @click="userStore.isConnected ? handleUserDisconnection() : handleUserConnection()"
+            />
           </div>
         </UCard>
       </div>
@@ -128,22 +216,28 @@ onBeforeUnmount(() => {
                   </h2>
                 </div>
                 <UBadge
-                  :color="availableLobbies.length ? 'warning' : 'error'"
+                  :color="availableLobbies?.length ? 'warning' : 'error'"
                   variant="subtle"
                   class="px-3 py-1"
                 >
-                  {{ availableLobbies.length }} Active
+                  {{ availableLobbies?.length }} Active
                 </UBadge>
+                <UButton
+                  color="primary"
+                  variant="ghost"
+                  icon="i-heroicons-trash"
+                  @click="handleFlushLobbies"
+                />
               </div>
             </template>
 
             <div class="space-y-3">
-              <template v-if="availableLobbies.length">
+              <template v-if="availableLobbies?.length">
                 <UCard
                   v-for="lobby in availableLobbies"
                   :key="lobby.id"
                   class="bg-slate-800/30 hover:bg-slate-800/50 cursor-pointer ring-slate-700 hover:ring-gold-500/50 transition-all duration-300"
-                  @click="setCurrentLobby(lobby.id)"
+                  @click="selectCurrentLobby(lobby.id)"
                 >
                   <div class="flex items-center justify-between">
                     <div>
@@ -151,10 +245,17 @@ onBeforeUnmount(() => {
                         {{ lobby.name }}
                       </h3>
                       <div class="flex items-center gap-2 text-sm text-slate-400">
-                        <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${lobby.hostName}`" size="xs" />
                         <span>{{ lobby.hostName }}</span>
                       </div>
                     </div>
+                    <UAvatarGroup v-if="lobby.players.length > 0">
+                      <UAvatar
+                        v-for="player in lobby.players"
+                        :key="player.id"
+                        :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`"
+                        :alt="player.name"
+                      />
+                    </UAvatarGroup>
                     <div class="flex items-center gap-3">
                       <UBadge color="warning" variant="subtle" class="px-2">
                         {{ lobby.players.length }}/{{ lobby.maxPlayers }}
@@ -185,7 +286,7 @@ onBeforeUnmount(() => {
                 class="text-center py-12 px-4"
               >
                 <UIcon
-                  name="i-heroicons-globe-alt"
+                  name="i-mdi-lan"
                   class="text-4xl text-slate-600 mb-2 mx-auto"
                 />
                 <p class="text-slate-400 mb-1">
@@ -295,7 +396,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Current Lobby Modal with improved styling -->
-      <UCard class="bg-slate-800/95 backdrop-blur ring-slate-700">
+      <UCard v-if="currentLobby" class="bg-slate-800/95 backdrop-blur ring-slate-700">
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -306,11 +407,18 @@ onBeforeUnmount(() => {
             </div>
             <div class="flex gap-2">
               <UButton
+                color="primary"
+                variant="soft"
+                icon="i-heroicons-link"
+                @click="copy(currentLobby?.id ?? '')"
+              >
+                {{ copied ? 'Copied!' : `${currentLobby?.id}` }}
+              </UButton>
+              <UButton
                 v-if="isCurrentPlayerHost"
                 color="error"
                 variant="soft"
                 icon="i-heroicons-trash"
-                @click="deleteSession(currentLobby?.id)"
               >
                 Delete Lobby
               </UButton>
@@ -318,7 +426,7 @@ onBeforeUnmount(() => {
                 color="error"
                 variant="soft"
                 icon="i-heroicons-arrow-left-on-rectangle"
-                @click="leaveLobby(userStore.username)"
+                @click="handleLeaveLobby"
               >
                 Leave
               </UButton>
@@ -331,44 +439,88 @@ onBeforeUnmount(() => {
             <h4 class="text-sm font-medium text-slate-400 mb-3">
               Players
             </h4>
-            <div class="grid grid-cols-4 gap-2">
+            <div v-if="currentLobby" class="grid grid-cols-4 gap-2">
               <UBadge
                 v-for="player in currentLobby?.players"
                 :key="player.id"
-                :color="player.isHost ? 'primary' : 'secondary'"
+                :color="player.isHost ? 'primary' : player.id === userStore.userId ? 'success' : 'secondary'"
                 variant="subtle"
                 class="px-3 py-1"
               >
-                <div class="flex items-center gap-2">
-                  <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xs" />
-                  {{ player.name }}
-                  <UIcon
-                    v-if="player.isHost"
-                    name="i-heroicons-crown-20-solid"
-                    class="text-primary"
+                <div class="w-full flex flex-col justify-start items-center gap-2 p-8">
+                  <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xl" />
+                  <div class="flex items-center gap-2">
+                    {{ player.name }} <span v-if="player.id === userStore.userId">(You)</span>
+                    <UIcon
+                      v-if="player.isHost"
+                      name="i-mdi-crown"
+                      class="text-primary"
+                    />
+                  </div>
+                  <UButton
+                    v-if="player.id === userStore.userId"
+                    color="primary"
+                    label="Ready"
+                    :icon="player.ready ? 'i-heroicons-check' : null"
+                    size="sm"
+                    @click="togglePlayerReady(player)"
                   />
+                  <UBadge
+                    v-else
+                    color="primary"
+                    variant="subtle"
+                    class="px-3 py-1"
+                    :icon="player.ready ? 'i-heroicons-check' : null"
+                  >
+                    Ready
+                  </UBadge>
+                </div>
+              </UBadge>
+              <UBadge
+                v-for="player in Array.from({ length: currentLobby?.maxPlayers - (currentLobby?.players?.length || 0) }, () => ({
+                  name: 'Open',
+                }))"
+                :key="player"
+                color="primary"
+                variant="subtle"
+                class="px-3 py-1"
+              >
+                <div class="w-full flex flex-col items-center gap-2 p-8">
+                  <UAvatar :src="`https://api.dicebear.com/9.x/thumbs/svg?seed=${player.name}`" size="xl" />
+                  <div class="flex items-center gap-2">
+                    {{ player.name }} <span v-if="player.id === userStore.userId">(You)</span>
+                    <UIcon
+                      v-if="player.isHost"
+                      name="i-mdi-crown"
+                      class="text-primary"
+                    />
+                  </div>
                 </div>
               </UBadge>
             </div>
           </div>
-
-          <div>
-            <h4 class="text-sm font-medium text-slate-400 mb-2">
-              Share Lobby
-            </h4>
-            <UButton
-              :text="currentLobby?.id"
-              class="w-full bg-slate-900/50"
-              variant="outline"
-              color="primary"
-              @click="copy(currentLobby?.id ?? '')"
-            >
-              <div class="flex items-center justify-center gap-2">
-                <UIcon name="i-heroicons-link" />
-                {{ copied ? 'Copied!' : `Copy Lobby ID: ${currentLobby?.id}` }}
-              </div>
-            </UButton>
-          </div>
+        </div>
+        <div class="space-y-4 p-8 flex items-center justify-center">
+          <UButton
+            v-if="showStartGameButton"
+            size="lg"
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-arrow-left-on-rectangle"
+            @click="handleStartGame"
+          >
+            Start Game
+          </UButton>
+          <UButton
+            v-if="showJoinStartedGameButton"
+            size="lg"
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-arrow-left-on-rectangle"
+            @click="handleJoinStartedGame"
+          >
+            Join Started Game
+          </UButton>
         </div>
       </UCard>
     </UContainer>
