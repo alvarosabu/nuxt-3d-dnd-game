@@ -4,24 +4,24 @@ import { onKeyStroke } from '@vueuse/core'
 import CharacterInfoPanel from '~/components/character/CharacterInfoPanel.vue'
 import gsap from 'gsap'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
+import { useGameStore } from '~/stores/useGameStore'
 
 definePageMeta({
   middleware: ['character'],
   colorMode: 'dark',
 })
 
-const { gameState } = useGameState()
+const gameStore = useGameStore()
 const lobbyStore = useLobbyStore()
 
 const { preloadResources } = useResourcePreloader()
-const router = useRouter()
 
 const { send } = useMultiplayer()
 
 await preloadResources()
 // Get character templates from game state and ensure consistent order
 const characters = computed(() => {
-  const templates = gameState.characterTemplates
+  const templates = gameStore.state.characterTemplates
   // Sort characters by their key or any other property to maintain consistent order
   return [...templates].sort((a, b) => a.key.localeCompare(b.key))
 })
@@ -92,13 +92,21 @@ onKeyStroke('ArrowLeft', selectPrevious)
 const characterName = ref('Tav')
 
 const handleSelectCharacter = () => {
+  if (gameStore.isMultiplayer) {
+    send(JSON.stringify({
+      type: 'SELECT_CHARACTER',
+      characterName: characterName.value,
+      lobbyId: lobbyStore.currentLobby?.id,
+      character: selectedCharacter.value?.key,
+    }))
+  }
+  else {
+    gameStore.setCharacter({
+      name: characterName.value,
+      key: selectedCharacter.value?.key,
+    })
+  }
   navigateTo('/game')
-  send(JSON.stringify({
-    type: 'SELECT_CHARACTER',
-    characterName: characterName.value,
-    lobbyId: lobbyStore.currentLobby?.id,
-    character: selectedCharacter.value?.key,
-  }))
 }
 </script>
 

@@ -1,0 +1,12 @@
+{
+  "name": "Shield",
+  "slug": "shield",
+  "icon": "game-icons:shield-reflect",
+  "description": "An invisible barrier of magical force appears and protects you",
+  "school": "Abjuration",
+  "level": 1,
+  "castingTime": "1 reaction",
+  "range": "Self",
+  "components": ["V", "S"],
+  "duration": "1 round"
+}

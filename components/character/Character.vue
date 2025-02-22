@@ -6,16 +6,23 @@ import type { Player } from '~/types'
 import { Html } from '@tresjs/cientos'
 import { useLobbyStore, useResourcePreloader } from '#imports'
 import { SkeletonUtils } from 'three-stdlib'
-import { dispose } from '@tresjs/core'
+import { dispose, type ThreeEvent } from '@tresjs/core'
 
 const props = defineProps<{
+  character: Character
   player: Player
   isCurrentPlayer: boolean
   index: number
 }>()
 
+const emit = defineEmits(['ready'])
+
+const modelRef = ref<Object3D | null>(null)
+
 const { getResource } = useResourcePreloader()
 const lobbyStore = useLobbyStore()
+const gameStore = useGameStore()
+const { isMultiplayer } = storeToRefs(gameStore)
 
 const MOVEMENT_SPEED = 0.032
 
@@ -24,7 +31,7 @@ const { send, data } = useMultiplayer()
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
-const serverPosition = ref<Vector3>(new Vector3(props.index * 1.5, 0, 0))
+const nextPosition = ref<Vector3>(new Vector3(props.index * 1.5, 0, 0))
 
 interface CharacterState {
   model: Object3D | null
@@ -71,23 +78,33 @@ if (rigNode) {
   }
 
   state.model = clonedRig
+  emit('ready', state.model)
   state.model.position.set(props.index * 1.5, 0, 0)
   state.animations = animations
 }
 
-watch(data, (newData) => {
-  const data = JSON.parse(newData)
-  if (data.type === 'PLAYER_UPDATE') {
+if (isMultiplayer.value) {
+  watch(data, (newData) => {
+    const data = JSON.parse(newData)
+    if (data.type === 'PLAYER_UPDATE') {
     // Handle position as array of components
-    if (data.player.position && data.player.id === props.player.id) {
-      serverPosition.value.set(
-        data.player.position[0], // x
-        data.player.position[1], // y
-        data.player.position[2], // z
-      )
+      if (data.player.position && data.player.id === props.player.id) {
+        nextPosition.value.set(
+          data.player.position[0], // x
+          data.player.position[1], // y
+          data.player.position[2], // z
+        )
+      }
     }
-  }
-})
+  })
+}
+else {
+  watch(gameStore.state.players, (newPlayers) => {
+    if (newPlayers[0].id === props.player.id) {
+      nextPosition.value.set(newPlayers[0].position[0], newPlayers[0].position[1], newPlayers[0].position[2])
+    }
+  })
+}
 
 // Throttle position updates to reduce websocket messages
 const sendPosition = (position: Vector3) => {
@@ -117,15 +134,15 @@ const { onBeforeRender } = useLoop()
 onBeforeRender(({ delta }) => {
   if (!state.model) { return }
 
-  if (state.model.position.distanceTo(serverPosition.value) > 0.1) {
+  if (state.model.position.distanceTo(nextPosition.value) > 0.1) {
     const direction = state.model.position
       .clone()
-      .sub(serverPosition.value)
+      .sub(nextPosition.value)
       .normalize()
       .multiplyScalar(MOVEMENT_SPEED)
 
     state.model.position.sub(direction)
-    state.model.lookAt(serverPosition.value)
+    state.model.lookAt(nextPosition.value)
     state.isMoving = true
   }
   else {
@@ -178,11 +195,29 @@ onBeforeUnmount(() => {
   state.actions = {}
   state.currentAction = null
 })
+
+const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
+/*   console.log('pointer enter', event.object)
+  gameStore.outlineCharacter(event.object)
+  event.stopPropagation() */
+}
+
+const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
+  /* console.log('pointer leave', event.object)
+  gameStore.removeCharacterOutline(event.object)
+  event.stopPropagation() */
+}
 </script>
 
 <template>
   <TresGroup>
-    <primitive name="modelRef" :object="state.model">
+    <primitive
+      ref="modelRef"
+      :name="player.name"
+      :object="state.model"
+      @pointerenter="handlePointerEnter"
+      @pointerleave="handlePointerLeave"
+    >
       <Html
         center
         :distance-factor="4"
@@ -190,7 +225,7 @@ onBeforeUnmount(() => {
         :position="[0, 3, 0]"
       >
         <div class="p-1 rounded-xl bg-white text-black text-lg">
-          {{ player.name }} {{ player.id }}
+          {{ player.name }}
         </div>
       </Html>
     </primitive>

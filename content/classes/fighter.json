@@ -1,0 +1,17 @@
+{
+  "name": "Fighter",
+  "slug": "fighter",
+  "icon": "/icons/classes/fighter.svg",
+  "description": "Masters of martial combat, skilled with a variety of weapons and armor. Fighters are the most diverse class of warriors in the worlds of D&D, from noble knights to grizzled veterans.",
+  "hitDie": "d10",
+  "primaryAbility": "Strength",
+  "savingThrows": ["Strength", "Constitution"],
+  "features": [
+    "Fighting Style",
+    "Second Wind",
+    "Action Surge",
+    "Martial Archetype",
+    "Extra Attack",
+    "Indomitable"
+  ]
+}

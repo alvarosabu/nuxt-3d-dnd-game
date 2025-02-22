@@ -1,0 +1,29 @@
+{
+  "name": "Rogue",
+  "key": "rogue",
+  "model": "/models/characters/rogue/Rogue.glb",
+  "title": "Thief",
+  "description": "A master of stealth and deception, rogues excel at thievery and evasion.",
+  "race": "drow",
+  "class": "rogue",
+  "stats": {
+    "str": 10,
+    "dex": 15,
+    "con": 12,
+    "int": 14,
+    "wis": 13,
+    "cha": 11
+  },
+  "proficiencies": {
+    "weapons": ["Daggers", "Short Swords", "Long Swords", "Rapiers", "Hand Crossbows"],
+    "armor": ["Leather", "Chain Mail"],
+    "skills": ["Stealth", "Sleight of Hand", "Thievery"]
+  },
+  "spells": [
+    "thieves-guile",
+    "thieves-guile"
+  ],
+  "cantrips": [
+    "thieves-guile"
+  ]
+}

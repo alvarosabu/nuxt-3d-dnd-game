@@ -1,0 +1,10 @@
+{
+  "name": "Drow",
+  "slug": "drow",
+  "description": "Also known as dark elves, the drow are a notorious race of subterranean elves known for their cruelty and affinity with darkness. With skin tones ranging from obsidian to ash gray and striking white or pale yellow hair, drow possess an otherworldly beauty that belies their often malevolent nature. Their society, typically dwelling in the vast networks of the Underdark, is marked by intrigue, ambition, and a strict matriarchal hierarchy. Drow are naturally gifted with innate magical abilities and exceptional combat prowess, particularly in the arts of stealth and spellcraft.",
+  "features": [
+    "Darkvision",
+    "Keen Senses",
+    "Fey Ancestry"
+  ]
+}

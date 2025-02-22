@@ -13,6 +13,7 @@ definePageMeta({
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
 const router = useRouter()
+const gameStore = useGameStore()
 
 const { availableLobbies, currentLobby } = storeToRefs(lobbyStore)
 // Websocket
@@ -51,7 +52,13 @@ watch(data, (newData) => {
     })
   }
   if (data.type === 'GAME_STARTED') {
-    router.push('/game')
+    const player = lobbyStore.currentLobby?.players.find(player => player.id === userStore.userId)
+    if (player?.character) {
+      navigateTo('/game')
+    }
+    else {
+      navigateTo('/character/select')
+    }
   }
 })
 
@@ -128,6 +135,7 @@ const selectCurrentLobby = (lobbyId: string) => {
 }
 
 const handleStartGame = () => {
+  gameStore.setMode('multiplayer')
   sendMsg({
     type: 'START_GAME',
     lobbyId: currentLobby.value?.id,
@@ -145,7 +153,14 @@ const showJoinStartedGameButton = computed(() => {
 })
 
 const handleJoinStartedGame = () => {
-  navigateTo('/game')
+  gameStore.setMode('multiplayer')
+  const player = lobbyStore.currentLobby?.players.find(player => player.id === userStore.userId)
+  if (player?.character) {
+    navigateTo('/game')
+  }
+  else {
+    navigateTo('/character/select')
+  }
 }
 
 onBeforeUnmount(() => {
@@ -327,6 +342,10 @@ onBeforeUnmount(() => {
                 <USelect
                   v-model="lobbyFormState.maxPlayers"
                   :items="[
+                    {
+                      label: '1',
+                      value: 1,
+                    },
                     {
                       label: '2',
                       value: 2,

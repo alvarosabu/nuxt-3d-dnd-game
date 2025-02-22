@@ -71,6 +71,7 @@ export interface GameState {
   activePlayer: Player | null
   characterTemplates: CharacterTemplate[]
   characters: Character[]
+  mode: 'single' | 'multiplayer'
 }
 
 export interface Race {

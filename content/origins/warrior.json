@@ -1,0 +1,31 @@
+{
+  "name": "Warrior",
+  "key": "warrior",
+  "model": "/models/characters/fighter/Fighter.glb",
+  "title": "Battle Master",
+  "description": "A seasoned warrior who has honed their combat skills through countless battles. Their mastery of weapons and tactical prowess makes them a formidable presence on any battlefield.",
+  "race": "human",
+  "class": "fighter",
+  "stats": {
+    "str": 16,
+    "dex": 14,
+    "con": 15,
+    "int": 10,
+    "wis": 12,
+    "cha": 11
+  },
+  "proficiencies": {
+    "weapons": ["Simple Weapons", "Martial Weapons"],
+    "armor": ["Light Armor", "Medium Armor", "Heavy Armor", "Shields"],
+    "skills": ["Athletics", "Intimidation", "Survival", "Perception"]
+  },
+  "equipment": [
+    "longsword",
+    "shield",
+    "chain-mail",
+    "crossbow-light"
+  ],
+  "spells": [],
+  "cantrips": [],
+  "fighting_style": "Defense"
+}

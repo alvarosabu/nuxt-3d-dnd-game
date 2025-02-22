@@ -1,0 +1,12 @@
+{
+  "name": "Mage Armor",
+  "slug": "mage-armor",
+  "icon": "game-icons:armor-upgrade",
+  "description": "You touch a willing creature who isn't wearing armor, and a protective magical force surrounds it until the spell ends",
+  "school": "Abjuration",
+  "level": 1,
+  "castingTime": "1 action",
+  "range": "Touch",
+  "components": ["V", "S", "M"],
+  "duration": "8 hours"
+}

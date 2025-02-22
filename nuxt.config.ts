@@ -20,6 +20,9 @@ export default defineNuxtConfig({
     '/game/**': {
       ssr: false,
     },
+    '/test': {
+      ssr: false,
+    },
   },
   ui: {
     theme: {

@@ -1,0 +1,11 @@
+{
+  "name": "Magic Missile",
+  "slug": "magic-missile",
+  "icon": "game-icons:missile-swarm",
+  "description": "You create three glowing darts of magical force that unerringly strike their targets",
+  "school": "Evocation",
+  "level": 1,
+  "castingTime": "1 action",
+  "range": "120 feet",
+  "components": ["V", "S"]
+}

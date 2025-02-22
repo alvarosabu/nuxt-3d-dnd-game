@@ -43,6 +43,9 @@ export const useResourcePreloader = () => {
     { type: 'model', path: '/models/characters/druid/Druid.glb', key: 'druid' },
     { type: 'model', path: '/models/characters/paladin/paladin_hammer.gltf', key: 'hammer' },
     { type: 'model', path: '/models/characters/artificer/Artificer.glb', key: 'artificer' },
+    { type: 'model', path: '/models/characters/rogue/Rogue.glb', key: 'rogue' },
+    { type: 'model', path: '/models/characters/wizard/Wizard.glb', key: 'wizard' },
+    { type: 'model', path: '/models/characters/warrior/Warrior.glb', key: 'warrior' },
     // Textures
     { type: 'texture', path: '/models/characters/paladin/paladin_texture_A.png', key: 'paladin-texture-a' },
     { type: 'texture', path: '/models/characters/paladin/paladin_texture_storyblok.png', key: 'paladin-texture-storyblok' },

@@ -1,0 +1,9 @@
+{
+  "name": "Ray of Frost",
+  "slug": "ray-of-frost",
+  "icon": "game-icons:ice-bolt",
+  "description": "A frigid beam of blue-white light streaks toward a creature within range",
+  "school": "Evocation",
+  "castingTime": "1 action",
+  "range": "60 feet"
+}

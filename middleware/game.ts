@@ -1,9 +1,9 @@
 export default defineNuxtRouteMiddleware((to) => {
-  const userStore = useUserStore()
-  const lobbyStore = useLobbyStore()
+  /* const userStore = useUserStore()
+  const lobbyStore = useLobbyStore() */
 
   // Check if user is authenticated and in a lobby
-  if (!userStore.isConnected || !lobbyStore.currentLobby) {
+  /*   if (!userStore.isConnected || !lobbyStore.currentLobby) {
     console.log('redirecting to multiplayer')
     return navigateTo('/multiplayer')
   }
@@ -13,7 +13,7 @@ export default defineNuxtRouteMiddleware((to) => {
   if (!player?.character) {
     console.log('redirecting to character select')
     return navigateTo('/character/select')
-  }
+  } */
 
   return true
 })

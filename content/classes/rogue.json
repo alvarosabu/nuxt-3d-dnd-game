@@ -1,0 +1,15 @@
+{
+  "name": "Rogue",
+  "slug": "rogue",
+  "icon": "/icons/classes/rogue.svg",
+  "description": "A master of stealth and deception, rogues excel at thievery and evasion.",
+  "hitDie": "d8",
+  "primaryAbility": "Dexterity",
+  "savingThrows": ["Dexterity", "Intelligence"],
+  "features": [
+    "Cunning Action",
+    "Expertise",
+    "Sneak Attack",
+    "Thieves' Tools"
+  ]
+}

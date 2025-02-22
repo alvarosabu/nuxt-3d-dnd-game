@@ -1,0 +1,9 @@
+{
+  "name": "Prestidigitation",
+  "slug": "prestidigitation",
+  "icon": "game-icons:magic-swirl",
+  "description": "This spell is a minor magical trick that novice spellcasters use for practice",
+  "school": "Transmutation",
+  "castingTime": "1 action",
+  "range": "10 feet"
+}

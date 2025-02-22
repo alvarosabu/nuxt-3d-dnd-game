@@ -2,8 +2,7 @@
 import { useUserStore } from '~/stores/useUserStore'
 
 const userStore = useUserStore()
-const router = useRouter()
-
+const gameStore = useGameStore()
 // Local state for the input
 const usernameInput = ref(userStore.username)
 
@@ -12,7 +11,26 @@ const usernameInput = ref(userStore.username)
  * @param route - The route to navigate to
  */
 const handleNavigation = (route: string) => {
-  router.push(route)
+  if (route === '/game') {
+    gameStore.setMode('single')
+    gameStore.addPlayer({
+      id: userStore.userId,
+      name: userStore.username,
+      character: null,
+      characterName: null,
+      position: [0, 0, 0],
+      status: 'in-game',
+    })
+    if (gameStore.state.characters.length > 0) {
+      navigateTo('/game')
+    }
+    else {
+      navigateTo('/character/select')
+    }
+  }
+  else {
+    navigateTo(route)
+  }
 }
 
 /**
@@ -36,6 +54,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
 }
 
 const buttons = ['New Game', 'Load Game', 'Multiplayer', 'Options']
+const buttonLinks = ['/game', '/load-game', '/multiplayer', '/options']
 </script>
 
 <template>
@@ -56,7 +75,7 @@ const buttons = ['New Game', 'Load Game', 'Multiplayer', 'Options']
             color="primary"
             :variant="index === 0 ? 'solid' : 'outline'"
             class="w-full text-xl font-medium cursor-pointer"
-            @click="handleNavigation(`/${button.toLowerCase().replace(' ', '')}`)"
+            @click="handleNavigation(buttonLinks[index])"
           >
             {{ button }}
           </UButton>

@@ -27,19 +27,6 @@ const scale = computed(() => props.isSelected ? 1.2 : hovered.value ? 1.1 : 1)
 const modelGroup = ref<Group>()
 
 // Apply opacity to the whole model group
-watchEffect(() => {
-  if (modelGroup.value) {
-    modelGroup.value.traverse((obj: any) => {
-      if (obj.isMesh) {
-        obj.material = obj.material.clone()
-        obj.material.transparent = true
-        obj.material.opacity = props.isSelected ? 1 : 0.1
-        // Keep materials unique to prevent affecting other instances
-        obj.material.needsUpdate = true
-      }
-    })
-  }
-})
 
 const { actions: animActions, mixer } = useAnimations(animations, model)
 actions.value = animActions

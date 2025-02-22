@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import type { Character, GameState } from '~/types'
+import type { Character, GameState, Player } from '~/types'
+import type { type Object3D, SkinnedMesh, Vector3 } from 'three'
 
 /**
  * Store for managing game state including characters, players, and templates
@@ -12,29 +13,58 @@ export const useGameStore = defineStore('game', () => {
     activePlayer: null,
     characterTemplates: [],
     characters: [],
+    mode: 'single',
   })
+
+  // Outlined objects state
+  const outlinedObjects = shallowRef<Object3D[]>([])
 
   // Getters
   const getCharacterById = computed(() => {
     return (id: string) => state.characters.find(char => char.id === id)
   })
 
-  // Actions
-  /**
-   * Save current game state to localStorage
-   */
-  function saveGame() {
-    localStorage.setItem('gameState', JSON.stringify(state))
+  function outlineObject(object: Object3D | null) {
+    if (!object) { return }
+
+    const existingObject = outlinedObjects.value.find(obj => obj.uuid === object.uuid)
+    if (!existingObject) {
+      outlinedObjects.value = [...outlinedObjects.value, object]
+    }
+  }
+
+  function removeObjectOutline(object: Object3D | null) {
+    if (!object) { return }
+
+    outlinedObjects.value = outlinedObjects.value.filter(obj => obj.uuid !== object.uuid)
   }
 
   /**
-   * Load game state from localStorage
+   * Add character's children to outlined objects if they're not already there
+   * @param character The character object to outline
    */
-  function loadGame() {
-    const saved = localStorage.getItem('gameState')
-    if (saved) {
-      Object.assign(state, JSON.parse(saved))
-    }
+  function outlineCharacter(character: Object3D | null) {
+    if (!character) { return }
+
+    character.children.forEach((child) => {
+      if (!(child instanceof SkinnedMesh)) { return }
+      const existingObject = outlinedObjects.value.find(obj => obj.uuid === child.uuid)
+      if (!existingObject) {
+        outlinedObjects.value = [...outlinedObjects.value, child]
+      }
+    })
+  }
+
+  /**
+   * Remove character's children from outlined objects
+   * @param character The character object to remove outline from
+   */
+  function removeCharacterOutline(character: Object3D | null) {
+    if (!character) { return }
+
+    outlinedObjects.value = outlinedObjects.value.filter(obj =>
+      !character.children.some(child => child.uuid === obj.uuid),
+    )
   }
 
   /**
@@ -74,18 +104,57 @@ export const useGameStore = defineStore('game', () => {
    * Initialize the game store
    */
   async function init() {
-    await loadCharacterTemplates()
+    await Promise.all([
+      loadCharacterTemplates(),
+
+    ])
+  }
+
+  const isMultiplayer = computed(() => state.mode === 'multiplayer')
+
+  /**
+   * Set the game mode
+   * @param mode The game mode to set
+   */
+  function setMode(mode: GameState['mode']) {
+    state.mode = mode
+  }
+
+  function setCharacter(character: Character) {
+    state.players[0].character = character.key
+    state.players[0].characterName = character.name
+  }
+
+  function setPlayerPosition(player: Player, position: Vector3) {
+    state.players[0].position = position
+  }
+
+  function addPlayer(player: Player) {
+    state.players = [...state.players, player]
   }
 
   return {
     // State
     state,
+    outlinedObjects,
+    isMultiplayer,
     // Getters
     getCharacterById,
     // Actions
-    saveGame,
-    loadGame,
     loadCharacterTemplates,
     init,
+    setMode,
+    setCharacter,
+    addPlayer,
+    setPlayerPosition,
+    // Outline methods
+    outlineCharacter,
+    removeCharacterOutline,
+    outlineObject,
+    removeObjectOutline,
   }
+}, {
+  persist: {
+    storage: piniaPluginPersistedstate.sessionStorage(),
+  },
 })

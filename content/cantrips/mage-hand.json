@@ -1,0 +1,9 @@
+{
+  "name": "Mage Hand",
+  "slug": "mage-hand",
+  "icon": "game-icons:magic-palm",
+  "description": "A spectral, floating hand appears at a point you choose within range",
+  "school": "Conjuration",
+  "castingTime": "1 action",
+  "range": "30 feet"
+}
