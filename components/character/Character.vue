@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
   state.currentAction = null
 })
 
-const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
+/* const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
   outlineCharacter(event.object)
   event.stopPropagation()
 }
@@ -209,6 +209,7 @@ const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
   removeCharacterOutline(event.object)
   event.stopPropagation()
 }
+  */
 </script>
 
 <template>
@@ -217,8 +218,6 @@ const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
       ref="modelRef"
       :name="player.name"
       :object="state.model"
-      @pointerenter="handlePointerEnter"
-      @pointerleave="handlePointerLeave"
     >
       <Html
         center

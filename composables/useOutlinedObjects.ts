@@ -13,6 +13,13 @@ export function useOutlinedObjects() {
   function outlineObject(object: Object3D | null) {
     if (!object) { return }
 
+    if (object.children.length > 0) {
+      object.children.forEach((child) => {
+        outlineObject(child)
+      })
+      return
+    }
+
     const existingObject = outlinedObjects.value.find(obj => obj.uuid === object.uuid)
     if (!existingObject) {
       outlinedObjects.value = [...outlinedObjects.value, object]
@@ -24,6 +31,13 @@ export function useOutlinedObjects() {
    */
   function removeObjectOutline(object: Object3D | null) {
     if (!object) { return }
+
+    if (object.children.length > 0) {
+      object.children.forEach((child) => {
+        removeObjectOutline(child)
+      })
+      return
+    }
 
     outlinedObjects.value = outlinedObjects.value.filter(obj => obj.uuid !== object.uuid)
   }

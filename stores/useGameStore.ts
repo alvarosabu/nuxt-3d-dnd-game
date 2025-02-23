@@ -14,6 +14,11 @@ export const useGameStore = defineStore('game', () => {
     characterTemplates: [],
     characters: [],
     mode: 'single',
+    contextMenu: {
+      enabled: false,
+      isOpen: false,
+      items: [],
+    },
   })
 
   // Getters

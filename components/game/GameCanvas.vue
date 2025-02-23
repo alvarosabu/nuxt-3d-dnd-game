@@ -5,6 +5,7 @@ import { ref, shallowRef } from 'vue'
 import type { Object3D } from 'three'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
 import { BlendFunction, KernelSize } from 'postprocessing'
+import Chest from '~/components/items/Chest.vue'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
@@ -28,9 +29,6 @@ const showIndicator = ref(false)
 const hoverIndicatorRef = shallowRef()
 
 useControls('fpsgraph')
-const { clearColor } = useControls({
-  clearColor: '#2f2f2f',
-})
 
 const { edgeStrength, pulseSpeed, visibleEdgeColor, blur } = useControls({
   edgeStrength: 2000,
@@ -112,91 +110,108 @@ const outlineRef = ref()
 watch(outlineRef, ({ effect }) => {
   effect.blurPass.kernelSize = 4
 })
+
+const { cursor } = useGameCursor()
+
+const handleContextMenuOpen = (open: boolean) => {
+  gameStore.state.contextMenu.isOpen = open
+
+  if (!open) {
+    gameStore.state.contextMenu.items = []
+    gameStore.state.contextMenu.enabled = false
+  }
+}
 </script>
 
 <template>
   <TresLeches collapsed />
-  <TresCanvas
-    clear-color="#2f2f2f"
-    window-size
-    :class="{ 'cursor-pointer': showIndicator }"
+  <UContextMenu
+    :disabled="!gameStore.state.contextMenu.enabled"
+    size="sm"
+    :items="gameStore.state.contextMenu.items"
+    @update:open="handleContextMenuOpen"
   >
-    <Suspense>
-      <Environment preset="sunset" :blur="1" background />
-    </Suspense>
-    <TresPerspectiveCamera
-      :position="[20, 20, 20]"
-      :look-at="[0, 0, 0]"
-      :fov="45"
-      :near="0.1"
-      :far="1000"
-    />
+    <TresCanvas
+      clear-color="#2f2f2f"
+      window-size
+      class="cursor-game"
+      :class="[`custom-cursor-${cursor}`]"
+    >
+      <Suspense>
+        <Environment preset="sunset" :blur="1" background />
+      </Suspense>
+      <TresPerspectiveCamera
+        :position="[20, 20, 20]"
+        :look-at="[0, 0, 0]"
+        :fov="45"
+        :near="0.1"
+        :far="1000"
+      />
 
-    <OrbitControls ref="orbitControlsRef" make-default />
+      <OrbitControls ref="orbitControlsRef" make-default />
 
-    <!-- Environment -->
-    <TresAmbientLight :intensity="0.5" />
-    <TresDirectionalLight :position="[10, 10, 10]" :intensity="1" />
+      <!-- Environment -->
+      <TresAmbientLight :intensity="0.5" />
+      <TresDirectionalLight :position="[10, 10, 10]" :intensity="1" />
 
-    <TresGridHelper :args="[100, 100]" :position-y="0.001" />
+      <TresGridHelper :args="[100, 100]" :position-y="0.001" />
 
-    <Suspense>
-      <template v-for="(player, index) in characters" :key="player.id">
-        <Character
-          :character="player.character"
-          :player="player"
-          :is-current-player="player.id === userStore.userId"
-          :index="index"
+      <Suspense>
+        <template v-for="(player, index) in characters" :key="player.id">
+          <Character
+            :character="player.character"
+            :player="player"
+            :is-current-player="player.id === userStore.userId"
+            :index="index"
+          />
+        </template>
+      </Suspense>
+      <!-- Hover Indicator -->
+      <TresMesh
+        v-if="showIndicator"
+        ref="hoverIndicatorRef"
+      >
+        <TresCylinderGeometry :args="[0.5, 0.5, 1, 32]" />
+        <TresShaderMaterial
+          transparent
+          :vertex-shader="cylinderShader.vertexShader"
+          :fragment-shader="cylinderShader.fragmentShader"
+          :uniforms="cylinderShader.uniforms"
         />
-      </template>
-    </Suspense>
-    <!-- Hover Indicator -->
-    <TresMesh
-      v-if="showIndicator"
-      ref="hoverIndicatorRef"
-    >
-      <TresCylinderGeometry :args="[0.5, 0.5, 1, 32]" />
-      <TresShaderMaterial
-        transparent
-        :vertex-shader="cylinderShader.vertexShader"
-        :fragment-shader="cylinderShader.fragmentShader"
-        :uniforms="cylinderShader.uniforms"
-      />
-    </TresMesh>
+      </TresMesh>
 
-    <TresMesh
-      name="fucking-box"
-      :position-y="2"
-      @pointerenter="handlePointerEnter"
-      @pointerleave="handlePointerLeave"
-    >
-      <TresBoxGeometry :args="[1, 1, 1]" />
-      <TresMeshNormalMaterial />
-    </TresMesh>
+      <Suspense>
+        <Chest />
+      </Suspense>
 
-    <!-- Floor -->
-    <TresMesh
-      :rotation-x="-Math.PI / 2"
-      class="cursor-pointer"
-      @click="handleFloorClick"
-      @pointer-move="handleFloorHover"
-      @pointer-leave="handleFloorLeave"
-    >
-      <TresPlaneGeometry :args="[100, 100]" />
-      <TresMeshBasicMaterial color="#4f4f4f" />
-    </TresMesh>
+      <!-- Floor -->
+      <TresMesh
+        :rotation-x="-Math.PI / 2"
+        class="cursor-pointer"
+        @click="handleFloorClick"
+        @pointer-move="handleFloorHover"
+        @pointer-leave="handleFloorLeave"
+      >
+        <TresPlaneGeometry :args="[100, 100]" />
+        <TresMeshBasicMaterial color="#4f4f4f" />
+      </TresMesh>
 
-    <!-- Postprocessing -->
-    <EffectComposerPmndrs>
-      <OutlinePmndrs
-        ref="outlineRef"
-        :outlined-objects="outlinedObjects"
-        :blur="blur"
-        :edge-strength="edgeStrength"
-        :pulse-speed="pulseSpeed"
-        :visible-edge-color="visibleEdgeColor"
-        :kernel-size="4"
-      />
-    </EffectComposerPmndrs>
-  </TresCanvas>
+      <!-- Postprocessing -->
+      <EffectComposerPmndrs>
+        <OutlinePmndrs
+          ref="outlineRef"
+          :outlined-objects="outlinedObjects"
+          :blur="blur"
+          :edge-strength="edgeStrength"
+          :pulse-speed="pulseSpeed"
+          :visible-edge-color="visibleEdgeColor"
+          :kernel-size="4"
+        />
+      </EffectComposerPmndrs>
+    </TresCanvas>
+  </UContextMenu>
 </template>
+
+<style>
+@import '~/assets/css/cursors.css';
+</style>

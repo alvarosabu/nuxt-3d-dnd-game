@@ -46,6 +46,8 @@ export const useResourcePreloader = () => {
     { type: 'model', path: '/models/characters/rogue/Rogue.glb', key: 'rogue' },
     { type: 'model', path: '/models/characters/wizard/Wizard.glb', key: 'wizard' },
     { type: 'model', path: '/models/characters/warrior/Warrior.glb', key: 'warrior' },
+    // Items
+    { type: 'model', path: '/models/items/Chest.glb', key: 'chest' },
     // Textures
     { type: 'texture', path: '/models/characters/paladin/paladin_texture_A.png', key: 'paladin-texture-a' },
     { type: 'texture', path: '/models/characters/paladin/paladin_texture_storyblok.png', key: 'paladin-texture-storyblok' },
@@ -59,7 +61,7 @@ export const useResourcePreloader = () => {
     try {
       switch (resource.type) {
         case 'model':
-          const result = await useGLTF(resource.path)
+          const result = await useGLTF(resource.path, { draco: true })
 
           const { scene, animations, nodes, materials } = result
           // Ensure scene is a Group
