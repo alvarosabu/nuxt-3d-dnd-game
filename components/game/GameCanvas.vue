@@ -3,13 +3,17 @@ import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { ThreeEvent } from '@tresjs/core'
 import { ref, shallowRef } from 'vue'
 import type { Object3D } from 'three'
-import { findCharacterRig } from '~/utils/three'
+import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
+import { BlendFunction, KernelSize } from 'postprocessing'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
 const gameStore = useGameStore()
 const { currentLobbyPlayers } = storeToRefs(lobbyStore)
-const { outlinedObjects, isMultiplayer, state } = storeToRefs(gameStore)
+const { isMultiplayer, state } = storeToRefs(gameStore)
+
+// Initialize outline objects composable
+const { outlinedObjects, outlineObject, removeObjectOutline } = useOutlinedObjects()
 
 const characters = computed(() => {
   if (isMultiplayer.value) {
@@ -18,15 +22,32 @@ const characters = computed(() => {
   return state.value.players
 })
 
-const { sendMsg } = useMultiplayer()
+const { sendMsg } = useMultiplayer(isMultiplayer.value)
 const orbitControlsRef = ref()
 const showIndicator = ref(false)
 const hoverIndicatorRef = shallowRef()
-const testMeshRef = ref()
 
 useControls('fpsgraph')
-useControls({
-  showCharacter: true,
+const { clearColor } = useControls({
+  clearColor: '#2f2f2f',
+})
+
+const { edgeStrength, pulseSpeed, visibleEdgeColor, blur } = useControls({
+  edgeStrength: 2000,
+  pulseSpeed: {
+    value: 0,
+    min: 0,
+    max: 2,
+    step: 0.01,
+  },
+  visibleEdgeColor: '#FFFF00',
+  blur: false,
+  kernelSize: {
+    value: 3,
+    min: KernelSize.VERY_SMALL,
+    max: KernelSize.VERY_LARGE,
+    step: 1,
+  },
 })
 
 // Custom shader for gradient cylinder
@@ -52,15 +73,16 @@ const cylinderShader = {
 }
 
 const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
+  const newPosition = { x: e.point.x, y: 0, z: e.point.z }
   if (isMultiplayer.value) {
     sendMsg({
       type: 'UPDATE_PLAYER_POSITION',
       lobbyId: lobbyStore.currentLobbyId,
-      position: [e.point.x, 0, e.point.z],
+      position: [newPosition.x, newPosition.y, newPosition.z],
     })
   }
   else {
-    gameStore.setPlayerPosition(state.value.players[0], [e.point.x, 0, e.point.z])
+    gameStore.setPlayerPosition(state.value.players[0], newPosition)
   }
 }
 
@@ -75,21 +97,27 @@ const handleFloorLeave = () => {
   showIndicator.value = false
 }
 
-watch(testMeshRef, (newVal) => {
-  if (newVal) {
-    outlinedObjects.value.push(newVal)
-  }
+const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
+  outlineObject(event.object)
+  event.stopPropagation()
+}
+
+const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
+  removeObjectOutline(event.object)
+  event.stopPropagation()
+}
+
+const outlineRef = ref()
+
+watch(outlineRef, ({ effect }) => {
+  effect.blurPass.kernelSize = 4
 })
 </script>
 
 <template>
-  <TresLeches>
-    <pre>
-      {{ outlinedObjects.map(obj => obj.name) }}
-    </pre>
-  </TresLeches>
+  <TresLeches collapsed />
   <TresCanvas
-    clear-color="#ffffff"
+    clear-color="#2f2f2f"
     window-size
     :class="{ 'cursor-pointer': showIndicator }"
   >
@@ -137,6 +165,7 @@ watch(testMeshRef, (newVal) => {
     </TresMesh>
 
     <TresMesh
+      name="fucking-box"
       :position-y="2"
       @pointerenter="handlePointerEnter"
       @pointerleave="handlePointerLeave"
@@ -160,12 +189,13 @@ watch(testMeshRef, (newVal) => {
     <!-- Postprocessing -->
     <EffectComposerPmndrs>
       <OutlinePmndrs
+        ref="outlineRef"
         :outlined-objects="outlinedObjects"
-        :blur="false"
-        :edge-strength="20000"
-        :pulse-speed="0"
-        visible-edge-color="#ffff00"
-        :kernel-size="3"
+        :blur="blur"
+        :edge-strength="edgeStrength"
+        :pulse-speed="pulseSpeed"
+        :visible-edge-color="visibleEdgeColor"
+        :kernel-size="4"
       />
     </EffectComposerPmndrs>
   </TresCanvas>

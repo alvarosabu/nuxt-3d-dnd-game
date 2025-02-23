@@ -27,7 +27,7 @@ const { isMultiplayer } = storeToRefs(gameStore)
 const MOVEMENT_SPEED = 0.032
 
 // Inject websocket methods
-const { send, data } = useMultiplayer()
+const { send, data } = useMultiplayer(isMultiplayer.value)
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
@@ -60,6 +60,8 @@ const state = shallowReactive<CharacterState>({
   isGrounded: true,
   verticalVelocity: JUMP_HEIGHT,
 })
+
+const { outlineCharacter, removeCharacterOutline } = useOutlinedObjects()
 
 const { scene, animations } = getResource('models', props.player.character)
 
@@ -103,7 +105,7 @@ else {
     if (newPlayers[0].id === props.player.id) {
       nextPosition.value.set(newPlayers[0].position[0], newPlayers[0].position[1], newPlayers[0].position[2])
     }
-  })
+  }, { immediate: true })
 }
 
 // Throttle position updates to reduce websocket messages
@@ -197,15 +199,13 @@ onBeforeUnmount(() => {
 })
 
 const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
-/*   console.log('pointer enter', event.object)
-  gameStore.outlineCharacter(event.object)
-  event.stopPropagation() */
+  outlineCharacter(event.object)
+  event.stopPropagation()
 }
 
 const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
-  /* console.log('pointer leave', event.object)
-  gameStore.removeCharacterOutline(event.object)
-  event.stopPropagation() */
+  removeCharacterOutline(event.object)
+  event.stopPropagation()
 }
 </script>
 

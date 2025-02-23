@@ -1,8 +1,7 @@
 import type { UseWebSocketReturn } from '@vueuse/core'
 import { useGameStore } from '~/stores/useGameStore'
 
-export const useMultiplayer = () => {
-  const { isMultiplayer: enabled } = useGameStore()
+export const useMultiplayer = (enabled: boolean = true) => {
   // Create a singleton instance of the WebSocket connection
   let wsInstance: UseWebSocketReturn<any>
 

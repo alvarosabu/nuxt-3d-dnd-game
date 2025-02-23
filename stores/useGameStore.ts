@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import type { Character, GameState, Player } from '~/types'
-import type { type Object3D, SkinnedMesh, Vector3 } from 'three'
+import type { CharacterTemplate, GameState, Player } from '~/types'
+import type { Object3D, Vector3 } from 'three'
 
 /**
  * Store for managing game state including characters, players, and templates
@@ -16,56 +16,10 @@ export const useGameStore = defineStore('game', () => {
     mode: 'single',
   })
 
-  // Outlined objects state
-  const outlinedObjects = shallowRef<Object3D[]>([])
-
   // Getters
   const getCharacterById = computed(() => {
     return (id: string) => state.characters.find(char => char.id === id)
   })
-
-  function outlineObject(object: Object3D | null) {
-    if (!object) { return }
-
-    const existingObject = outlinedObjects.value.find(obj => obj.uuid === object.uuid)
-    if (!existingObject) {
-      outlinedObjects.value = [...outlinedObjects.value, object]
-    }
-  }
-
-  function removeObjectOutline(object: Object3D | null) {
-    if (!object) { return }
-
-    outlinedObjects.value = outlinedObjects.value.filter(obj => obj.uuid !== object.uuid)
-  }
-
-  /**
-   * Add character's children to outlined objects if they're not already there
-   * @param character The character object to outline
-   */
-  function outlineCharacter(character: Object3D | null) {
-    if (!character) { return }
-
-    character.children.forEach((child) => {
-      if (!(child instanceof SkinnedMesh)) { return }
-      const existingObject = outlinedObjects.value.find(obj => obj.uuid === child.uuid)
-      if (!existingObject) {
-        outlinedObjects.value = [...outlinedObjects.value, child]
-      }
-    })
-  }
-
-  /**
-   * Remove character's children from outlined objects
-   * @param character The character object to remove outline from
-   */
-  function removeCharacterOutline(character: Object3D | null) {
-    if (!character) { return }
-
-    outlinedObjects.value = outlinedObjects.value.filter(obj =>
-      !character.children.some(child => child.uuid === obj.uuid),
-    )
-  }
 
   /**
    * Load and join character templates with their related data
@@ -106,7 +60,6 @@ export const useGameStore = defineStore('game', () => {
   async function init() {
     await Promise.all([
       loadCharacterTemplates(),
-
     ])
   }
 
@@ -120,13 +73,22 @@ export const useGameStore = defineStore('game', () => {
     state.mode = mode
   }
 
-  function setCharacter(character: Character) {
+  /**
+   * Set the selected character for the player
+   * @param character The character template to set
+   */
+  function setCharacter(character: CharacterTemplate) {
     state.players[0].character = character.key
     state.players[0].characterName = character.name
   }
 
+  /**
+   * Set the player's position in the game world
+   * @param player The player to update
+   * @param position The new position as a Three.js Vector3
+   */
   function setPlayerPosition(player: Player, position: Vector3) {
-    state.players[0].position = position
+    state.players[0].position = [position.x, position.y, position.z]
   }
 
   function addPlayer(player: Player) {
@@ -136,7 +98,6 @@ export const useGameStore = defineStore('game', () => {
   return {
     // State
     state,
-    outlinedObjects,
     isMultiplayer,
     // Getters
     getCharacterById,
@@ -147,11 +108,6 @@ export const useGameStore = defineStore('game', () => {
     setCharacter,
     addPlayer,
     setPlayerPosition,
-    // Outline methods
-    outlineCharacter,
-    removeCharacterOutline,
-    outlineObject,
-    removeObjectOutline,
   }
 }, {
   persist: {
