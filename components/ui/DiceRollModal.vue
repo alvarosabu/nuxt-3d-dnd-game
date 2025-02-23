@@ -21,20 +21,63 @@ const props = withDefaults(defineProps<DiceRollProps>(), {
   modifiers: () => [],
 })
 
+const emit = defineEmits(['success', 'failure', 'close'])
+
 const isRolling = ref(false)
 const diceResult = ref<number | null>(null)
+const showResult = ref(false)
 
 // Calculate total bonus from modifiers
 const totalBonus = computed(() => {
   return props.modifiers.reduce((acc, mod) => acc + mod.value, 0)
 })
 
+// Computed properties for roll results
+const isCriticalSuccess = computed(() => diceResult.value === 20)
+const isCriticalFailure = computed(() => diceResult.value === 1)
+const isSuccess = computed(() => {
+  if (!diceResult.value) { return false }
+  if (isCriticalSuccess.value) { return true }
+  if (isCriticalFailure.value) { return false }
+  return (diceResult.value + totalBonus.value) >= props.difficultyClass
+})
+
+const resultText = computed(() => {
+  if (isCriticalSuccess.value) { return 'Critical Success!' }
+  if (isCriticalFailure.value) { return 'Critical Failure!' }
+  return isSuccess.value ? 'Success!' : 'Failure'
+})
+
+const resultClass = computed(() => {
+  if (isCriticalSuccess.value) { return 'text-emerald-500' }
+  if (isCriticalFailure.value) { return 'text-red-500' }
+  return isSuccess.value ? 'text-gold-500' : 'text-red-500'
+})
+
+const handleContinue = () => {
+  emit('close')
+}
+
 const rollDice = () => {
+  showResult.value = false
   isRolling.value = true
+  diceResult.value = null
+
   // Simulate dice roll animation
   setTimeout(() => {
     diceResult.value = Math.floor(Math.random() * props.diceType) + 1
+    if (diceResult.value >= props.difficultyClass) {
+      emit('success')
+    }
+    else {
+      emit('failure')
+    }
     isRolling.value = false
+
+    // Show result after roll animation
+    setTimeout(() => {
+      showResult.value = true
+    }, 500)
   }, 1000)
 }
 </script>
@@ -59,30 +102,91 @@ const rollDice = () => {
 
       <!-- Dice Section -->
       <div
-        class="flex flex-col items-center justify-center dice-container relative cursor-pointer transition-transform duration-300 hover:scale-105"
-
-        @click="rollDice"
+        class="flex flex-col items-center justify-center dice-container relative transition-transform duration-300"
+        :class="{ 'hover:scale-105': !showResult || !isSuccess }"
       >
-        <div class="dice-face w-full rounded-lg p-8 text-center ring-1 ring-slate-700 shadow-lg bg-slate-900/50 relative">
-          <Dice20 class="mx-auto w-[300px] h-[300px]" :fontControlled="false" :class="{ 'animate-spin': isRolling }" />
-          <span class="absolute text-6xl font-bold text-gold-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            {{ diceResult || `${diceType}` }}
-          </span>
-        </div>
-        <UButton
-          size="sm"
-          variant="outline"
-          color="neutral"
-          class="mt-2 text-sm text-slate-400"
+        <div
+          class="flex flex-col items-center justify-center dice-face min-h-[364px] w-full rounded-lg p-8 text-center ring-1 ring-slate-700 shadow-lg bg-slate-900/50 relative"
+          :class="{ 'cursor-pointer': !showResult || !isSuccess }"
+          @click="(!showResult || !isSuccess) && rollDice()"
         >
-          Click dice to roll
-        </UButton>
+          <Transition name="fade">
+            <div v-if="!showResult" class="relative">
+              <Dice20
+                class="mx-auto w-[300px] h-[300px]"
+                :fontControlled="false"
+                :class="{ 'animate-spin': isRolling }"
+              />
+              <span
+                v-if="diceResult !== null"
+                class="absolute text-6xl font-bold top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                :class="[
+                  isCriticalSuccess ? 'text-emerald-500'
+                  : isCriticalFailure ? 'text-red-500'
+                    : isSuccess ? 'text-gold-500' : 'text-red-500',
+                ]"
+              >
+                {{ diceResult }}
+              </span>
+              <span
+                v-else
+                class="absolute text-6xl font-bold text-gold-600 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              >
+                {{ diceType }}
+              </span>
+            </div>
+            <div
+              v-else
+              class="flex items-center justify-center min-h-300px"
+            >
+              <h3
+                class="text-5xl font-bold font-serif"
+                :class="resultClass"
+              >
+                {{ resultText }}
+              </h3>
+            </div>
+          </Transition>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-4">
+          <UButton
+            v-if="showResult && isSuccess"
+            size="lg"
+            color="primary"
+            variant="solid"
+            class="font-bold"
+            @click="handleContinue"
+          >
+            Continue
+          </UButton>
+          <UButton
+            v-else-if="diceResult && !isSuccess"
+            size="sm"
+            variant="outline"
+            color="error"
+            class="text-sm"
+            @click="rollDice"
+          >
+            Try Again
+          </UButton>
+          <UButton
+            v-else
+            size="sm"
+            variant="outline"
+            color="neutral"
+            class="text-sm text-slate-400"
+            @click="rollDice"
+          >
+            Click dice to roll
+          </UButton>
+        </div>
       </div>
     </template>
 
     <!-- Footer Section -->
     <template #footer>
-      <!-- Modifiers Section -->
       <!-- Modifiers Section -->
       <div class="modifiers-section mt-6 space-y-2">
         <div
@@ -135,5 +239,15 @@ const rollDice = () => {
 
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -53,18 +53,30 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
   outlineObject(e.object)
   setCursor(isLocked.value ? 'locked' : 'pointer')
   gameStore.state.contextMenu.enabled = true
-  gameStore.state.contextMenu.items = [{
-    label: 'Lockpick',
-    icon: 'i-lucide-lock',
-    onSelect: () => {
-      gameStore.openDiceRollModal({
-        title: 'Lockpick',
-        subtitle: 'Lockpick',
-        difficultyClass: 10,
-        diceType: 20,
-      })
-    },
-  }]
+  gameStore.state.contextMenu.items = isLocked.value
+    ? [{
+        label: 'Lockpick',
+        icon: 'i-lucide-lock',
+        onSelect: () => {
+          gameStore.openDiceRollModal({
+            title: 'Dexterity Check',
+            subtitle: 'Sleight of Hand',
+            difficultyClass: 10,
+            diceType: 20,
+            onSuccess: () => {
+              isLocked.value = false
+            },
+          })
+        },
+      }]
+    : [
+        {
+          label: 'Open',
+          onSelect: () => {
+            isOpen.value = true
+          },
+        },
+      ]
   e.stopPropagation()
 }
 
@@ -79,7 +91,7 @@ const handlePointerLeave = (e: ThreeEvent<PointerEvent>) => {
   resetCursor()
   gameStore.state.contextMenu.items = []
   gameStore.state.contextMenu.enabled = false
-
+  isOpen.value = false
   e.stopPropagation()
 }
 

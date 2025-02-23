@@ -114,12 +114,12 @@ watch(outlineRef, ({ effect }) => {
 const { cursor } = useGameCursor()
 
 // Temporary
-gameStore.openDiceRollModal({
+/* gameStore.openDiceRollModal({
   title: 'Dexterity Check',
   subtitle: 'Sleight of Hand',
   difficultyClass: 10,
   diceType: 20,
-})
+}) */
 </script>
 
 <template>

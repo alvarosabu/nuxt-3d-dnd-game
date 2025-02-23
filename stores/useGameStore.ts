@@ -118,6 +118,13 @@ export const useGameStore = defineStore('game', () => {
       subtitle: args.subtitle,
       difficultyClass: args.difficultyClass,
       diceType: args.diceType,
+      onSuccess: args.onSuccess,
+      onFailure: args.onFailure,
+      onClose: () => {
+        modal.close()
+        state.diceRollModal.isOpen = false
+        state.diceRollModal.args = undefined
+      },
     })
   }
 
