@@ -12,9 +12,9 @@ definePageMeta({
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
-const router = useRouter()
-const gameStore = useGameStore()
 
+const gameStore = useGameStore()
+gameStore.setMode('multiplayer')
 const { availableLobbies, currentLobby } = storeToRefs(lobbyStore)
 // Websocket
 const { data, sendMsg } = useMultiplayer()
@@ -135,7 +135,6 @@ const selectCurrentLobby = (lobbyId: string) => {
 }
 
 const handleStartGame = () => {
-  gameStore.setMode('multiplayer')
   sendMsg({
     type: 'START_GAME',
     lobbyId: currentLobby.value?.id,
@@ -153,7 +152,6 @@ const showJoinStartedGameButton = computed(() => {
 })
 
 const handleJoinStartedGame = () => {
-  gameStore.setMode('multiplayer')
   const player = lobbyStore.currentLobby?.players.find(player => player.id === userStore.userId)
   if (player?.character) {
     navigateTo('/game')
