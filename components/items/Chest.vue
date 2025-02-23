@@ -5,28 +5,50 @@ import { Html } from '@tresjs/cientos'
 import { useGameStore } from '~/stores/useGameStore'
 
 const chestRef = ref()
-
+const vueLogoRef = ref()
 const { getResource } = useResourcePreloader()
 const { nodes } = getResource('models', 'chest') as { nodes: Record<string, any> }
+const { nodes: vueNodes } = getResource('models', 'vue') as { nodes: Record<string, any> }
+
 const { setCursor, resetCursor } = useGameCursor()
 const gameStore = useGameStore()
 
-const isOpen = ref(false)
-const isLocked = ref(true)
+const isOpen = ref(true)
+const isLocked = ref(false)
 const isHovering = ref(false)
 
 const chestBase = nodes.chest_large
 const chestLid = nodes.chest_large_lid
+const vue = vueNodes.Vue
+// Set initial scale and position
+vue.scale.set(0, 0, 0)
+vue.position.set(0, 0, 0)
 
 /**
  * Handles the chest lid animation using GSAP
  * @param value - Whether the chest is open or closed
  */
 watch(isOpen, (value) => {
+  // Animate chest lid
   gsap.to(chestLid.rotation, {
     x: value ? -Math.PI / 2 : 0,
     duration: 0.5,
     ease: 'power2.out',
+  })
+
+  // Animate Vue logo
+  gsap.to(vue.scale, {
+    x: value ? 3 : 0,
+    y: value ? 3 : 0,
+    z: value ? 3 : 0,
+    duration: 0.5,
+    ease: 'back.out(1.7)',
+  })
+
+  gsap.to(vue.position, {
+    y: value ? 1.5 : 0,
+    duration: 0.5,
+    ease: 'back.out(1.7)',
   })
 })
 
@@ -102,6 +124,14 @@ watch(() => gameStore.state.contextMenu.isOpen, (value) => {
     resetCursor()
   }
 })
+
+const { onBeforeRender } = useLoop()
+
+onBeforeRender(({ elapsed }) => {
+  if (vueLogoRef.value) {
+    vueLogoRef.value.rotation.y = Math.sin(elapsed * 0.5) * 0.5
+  }
+})
 </script>
 
 <template>
@@ -125,5 +155,6 @@ watch(() => gameStore.state.contextMenu.isOpen, (value) => {
     </Html>
     <primitive :object="chestBase" />
     <primitive :object="chestLid" />
+    <primitive ref="vueLogoRef" :object="vue" />
   </TresGroup>
 </template>
