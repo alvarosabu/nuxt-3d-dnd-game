@@ -23,7 +23,6 @@ export interface Player {
   character?: string
   characterName?: string
   position: number[] // [x, y, z]
-
 }
 
 export interface Lobby {
@@ -72,27 +71,6 @@ export interface GameState {
   characterTemplates: CharacterTemplate[]
   characters: Character[]
   mode: 'single' | 'multiplayer'
-  contextMenu: {
-    enabled: boolean
-    isOpen: boolean
-    items: {
-      label: string
-      icon?: string
-      action?: () => void
-    }[]
-  }
-  diceRollModal: {
-      title?: string
-      subtitle?: string
-      difficultyClass?: number
-      diceType?: 4 | 6 | 8 | 10 | 12 | 20
-      modifiers?: {
-        name: string
-        value: number
-        icon?: string
-      }[]
-    }
-  }
 }
 
 export interface Race {
@@ -134,4 +112,36 @@ export interface Session {
   id: string
   players: Player[]
   hostId: string
+}
+
+export interface ContextMenuItem {
+  label: string
+  icon?: string
+  action?: () => void
+}
+
+export interface DiceRollModalArgs {
+  title?: string
+  subtitle?: string
+  difficultyClass?: number
+  diceType?: 4 | 6 | 8 | 10 | 12 | 20
+  modifiers?: Array<{
+    name: string
+    value: number
+    icon?: string
+  }>
+  onSuccess?: () => void
+  onFailure?: () => void
+}
+
+export interface UIState {
+  contextMenu: {
+    enabled: boolean
+    isOpen: boolean
+    items: ContextMenuItem[]
+  }
+  diceRollModal: {
+    isOpen: boolean
+    args?: DiceRollModalArgs
+  }
 }

@@ -2,7 +2,7 @@
 import gsap from 'gsap'
 import type { ThreeEvent } from '@tresjs/core'
 import { Html } from '@tresjs/cientos'
-import { useGameStore } from '~/stores/useGameStore'
+import { useUIStore } from '~/stores/useUIStore'
 
 const chestRef = ref()
 const vueLogoRef = ref()
@@ -11,7 +11,7 @@ const { nodes } = getResource('models', 'chest') as { nodes: Record<string, any>
 const { nodes: vueNodes } = getResource('models', 'vue') as { nodes: Record<string, any> }
 
 const { setCursor, resetCursor } = useGameCursor()
-const gameStore = useGameStore()
+const uiStore = useUIStore()
 
 const isOpen = ref(true)
 const isLocked = ref(true)
@@ -74,13 +74,13 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
   isHovering.value = true
   outlineObject(e.object)
   setCursor(isLocked.value ? 'locked' : 'pointer')
-  gameStore.state.contextMenu.enabled = true
-  gameStore.state.contextMenu.items = isLocked.value
+  uiStore.contextMenu.enabled = true
+  uiStore.setContextMenuItems(isLocked.value
     ? [{
         label: 'Lockpick',
         icon: 'i-lucide-lock',
         onSelect: () => {
-          gameStore.openDiceRollModal({
+          uiStore.openDiceRollModal({
             title: 'Dexterity Check',
             subtitle: 'Sleight of Hand',
             difficultyClass: 10,
@@ -98,7 +98,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
             isOpen.value = true
           },
         },
-      ]
+      ])
   e.stopPropagation()
 }
 
@@ -107,17 +107,17 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
  * Resets cursor and removes outline
  */
 const handlePointerLeave = (e: ThreeEvent<PointerEvent>) => {
-  if (gameStore.state.contextMenu.isOpen === true) { return }
+  if (uiStore.contextMenu.isOpen) { return }
   isHovering.value = false
+  uiStore.contextMenu.enabled = false
   removeObjectOutline(e.object)
   resetCursor()
-  gameStore.state.contextMenu.items = []
-  gameStore.state.contextMenu.enabled = false
+  uiStore.setContextMenuItems([])
   isOpen.value = false
   e.stopPropagation()
 }
 
-watch(() => gameStore.state.contextMenu.isOpen, (value) => {
+watch(() => uiStore.contextMenu.isOpen, (value) => {
   if (!value) {
     isHovering.value = false
     removeObjectOutline(chestRef.value)

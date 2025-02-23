@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { CharacterTemplate, GameState, Player } from '~/types'
-import type { Object3D, Vector3 } from 'three'
-import DiceRollModal from '~/components/ui/DiceRollModal.vue'
+import type { Vector3 } from 'three'
+
 /**
  * Store for managing game state including characters, players, and templates
  * @returns {object} Game store methods and state
@@ -14,18 +14,7 @@ export const useGameStore = defineStore('game', () => {
     characterTemplates: [],
     characters: [],
     mode: 'single',
-    contextMenu: {
-      enabled: false,
-      isOpen: false,
-      items: [],
-    },
-    diceRollModal: {
-      isOpen: false,
-      args: undefined,
-    },
   })
-
-  const modal = useModal()
 
   // Getters
   const getCharacterById = computed(() => {
@@ -106,36 +95,6 @@ export const useGameStore = defineStore('game', () => {
     state.players = [...state.players, player]
   }
 
-  /**
-   * Opens the dice roll modal with the given arguments
-   * @param args The arguments for the dice roll modal
-   */
-  function openDiceRollModal(args: GameState['diceRollModal']['args']) {
-    state.diceRollModal.args = args
-    state.diceRollModal.isOpen = true
-    modal.open(DiceRollModal, {
-      title: args.title,
-      subtitle: args.subtitle,
-      difficultyClass: args.difficultyClass,
-      diceType: args.diceType,
-      onSuccess: args.onSuccess,
-      onFailure: args.onFailure,
-      onClose: () => {
-        modal.close()
-        state.diceRollModal.isOpen = false
-        state.diceRollModal.args = undefined
-      },
-    })
-  }
-
-  /**
-   * Closes the dice roll modal
-   */
-  function closeDiceRollModal() {
-    state.diceRollModal.isOpen = false
-    state.diceRollModal.args = undefined
-  }
-
   return {
     // State
     state,
@@ -149,8 +108,6 @@ export const useGameStore = defineStore('game', () => {
     setCharacter,
     addPlayer,
     setPlayerPosition,
-    openDiceRollModal,
-    closeDiceRollModal,
   }
 }, {
   persist: {
