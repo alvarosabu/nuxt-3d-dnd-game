@@ -72,6 +72,27 @@ export interface GameState {
   characterTemplates: CharacterTemplate[]
   characters: Character[]
   mode: 'single' | 'multiplayer'
+  contextMenu: {
+    enabled: boolean
+    isOpen: boolean
+    items: {
+      label: string
+      icon?: string
+      action?: () => void
+    }[]
+  }
+  diceRollModal: {
+      title?: string
+      subtitle?: string
+      difficultyClass?: number
+      diceType?: 4 | 6 | 8 | 10 | 12 | 20
+      modifiers?: {
+        name: string
+        value: number
+        icon?: string
+      }[]
+    }
+  }
 }
 
 export interface Race {

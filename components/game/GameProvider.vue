@@ -1,13 +1,30 @@
 <script setup lang="ts">
 import '@tresjs/leches/styles'
 
-const { init } = useGameStore()
+const gameStore = useGameStore()
 
-await init()
+await gameStore.init()
+
+const handleContextMenuOpen = (open: boolean) => {
+  gameStore.state.contextMenu.isOpen = open
+
+  if (!open) {
+    gameStore.state.contextMenu.items = []
+    gameStore.state.contextMenu.enabled = false
+  }
+}
 </script>
 
 <template>
   <div>
-    <slot></slot>
+    <!-- <TresLeches collapsed /> -->
+    <UContextMenu
+      :disabled="!gameStore.state.contextMenu.enabled"
+      size="sm"
+      :items="gameStore.state.contextMenu.items"
+      @update:open="handleContextMenuOpen"
+    >
+      <slot></slot>
+    </UContextMenu>
   </div>
 </template>

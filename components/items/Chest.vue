@@ -56,6 +56,14 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
   gameStore.state.contextMenu.items = [{
     label: 'Lockpick',
     icon: 'i-lucide-lock',
+    onSelect: () => {
+      gameStore.openDiceRollModal({
+        title: 'Lockpick',
+        subtitle: 'Lockpick',
+        difficultyClass: 10,
+        diceType: 20,
+      })
+    },
   }]
   e.stopPropagation()
 }

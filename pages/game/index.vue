@@ -5,10 +5,6 @@ const { progress, isLoading } = useResourcePreloader()
 
 const { preloadResources } = useResourcePreloader()
 
-definePageMeta({
-  colorMode: 'dark',
-})
-
 // Start loading sequence
 onMounted(async () => {
   // Actually load resources
@@ -16,7 +12,7 @@ onMounted(async () => {
 })
 
 definePageMeta({
-  middleware: 'game',
+  colorMode: 'dark',
 })
 
 const { sendMsg, data } = useMultiplayer()

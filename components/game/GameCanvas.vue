@@ -113,103 +113,94 @@ watch(outlineRef, ({ effect }) => {
 
 const { cursor } = useGameCursor()
 
-const handleContextMenuOpen = (open: boolean) => {
-  gameStore.state.contextMenu.isOpen = open
-
-  if (!open) {
-    gameStore.state.contextMenu.items = []
-    gameStore.state.contextMenu.enabled = false
-  }
-}
+// Temporary
+gameStore.openDiceRollModal({
+  title: 'Dexterity Check',
+  subtitle: 'Sleight of Hand',
+  difficultyClass: 10,
+  diceType: 20,
+})
 </script>
 
 <template>
-  <TresLeches collapsed />
-  <UContextMenu
-    :disabled="!gameStore.state.contextMenu.enabled"
-    size="sm"
-    :items="gameStore.state.contextMenu.items"
-    @update:open="handleContextMenuOpen"
+  <TresCanvas
+    clear-color="#2f2f2f"
+    window-size
+    class="cursor-game"
+    :class="[`custom-cursor-${cursor}`]"
   >
-    <TresCanvas
-      clear-color="#2f2f2f"
-      window-size
-      class="cursor-game"
-      :class="[`custom-cursor-${cursor}`]"
+    <Suspense>
+      <Environment preset="sunset" :blur="1" background />
+    </Suspense>
+    <TresPerspectiveCamera
+      :position="[20, 20, 20]"
+      :look-at="[0, 0, 0]"
+      :fov="45"
+      :near="0.1"
+      :far="1000"
+    />
+
+    <OrbitControls ref="orbitControlsRef" make-default />
+
+    <!-- Environment -->
+    <TresAmbientLight :intensity="0.5" />
+    <TresDirectionalLight :position="[10, 10, 10]" :intensity="1" />
+
+    <TresGridHelper :args="[100, 100]" :position-y="0.001" />
+
+    <Suspense>
+      <template v-for="(player, index) in characters" :key="player.id">
+        <Character
+          :character="player.character"
+          :player="player"
+          :is-current-player="player.id === userStore.userId"
+          :index="index"
+        />
+      </template>
+    </Suspense>
+    <!-- Hover Indicator -->
+    <TresMesh
+      v-if="showIndicator"
+      ref="hoverIndicatorRef"
     >
-      <Suspense>
-        <Environment preset="sunset" :blur="1" background />
-      </Suspense>
-      <TresPerspectiveCamera
-        :position="[20, 20, 20]"
-        :look-at="[0, 0, 0]"
-        :fov="45"
-        :near="0.1"
-        :far="1000"
+      <TresCylinderGeometry :args="[0.5, 0.5, 1, 32]" />
+      <TresShaderMaterial
+        transparent
+        :vertex-shader="cylinderShader.vertexShader"
+        :fragment-shader="cylinderShader.fragmentShader"
+        :uniforms="cylinderShader.uniforms"
       />
+    </TresMesh>
 
-      <OrbitControls ref="orbitControlsRef" make-default />
+    <Suspense>
+      <Chest />
+    </Suspense>
 
-      <!-- Environment -->
-      <TresAmbientLight :intensity="0.5" />
-      <TresDirectionalLight :position="[10, 10, 10]" :intensity="1" />
+    <!-- Floor -->
+    <TresMesh
+      :rotation-x="-Math.PI / 2"
+      class="cursor-pointer"
+      @click="handleFloorClick"
+      @pointer-move="handleFloorHover"
+      @pointer-leave="handleFloorLeave"
+    >
+      <TresPlaneGeometry :args="[100, 100]" />
+      <TresMeshBasicMaterial color="#4f4f4f" />
+    </TresMesh>
 
-      <TresGridHelper :args="[100, 100]" :position-y="0.001" />
-
-      <Suspense>
-        <template v-for="(player, index) in characters" :key="player.id">
-          <Character
-            :character="player.character"
-            :player="player"
-            :is-current-player="player.id === userStore.userId"
-            :index="index"
-          />
-        </template>
-      </Suspense>
-      <!-- Hover Indicator -->
-      <TresMesh
-        v-if="showIndicator"
-        ref="hoverIndicatorRef"
-      >
-        <TresCylinderGeometry :args="[0.5, 0.5, 1, 32]" />
-        <TresShaderMaterial
-          transparent
-          :vertex-shader="cylinderShader.vertexShader"
-          :fragment-shader="cylinderShader.fragmentShader"
-          :uniforms="cylinderShader.uniforms"
-        />
-      </TresMesh>
-
-      <Suspense>
-        <Chest />
-      </Suspense>
-
-      <!-- Floor -->
-      <TresMesh
-        :rotation-x="-Math.PI / 2"
-        class="cursor-pointer"
-        @click="handleFloorClick"
-        @pointer-move="handleFloorHover"
-        @pointer-leave="handleFloorLeave"
-      >
-        <TresPlaneGeometry :args="[100, 100]" />
-        <TresMeshBasicMaterial color="#4f4f4f" />
-      </TresMesh>
-
-      <!-- Postprocessing -->
-      <EffectComposerPmndrs>
-        <OutlinePmndrs
-          ref="outlineRef"
-          :outlined-objects="outlinedObjects"
-          :blur="blur"
-          :edge-strength="edgeStrength"
-          :pulse-speed="pulseSpeed"
-          :visible-edge-color="visibleEdgeColor"
-          :kernel-size="4"
-        />
-      </EffectComposerPmndrs>
-    </TresCanvas>
-  </UContextMenu>
+    <!-- Postprocessing -->
+    <EffectComposerPmndrs>
+      <OutlinePmndrs
+        ref="outlineRef"
+        :outlined-objects="outlinedObjects"
+        :blur="blur"
+        :edge-strength="edgeStrength"
+        :pulse-speed="pulseSpeed"
+        :visible-edge-color="visibleEdgeColor"
+        :kernel-size="4"
+      />
+    </EffectComposerPmndrs>
+  </TresCanvas>
 </template>
 
 <style>
