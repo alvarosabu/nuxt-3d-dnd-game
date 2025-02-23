@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { CharacterTemplate, GameState, Player } from '~/types'
+import type { CharacterTemplate, Player } from '~/types'
 import type { Vector3 } from 'three'
 
 /**
@@ -7,18 +7,21 @@ import type { Vector3 } from 'three'
  * @returns {object} Game store methods and state
  */
 export const useGameStore = defineStore('game', () => {
-  // State
-  const state = reactive<GameState>({
-    players: [],
-    activePlayer: null,
-    characterTemplates: [],
-    characters: [],
-    mode: 'single',
-  })
+  // Players State
+  const players = ref<Player[]>([])
+  const activePlayer = ref<Player | null>(null)
+
+  // Game Mode
+  const mode = ref<'single' | 'multiplayer'>('single')
+  const isMultiplayer = computed(() => mode.value === 'multiplayer')
+
+  // Characters
+  const characterTemplates = ref<CharacterTemplate[]>([])
+  const characters = ref<any[]>([]) // TODO: Define proper type
 
   // Getters
   const getCharacterById = computed(() => {
-    return (id: string) => state.characters.find(char => char.id === id)
+    return (id: string) => characters.value.find(char => char.id === id)
   })
 
   /**
@@ -26,7 +29,7 @@ export const useGameStore = defineStore('game', () => {
    */
   async function loadCharacterTemplates() {
     // Load all collections
-    const [characterTemplates, races, classes, spells, cantrips] = await Promise.all([
+    const [templates, races, classes, spells, cantrips] = await Promise.all([
       queryCollection('origins').all(),
       queryCollection('races').all(),
       queryCollection('classes').all(),
@@ -41,7 +44,7 @@ export const useGameStore = defineStore('game', () => {
     const cantripMap = new Map(cantrips.map(cantrip => [cantrip.slug, cantrip]))
 
     // Join the data with proper type assertions
-    state.characterTemplates = characterTemplates.map(character => ({
+    characterTemplates.value = templates.map(character => ({
       ...character,
       raceData: raceMap.get(character.race) ?? undefined,
       classData: classMap.get(character.class) ?? undefined,
@@ -63,23 +66,22 @@ export const useGameStore = defineStore('game', () => {
     ])
   }
 
-  const isMultiplayer = computed(() => state.mode === 'multiplayer')
-
   /**
    * Set the game mode
-   * @param mode The game mode to set
+   * @param newMode The game mode to set
    */
-  function setMode(mode: GameState['mode']) {
-    state.mode = mode
+  function setMode(newMode: 'single' | 'multiplayer') {
+    mode.value = newMode
   }
 
   /**
    * Set the selected character for the player
    * @param character The character template to set
    */
-  function setCharacter(character: CharacterTemplate) {
-    state.players[0].character = character.key
-    state.players[0].characterName = character.name
+  function setCharacter(character: Pick<CharacterTemplate, 'key' | 'name'>) {
+    if (!players.value[0]) { return }
+    players.value[0].character = character.key
+    players.value[0].characterName = character.name
   }
 
   /**
@@ -88,18 +90,27 @@ export const useGameStore = defineStore('game', () => {
    * @param position The new position as a Three.js Vector3
    */
   function setPlayerPosition(player: Player, position: Vector3) {
-    state.players[0].position = [position.x, position.y, position.z]
+    if (!players.value[0]) { return }
+    players.value[0].position = [position.x, position.y, position.z]
   }
 
+  /**
+   * Add a new player to the game
+   * @param player The player to add
+   */
   function addPlayer(player: Player) {
-    state.players = [...state.players, player]
+    players.value = [...players.value, player]
   }
 
   return {
     // State
-    state,
+    players,
+    activePlayer,
+    mode,
+    characterTemplates,
+    characters,
+    // Computed
     isMultiplayer,
-    // Getters
     getCharacterById,
     // Actions
     loadCharacterTemplates,

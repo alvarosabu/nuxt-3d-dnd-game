@@ -11,19 +11,19 @@ const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
 const gameStore = useGameStore()
 const { currentLobbyPlayers } = storeToRefs(lobbyStore)
-const { isMultiplayer, state } = storeToRefs(gameStore)
 
 // Initialize outline objects composable
-const { outlinedObjects, outlineObject, removeObjectOutline } = useOutlinedObjects()
+const { outlinedObjects } = useOutlinedObjects()
 
+// Compute characters based on game mode
 const characters = computed(() => {
-  if (isMultiplayer.value) {
+  if (gameStore.isMultiplayer) {
     return currentLobbyPlayers.value
   }
-  return state.value.players
+  return gameStore.players
 })
 
-const { sendMsg } = useMultiplayer(isMultiplayer.value)
+const { sendMsg } = useMultiplayer(gameStore.isMultiplayer)
 const orbitControlsRef = ref()
 const showIndicator = ref(false)
 const hoverIndicatorRef = shallowRef()
@@ -72,7 +72,7 @@ const cylinderShader = {
 
 const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
   const newPosition = { x: e.point.x, y: 0, z: e.point.z }
-  if (isMultiplayer.value) {
+  if (gameStore.isMultiplayer) {
     sendMsg({
       type: 'UPDATE_PLAYER_POSITION',
       lobbyId: lobbyStore.currentLobbyId,
@@ -80,7 +80,7 @@ const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
     })
   }
   else {
-    gameStore.setPlayerPosition(state.value.players[0], newPosition)
+    gameStore.setPlayerPosition(gameStore.players[0], newPosition)
   }
 }
 
@@ -93,16 +93,6 @@ const handleFloorHover = (e: ThreeEvent<PointerEvent>) => {
 
 const handleFloorLeave = () => {
   showIndicator.value = false
-}
-
-const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
-  outlineObject(event.object)
-  event.stopPropagation()
-}
-
-const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
-  removeObjectOutline(event.object)
-  event.stopPropagation()
 }
 
 const outlineRef = ref()
