@@ -101,11 +101,13 @@ if (isMultiplayer.value) {
   })
 }
 else {
+  state.model?.position.set(gameStore.state.players[0].position[0], gameStore.state.players[0].position[1], gameStore.state.players[0].position[2])
+  nextPosition.value.set(gameStore.state.players[0].position[0], gameStore.state.players[0].position[1], gameStore.state.players[0].position[2])
   watch(gameStore.state.players, (newPlayers) => {
     if (newPlayers[0].id === props.player.id) {
       nextPosition.value.set(newPlayers[0].position[0], newPlayers[0].position[1], newPlayers[0].position[2])
     }
-  }, { immediate: true })
+  })
 }
 
 // Throttle position updates to reduce websocket messages
