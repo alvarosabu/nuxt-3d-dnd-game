@@ -14,7 +14,7 @@ const { setCursor, resetCursor } = useGameCursor()
 const gameStore = useGameStore()
 
 const isOpen = ref(true)
-const isLocked = ref(false)
+const isLocked = ref(true)
 const isHovering = ref(false)
 
 const chestBase = nodes.chest_large
