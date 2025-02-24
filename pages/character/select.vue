@@ -13,7 +13,8 @@ definePageMeta({
 
 const gameStore = useGameStore()
 const lobbyStore = useLobbyStore()
-
+const { init } = gameStore
+await init()
 const { preloadResources } = useResourcePreloader()
 
 const { send } = useMultiplayer()

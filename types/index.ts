@@ -145,3 +145,53 @@ export interface UIState {
     args?: DiceRollModalArgs
   }
 }
+
+/**
+ * Base interface for game items like chests, doors, etc.
+ */
+export interface GameItem {
+  id: string
+  type: 'chest' | 'door' // Add more types as needed
+  position: [number, number, number]
+  rotation?: [number, number, number]
+  state: Record<string, any>
+}
+
+/**
+ * Interface specifically for chest items
+ */
+export interface ChestItem extends GameItem {
+  type: 'chest'
+  state: {
+    isLocked: boolean
+    isOpen: boolean
+  }
+}
+
+/**
+ * Interface for level ambient settings
+ */
+export interface LevelAmbient {
+  light: number
+  environment: 'sunset' | 'dawn' | 'night' | 'day'
+}
+
+/**
+ * Interface for level grid settings
+ */
+export interface LevelGrid {
+  size: [number, number]
+  cellSize: number
+}
+
+/**
+ * Interface for game levels
+ */
+export interface Level {
+  id: string
+  slug: string
+  name: string
+  ambient: LevelAmbient
+  grid: LevelGrid
+  items: GameItem[]
+}

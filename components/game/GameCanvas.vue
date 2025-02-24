@@ -6,6 +6,7 @@ import type { Object3D } from 'three'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
 import { BlendFunction, KernelSize } from 'postprocessing'
 import Chest from '~/components/items/Chest.vue'
+import Item from '~/components/game/Item.vue'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
@@ -162,9 +163,13 @@ const { cursor } = useGameCursor()
       />
     </TresMesh>
 
-    <Suspense>
-      <Chest />
-    </Suspense>
+    <!-- Level Items -->
+
+    <template v-if="gameStore.currentLevel">
+      <template v-for="item in gameStore.currentLevel.items" :key="item.id">
+        <Item :id="item.id" />
+      </template>
+    </template>
 
     <!-- Floor -->
     <TresMesh
@@ -174,7 +179,7 @@ const { cursor } = useGameCursor()
       @pointer-move="handleFloorHover"
       @pointer-leave="handleFloorLeave"
     >
-      <TresPlaneGeometry :args="[100, 100]" />
+      <TresPlaneGeometry :args="[gameStore.currentLevel.grid.size[0], gameStore.currentLevel.grid.size[1]]" />
       <TresMeshBasicMaterial color="#4f4f4f" />
     </TresMesh>
 

@@ -2,9 +2,11 @@
 import '@tresjs/leches/styles'
 
 const gameStore = useGameStore()
-const { init } = gameStore
+const { init, setCurrentLevel } = gameStore
 const uiStore = useUIStore()
 const { handleContextMenuOpen, contextMenu } = uiStore
+
+setCurrentLevel('test-level-a')
 
 await init()
 </script>

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { CharacterTemplate, Player } from '~/types'
+import type { CharacterTemplate, GameItem, Level, Player } from '~/types'
 import type { Vector3 } from 'three'
 
 /**
@@ -19,9 +19,21 @@ export const useGameStore = defineStore('game', () => {
   const characterTemplates = ref<CharacterTemplate[]>([])
   const characters = ref<any[]>([]) // TODO: Define proper type
 
+  // Items State - Using a Record instead of Map for better persistence
+  const items = ref<Record<string, GameItem>>({})
+
+  // Levels State
+  const levels = ref<Level[]>([])
+  const currentLevelSlug = ref<string | null>(null)
+  const currentLevel = computed(() => levels.value.find(level => level.slug === currentLevelSlug.value) ?? null)
+
   // Getters
   const getCharacterById = computed(() => {
     return (id: string) => characters.value.find(char => char.id === id)
+  })
+
+  const getItemById = computed(() => {
+    return (id: string) => items.value[id]
   })
 
   /**
@@ -58,11 +70,51 @@ export const useGameStore = defineStore('game', () => {
   }
 
   /**
+   * Load all available levels
+   */
+  async function loadLevels() {
+    const levelsData = await queryCollection('levels').all()
+    // Transform the level data to match our types
+    levels.value = levelsData.map(level => ({
+      ...level,
+      items: level.items.map(item => ({
+        ...item,
+        position: item.position,
+        rotation: item.rotation,
+      })),
+    }))
+  }
+
+  /**
+   * Set the current level and initialize its items
+   * @param levelSlug The slug of the level to set
+   */
+  function setCurrentLevel(levelSlug: string) {
+    const level = levels.value.find(l => l.slug === levelSlug)
+    if (!level) { return }
+
+    // Clear existing items
+    items.value = {}
+
+    // Initialize level items
+    level.items.forEach((item) => {
+      setItem({
+        ...item,
+        position: item.position,
+        rotation: item.rotation,
+      })
+    })
+
+    currentLevelSlug.value = level.slug
+  }
+
+  /**
    * Initialize the game store
    */
   async function init() {
     await Promise.all([
       loadCharacterTemplates(),
+      loadLevels(),
     ])
   }
 
@@ -102,6 +154,59 @@ export const useGameStore = defineStore('game', () => {
     players.value = [...players.value, player]
   }
 
+  /**
+   * Add or update an item in the game world
+   * @param item The item to add or update
+   */
+  function setItem(item: GameItem) {
+    items.value = { ...items.value, [item.id]: item }
+  }
+
+  /**
+   * Update the state of an item
+   * @param itemId The ID of the item to update
+   * @param state The new state to merge with the existing state
+   */
+  function updateItemState(itemId: string, state: Record<string, any>) {
+    const item = items.value[itemId]
+    if (item) {
+      items.value = {
+        ...items.value,
+        [itemId]: {
+          ...item,
+          state: { ...item.state, ...state },
+        },
+      }
+    }
+  }
+
+  /**
+   * Update an item's position in the game world
+   * @param itemId The ID of the item to update
+   * @param position The new position as a Three.js Vector3
+   */
+  function updateItemPosition(itemId: string, position: Vector3) {
+    const item = items.value[itemId]
+    if (item) {
+      items.value = {
+        ...items.value,
+        [itemId]: {
+          ...item,
+          position,
+        },
+      }
+    }
+  }
+
+  /**
+   * Remove an item from the game world
+   * @param itemId The ID of the item to remove
+   */
+  function removeItem(itemId: string) {
+    const { [itemId]: _, ...rest } = items.value
+    items.value = rest
+  }
+
   return {
     // State
     players,
@@ -109,16 +214,27 @@ export const useGameStore = defineStore('game', () => {
     mode,
     characterTemplates,
     characters,
+    items,
+    levels,
+    currentLevelSlug,
     // Computed
     isMultiplayer,
+    currentLevel,
     getCharacterById,
+    getItemById,
     // Actions
     loadCharacterTemplates,
+    loadLevels,
     init,
     setMode,
     setCharacter,
     addPlayer,
     setPlayerPosition,
+    setItem,
+    updateItemState,
+    updateItemPosition,
+    removeItem,
+    setCurrentLevel,
   }
 }, {
   persist: {

@@ -3,18 +3,44 @@ import gsap from 'gsap'
 import type { ThreeEvent } from '@tresjs/core'
 import { Html } from '@tresjs/cientos'
 import { useUIStore } from '~/stores/useUIStore'
+import { useGameStore } from '~/stores/useGameStore'
+import { Vector3 } from 'three'
 
+// Props for the chest
+const props = defineProps<{
+  id: string
+  position?: [number, number, number]
+}>()
 const chestRef = ref()
 const vueLogoRef = ref()
 const { getResource } = useResourcePreloader()
-const { nodes } = getResource('models', 'chest') as { nodes: Record<string, any> }
-const { nodes: vueNodes } = getResource('models', 'vue') as { nodes: Record<string, any> }
+const { nodes } = getResource('models', 'chest') as unknown as { nodes: Record<string, any> }
+const { nodes: vueNodes } = getResource('models', 'vue') as unknown as { nodes: Record<string, any> }
 
 const { setCursor, resetCursor } = useGameCursor()
 const uiStore = useUIStore()
+const gameStore = useGameStore()
 
-const isOpen = ref(true)
-const isLocked = ref(true)
+// Get chest state from the store
+const item = computed(() => gameStore.getItemById(props.id))
+const chestState = computed(() => item.value?.state ?? { isLocked: true, isOpen: false })
+const chestPosition = computed(() => item.value?.position ?? new Vector3())
+watch(item, (value) => {
+  console.log(value)
+})
+const isOpen = computed({
+  get: () => chestState.value.isOpen,
+  set: (value) => {
+    gameStore.updateItemState(props.id, { isOpen: value })
+  },
+})
+const isLocked = computed({
+  get: () => chestState.value.isLocked,
+  set: (value) => {
+    gameStore.updateItemState(props.id, { isLocked: value })
+  },
+})
+
 const isHovering = ref(false)
 
 const chestBase = nodes.chest_large
@@ -137,6 +163,8 @@ onBeforeRender(({ elapsed }) => {
 <template>
   <TresGroup
     ref="chestRef"
+    :name="item.id"
+    :position="[chestPosition[0], chestPosition[1], chestPosition[2]]"
     @click="handleClick"
     @pointerenter="handlePointerEnter"
     @pointerleave="handlePointerLeave"
