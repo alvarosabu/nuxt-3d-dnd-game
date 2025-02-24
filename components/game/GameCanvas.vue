@@ -5,32 +5,31 @@ import { ref, shallowRef } from 'vue'
 import type { Object3D } from 'three'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
 import { BlendFunction, KernelSize } from 'postprocessing'
+import Chest from '~/components/items/Chest.vue'
+import Item from '~/components/game/Item.vue'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
 const gameStore = useGameStore()
 const { currentLobbyPlayers } = storeToRefs(lobbyStore)
-const { isMultiplayer, state } = storeToRefs(gameStore)
 
 // Initialize outline objects composable
-const { outlinedObjects, outlineObject, removeObjectOutline } = useOutlinedObjects()
+const { outlinedObjects } = useOutlinedObjects()
 
+// Compute characters based on game mode
 const characters = computed(() => {
-  if (isMultiplayer.value) {
+  if (gameStore.isMultiplayer) {
     return currentLobbyPlayers.value
   }
-  return state.value.players
+  return gameStore.players
 })
 
-const { sendMsg } = useMultiplayer(isMultiplayer.value)
+const { sendMsg } = useMultiplayer(gameStore.isMultiplayer)
 const orbitControlsRef = ref()
 const showIndicator = ref(false)
 const hoverIndicatorRef = shallowRef()
 
 useControls('fpsgraph')
-const { clearColor } = useControls({
-  clearColor: '#2f2f2f',
-})
 
 const { edgeStrength, pulseSpeed, visibleEdgeColor, blur } = useControls({
   edgeStrength: 2000,
@@ -74,7 +73,7 @@ const cylinderShader = {
 
 const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
   const newPosition = { x: e.point.x, y: 0, z: e.point.z }
-  if (isMultiplayer.value) {
+  if (gameStore.isMultiplayer) {
     sendMsg({
       type: 'UPDATE_PLAYER_POSITION',
       lobbyId: lobbyStore.currentLobbyId,
@@ -82,7 +81,7 @@ const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
     })
   }
   else {
-    gameStore.setPlayerPosition(state.value.players[0], newPosition)
+    gameStore.setPlayerPosition(gameStore.players[0], newPosition)
   }
 }
 
@@ -97,29 +96,29 @@ const handleFloorLeave = () => {
   showIndicator.value = false
 }
 
-const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
-  outlineObject(event.object)
-  event.stopPropagation()
-}
-
-const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
-  removeObjectOutline(event.object)
-  event.stopPropagation()
-}
-
 const outlineRef = ref()
 
 watch(outlineRef, ({ effect }) => {
   effect.blurPass.kernelSize = 4
 })
+
+const { cursor } = useGameCursor()
+
+// Temporary
+/* gameStore.openDiceRollModal({
+  title: 'Dexterity Check',
+  subtitle: 'Sleight of Hand',
+  difficultyClass: 10,
+  diceType: 20,
+}) */
 </script>
 
 <template>
-  <TresLeches collapsed />
   <TresCanvas
     clear-color="#2f2f2f"
     window-size
-    :class="{ 'cursor-pointer': showIndicator }"
+    class="cursor-game"
+    :class="[`custom-cursor-${cursor}`]"
   >
     <Suspense>
       <Environment preset="sunset" :blur="1" background />
@@ -164,15 +163,13 @@ watch(outlineRef, ({ effect }) => {
       />
     </TresMesh>
 
-    <TresMesh
-      name="fucking-box"
-      :position-y="2"
-      @pointerenter="handlePointerEnter"
-      @pointerleave="handlePointerLeave"
-    >
-      <TresBoxGeometry :args="[1, 1, 1]" />
-      <TresMeshNormalMaterial />
-    </TresMesh>
+    <!-- Level Items -->
+
+    <template v-if="gameStore.currentLevel">
+      <template v-for="item in gameStore.currentLevel.items" :key="item.id">
+        <Item :id="item.id" />
+      </template>
+    </template>
 
     <!-- Floor -->
     <TresMesh
@@ -182,7 +179,7 @@ watch(outlineRef, ({ effect }) => {
       @pointer-move="handleFloorHover"
       @pointer-leave="handleFloorLeave"
     >
-      <TresPlaneGeometry :args="[100, 100]" />
+      <TresPlaneGeometry :args="[gameStore.currentLevel.grid.size[0], gameStore.currentLevel.grid.size[1]]" />
       <TresMeshBasicMaterial color="#4f4f4f" />
     </TresMesh>
 
@@ -200,3 +197,7 @@ watch(outlineRef, ({ effect }) => {
     </EffectComposerPmndrs>
   </TresCanvas>
 </template>
+
+<style>
+@import '~/assets/css/cursors.css';
+</style>

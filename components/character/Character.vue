@@ -6,7 +6,7 @@ import type { Player } from '~/types'
 import { Html } from '@tresjs/cientos'
 import { useLobbyStore, useResourcePreloader } from '#imports'
 import { SkeletonUtils } from 'three-stdlib'
-import { dispose, type ThreeEvent } from '@tresjs/core'
+import { dispose } from '@tresjs/core'
 
 const props = defineProps<{
   character: Character
@@ -22,12 +22,11 @@ const modelRef = ref<Object3D | null>(null)
 const { getResource } = useResourcePreloader()
 const lobbyStore = useLobbyStore()
 const gameStore = useGameStore()
-const { isMultiplayer } = storeToRefs(gameStore)
 
 const MOVEMENT_SPEED = 0.032
 
 // Inject websocket methods
-const { send, data } = useMultiplayer(isMultiplayer.value)
+const { send, data } = useMultiplayer(gameStore.isMultiplayer)
 
 const JUMP_HEIGHT = 5
 const GRAVITY = -9.81
@@ -61,8 +60,6 @@ const state = shallowReactive<CharacterState>({
   verticalVelocity: JUMP_HEIGHT,
 })
 
-const { outlineCharacter, removeCharacterOutline } = useOutlinedObjects()
-
 const { scene, animations } = getResource('models', props.player.character)
 
 const clonedScene = SkeletonUtils.clone(scene)
@@ -85,7 +82,7 @@ if (rigNode) {
   state.animations = animations
 }
 
-if (isMultiplayer.value) {
+if (gameStore.isMultiplayer) {
   watch(data, (newData) => {
     const data = JSON.parse(newData)
     if (data.type === 'PLAYER_UPDATE') {
@@ -101,11 +98,18 @@ if (isMultiplayer.value) {
   })
 }
 else {
-  watch(gameStore.state.players, (newPlayers) => {
-    if (newPlayers[0].id === props.player.id) {
-      nextPosition.value.set(newPlayers[0].position[0], newPlayers[0].position[1], newPlayers[0].position[2])
+  const playerPosition = gameStore.players[0]?.position
+  if (playerPosition) {
+    state.model?.position.set(playerPosition[0], playerPosition[1], playerPosition[2])
+    nextPosition.value.set(playerPosition[0], playerPosition[1], playerPosition[2])
+  }
+
+  watch(() => gameStore.players, (newPlayers) => {
+    const player = newPlayers[0]
+    if (player?.id === props.player.id) {
+      nextPosition.value.set(player.position[0], player.position[1], player.position[2])
     }
-  }, { immediate: true })
+  }, { deep: true })
 }
 
 // Throttle position updates to reduce websocket messages
@@ -197,16 +201,6 @@ onBeforeUnmount(() => {
   state.actions = {}
   state.currentAction = null
 })
-
-const handlePointerEnter = (event: ThreeEvent<PointerEvent>) => {
-  outlineCharacter(event.object)
-  event.stopPropagation()
-}
-
-const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
-  removeCharacterOutline(event.object)
-  event.stopPropagation()
-}
 </script>
 
 <template>
@@ -215,8 +209,6 @@ const handlePointerLeave = (event: ThreeEvent<PointerEvent>) => {
       ref="modelRef"
       :name="player.name"
       :object="state.model"
-      @pointerenter="handlePointerEnter"
-      @pointerleave="handlePointerLeave"
     >
       <Html
         center

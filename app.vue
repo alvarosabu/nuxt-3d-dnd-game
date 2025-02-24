@@ -4,9 +4,7 @@
 <template>
   <UApp>
     <Suspense>
-      <GameProvider>
-        <NuxtPage />
-      </GameProvider>
+      <NuxtPage />
     </Suspense>
   </UApp>
 </template>

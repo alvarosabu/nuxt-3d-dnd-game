@@ -12,7 +12,7 @@ onMounted(async () => {
 })
 
 definePageMeta({
-  middleware: 'game',
+  colorMode: 'dark',
 })
 
 const { sendMsg, data } = useMultiplayer()

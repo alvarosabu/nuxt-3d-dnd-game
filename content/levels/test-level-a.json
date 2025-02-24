@@ -1,0 +1,24 @@
+{
+  "slug": "test-level-a",
+  "name": "Test Level A",
+  "ambient": {
+    "light": 0.5,
+    "environment": "sunset"
+  },
+  "grid": {
+    "size": [40, 60],
+    "cellSize": 1
+  },
+  "items": [
+    {
+      "id": "test-chest",
+      "type": "chest",
+      "position": [2, 0, 3],
+      "rotation": [0, 0, 0],
+      "state": {
+        "isLocked": true,
+        "isOpen": false
+      }
+    }
+  ]
+}

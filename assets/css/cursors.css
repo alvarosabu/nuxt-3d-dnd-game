@@ -1,0 +1,18 @@
+/* Game Cursors */
+.cursor-game {
+  @apply cursor-default;
+}
+
+.cursor-game.custom-cursor-default {
+  cursor: url('/cursors/default.svg'), not-allowed;
+}
+
+.cursor-game.custom-cursor-pointer {
+  cursor: url('/cursors/pointer.svg'), pointer;
+}
+
+
+/* Custom cursors using images */
+.cursor-game.custom-cursor-locked {
+  cursor: url('/cursors/lock.svg'), not-allowed;
+}

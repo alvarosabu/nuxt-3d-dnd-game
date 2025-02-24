@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@nuxt/content',
     'pinia-plugin-persistedstate/nuxt',
+    'nuxt-svgo',
   ],
   css: ['~/assets/css/main.css'],
   routeRules: {

@@ -21,7 +21,7 @@ const handleNavigation = (route: string) => {
       position: [0, 0, 0],
       status: 'in-game',
     })
-    if (gameStore.state.characters.length > 0) {
+    if (gameStore.characters.length > 0) {
       navigateTo('/game')
     }
     else {

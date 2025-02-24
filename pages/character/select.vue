@@ -13,7 +13,8 @@ definePageMeta({
 
 const gameStore = useGameStore()
 const lobbyStore = useLobbyStore()
-
+const { init } = gameStore
+await init()
 const { preloadResources } = useResourcePreloader()
 
 const { send } = useMultiplayer()
@@ -21,7 +22,7 @@ const { send } = useMultiplayer()
 await preloadResources()
 // Get character templates from game state and ensure consistent order
 const characters = computed(() => {
-  const templates = gameStore.state.characterTemplates
+  const templates = gameStore.characterTemplates
   // Sort characters by their key or any other property to maintain consistent order
   return [...templates].sort((a, b) => a.key.localeCompare(b.key))
 })

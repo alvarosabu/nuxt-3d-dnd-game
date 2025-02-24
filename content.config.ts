@@ -2,6 +2,30 @@ import { defineCollection, defineContentConfig, z } from '@nuxt/content'
 
 export default defineContentConfig({
   collections: {
+    levels: defineCollection({
+      type: 'data',
+      source: 'levels/**.json',
+      schema: z.object({
+        slug: z.string(),
+        name: z.string(),
+        ambient: z.object({
+          light: z.number(),
+          environment: z.enum(['sunset', 'dawn', 'night', 'day']),
+        }),
+        grid: z.object({
+          size: z.tuple([z.number(), z.number()]),
+          cellSize: z.number(),
+        }),
+        items: z.array(z.object({
+          id: z.string(),
+          type: z.enum(['chest', 'door']),
+          position: z.tuple([z.number(), z.number(), z.number()]),
+          rotation: z.tuple([z.number(), z.number(), z.number()]).optional(),
+          state: z.record(z.string(), z.any()),
+        })),
+      }),
+    }),
+
     origins: defineCollection({
       type: 'data',
       source: 'origins/**.json',
