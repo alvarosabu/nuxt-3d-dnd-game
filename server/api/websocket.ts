@@ -132,7 +132,7 @@ function playerReady(peer: Peer, lobbyId: string, value: boolean) {
     }
   }
 }
-function broadcastMessage(message) {
+function broadcastMessage(message: Record<string, any>) {
   connectedPeers.forEach((p) => {
     p.send(JSON.stringify(message))
   })
@@ -218,6 +218,48 @@ function updatePlayerStatus(peer: Peer, status: string) {
   }
 }
 
+function updateItemState(peer: Peer, data: {
+  itemId: string
+  itemType: string
+  state: Record<string, any>
+  position?: number[]
+}) {
+  const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
+  broadcastMessage({
+    type: 'ITEM_STATE_UPDATE',
+    itemId: data.itemId,
+    itemType: data.itemType,
+    state: data.state,
+    position: data.position,
+    playerId,
+  })
+}
+
+function handleDiceRollStart(peer: Peer, data: { modalArgs: any }) {
+  const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
+  broadcastMessage({
+    type: 'DICE_ROLL_START',
+    playerId,
+    modalArgs: data.modalArgs,
+  })
+}
+
+function handleDiceRollResult(peer: Peer, data: { result: number, success: boolean }) {
+  const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
+  broadcastMessage({
+    type: 'DICE_ROLL_RESULT',
+    playerId,
+    result: data.result,
+    success: data.success,
+  })
+}
+
 export default defineWebSocketHandler({
   open: (peer) => {
     console.warn(`[WS] Client connected: ${peer.id}`)
@@ -277,6 +319,20 @@ export default defineWebSocketHandler({
       UPDATE_PLAYER_STATUS: (peer: Peer, data: { status: string }) => {
         console.log('UPDATE_PLAYER_STATUS', data)
         updatePlayerStatus(peer, data.status)
+      },
+      UPDATE_ITEM_STATE: (peer: Peer, data: {
+        itemId: string
+        itemType: string
+        state: Record<string, any>
+        position?: number[]
+      }) => {
+        updateItemState(peer, data)
+      },
+      DICE_ROLL_START: (peer: Peer, data: { modalArgs: any }) => {
+        handleDiceRollStart(peer, data)
+      },
+      DICE_ROLL_RESULT: (peer: Peer, data: { result: number, success: boolean }) => {
+        handleDiceRollResult(peer, data)
       },
     }
 

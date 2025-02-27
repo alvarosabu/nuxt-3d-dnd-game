@@ -17,7 +17,7 @@ const { init } = gameStore
 await init()
 const { preloadResources } = useResourcePreloader()
 
-const { send } = useMultiplayer()
+const { send, data, sendMsg } = useMultiplayer()
 
 await preloadResources()
 // Get character templates from game state and ensure consistent order
@@ -109,6 +109,15 @@ const handleSelectCharacter = () => {
   }
   navigateTo('/game')
 }
+
+onMounted(() => {
+  if (gameStore.isMultiplayer) {
+    sendMsg({
+      type: 'UPDATE_PLAYER_STATUS',
+      status: 'in-game',
+    })
+  }
+})
 </script>
 
 <template>

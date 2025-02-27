@@ -125,11 +125,11 @@ export interface DiceRollModalArgs {
   subtitle?: string
   difficultyClass?: number
   diceType?: 4 | 6 | 8 | 10 | 12 | 20
-  modifiers?: Array<{
+  modifiers?: {
     name: string
     value: number
     icon?: string
-  }>
+  }[]
   onSuccess?: () => void
   onFailure?: () => void
 }

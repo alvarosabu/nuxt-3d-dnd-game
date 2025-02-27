@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import type { CharacterTemplate, GameItem, Level, Player } from '~/types'
-import type { Vector3 } from 'three'
 
 /**
  * Store for managing game state including characters, players, and templates
@@ -183,9 +182,9 @@ export const useGameStore = defineStore('game', () => {
   /**
    * Update an item's position in the game world
    * @param itemId The ID of the item to update
-   * @param position The new position as a Three.js Vector3
+   * @param position The new position as [x, y, z]
    */
-  function updateItemPosition(itemId: string, position: Vector3) {
+  function updateItemPosition(itemId: string, position: [number, number, number]) {
     const item = items.value[itemId]
     if (item) {
       items.value = {
@@ -205,6 +204,31 @@ export const useGameStore = defineStore('game', () => {
   function removeItem(itemId: string) {
     const { [itemId]: _, ...rest } = items.value
     items.value = rest
+  }
+
+  /**
+   * Handle remote item state update
+   * @param itemId The ID of the item to update
+   * @param state The new state to merge
+   * @param position Optional new position as [x, y, z]
+   */
+  function handleRemoteItemUpdate(itemId: string, state: Record<string, any>, position?: [number, number, number]) {
+    // Update item in items state
+    updateItemState(itemId, state)
+    if (position) {
+      updateItemPosition(itemId, position)
+    }
+
+    // Update item in current level
+    if (currentLevel.value) {
+      const levelItem = currentLevel.value.items.find(item => item.id === itemId)
+      if (levelItem) {
+        levelItem.state = { ...levelItem.state, ...state }
+        if (position) {
+          levelItem.position = position
+        }
+      }
+    }
   }
 
   return {
@@ -235,6 +259,7 @@ export const useGameStore = defineStore('game', () => {
     updateItemPosition,
     removeItem,
     setCurrentLevel,
+    handleRemoteItemUpdate,
   }
 }, {
   persist: {

@@ -5,6 +5,8 @@ import { Html } from '@tresjs/cientos'
 import { useUIStore } from '~/stores/useUIStore'
 import { useGameStore } from '~/stores/useGameStore'
 import { Vector3 } from 'three'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
+import { storeToRefs } from 'pinia'
 
 // Props for the chest
 const props = defineProps<{
@@ -20,14 +22,20 @@ const { nodes: vueNodes } = getResource('models', 'vue') as unknown as { nodes: 
 const { setCursor, resetCursor } = useGameCursor()
 const uiStore = useUIStore()
 const gameStore = useGameStore()
+const { data, sendMsg } = useMultiplayer(gameStore.isMultiplayer)
 
 // Get chest state from the store
 const item = computed(() => gameStore.getItemById(props.id))
 const chestState = computed(() => item.value?.state ?? { isLocked: true, isOpen: false })
-const chestPosition = computed(() => item.value?.position ?? new Vector3())
-watch(item, (value) => {
-  console.log(value)
+const chestPosition = computed(() => {
+  // First try to get position from store
+  if (item.value?.position) {
+    return item.value.position
+  }
+  // Fallback to props position or default
+  return props.position ?? [0, 0, 0]
 })
+
 const isOpen = computed({
   get: () => chestState.value.isOpen,
   set: (value) => {
@@ -79,12 +87,31 @@ watch(isOpen, (value) => {
 })
 
 /**
+ * Syncs the chest state with other players
+ */
+const syncChestState = () => {
+  if (!gameStore.isMultiplayer) { return }
+
+  sendMsg({
+    type: 'UPDATE_ITEM_STATE',
+    itemId: props.id,
+    itemType: 'chest',
+    state: {
+      isOpen: isOpen.value,
+      isLocked: isLocked.value,
+    },
+    position: [chestPosition.value.x, chestPosition.value.y, chestPosition.value.z],
+  })
+}
+
+/**
  * Handles the click event on the chest
  * @param e - The pointer event from TresJS
  */
 const handleClick = (e: ThreeEvent<PointerEvent>) => {
   if (!isLocked.value) {
     isOpen.value = !isOpen.value
+    syncChestState()
   }
   e.stopPropagation()
 }
@@ -113,6 +140,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
             diceType: 20,
             onSuccess: () => {
               isLocked.value = false
+              syncChestState()
             },
           })
         },
@@ -122,6 +150,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
           label: 'Open',
           onSelect: () => {
             isOpen.value = true
+            syncChestState()
           },
         },
       ])
@@ -158,13 +187,37 @@ onBeforeRender(({ elapsed }) => {
     vueLogoRef.value.rotation.y = Math.sin(elapsed * 0.5) * 0.5
   }
 })
+
+// Add watch for remote state updates only in multiplayer mode
+watch(data, (newData) => {
+  if (!newData) { return }
+
+  const data = JSON.parse(newData)
+  if (data.type === 'ITEM_STATE_UPDATE'
+    && data.itemId === props.id
+    && data.itemType === 'chest') {
+    // Update local chest state
+    isOpen.value = data.state.isOpen
+    isLocked.value = data.state.isLocked
+    if (data.position) {
+      gameStore.updateItemPosition(props.id, data.position)
+    }
+  }
+})
+
+// Initialize the item in the store with props position if provided
+onMounted(() => {
+  if (props.position && !item.value?.position) {
+    gameStore.updateItemPosition(props.id, props.position)
+  }
+})
 </script>
 
 <template>
   <TresGroup
     ref="chestRef"
     :name="item.id"
-    :position="[chestPosition[0], chestPosition[1], chestPosition[2]]"
+    :position="chestPosition"
     @click="handleClick"
     @pointerenter="handlePointerEnter"
     @pointerleave="handlePointerLeave"

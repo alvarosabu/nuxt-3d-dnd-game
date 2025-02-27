@@ -11,6 +11,12 @@ interface DiceRollProps {
     value: number
     icon?: string
   }[]
+  remoteRoll?: {
+    result: number
+    success: boolean
+    isCriticalSuccess: boolean
+    isCriticalFailure: boolean
+  }
 }
 
 const props = withDefaults(defineProps<DiceRollProps>(), {
@@ -19,9 +25,10 @@ const props = withDefaults(defineProps<DiceRollProps>(), {
   difficultyClass: 10,
   diceType: 20,
   modifiers: () => [],
+  remoteRoll: undefined,
 })
 
-const emit = defineEmits(['success', 'failure', 'close'])
+const emit = defineEmits(['success', 'failure', 'close', 'result'])
 
 const isRolling = ref(false)
 const diceResult = ref<number | null>(null)
@@ -66,7 +73,17 @@ const rollDice = () => {
   // Simulate dice roll animation
   setTimeout(() => {
     diceResult.value = Math.floor(Math.random() * props.diceType) + 1
-    if (diceResult.value >= props.difficultyClass) {
+    const success = diceResult.value >= props.difficultyClass
+
+    // Emit the result for multiplayer sync
+    emit('result', {
+      result: diceResult.value,
+      success,
+      isCriticalSuccess: diceResult.value === 20,
+      isCriticalFailure: diceResult.value === 1,
+    })
+
+    if (success) {
       emit('success')
     }
     else {
@@ -80,6 +97,38 @@ const rollDice = () => {
     }, 500)
   }, 1000)
 }
+
+// Watch for remote roll updates
+watch(() => props.remoteRoll, (roll) => {
+  if (!roll) { return }
+
+  showResult.value = false
+  isRolling.value = true
+  diceResult.value = null
+
+  // Simulate dice roll animation for remote roll
+  setTimeout(() => {
+    diceResult.value = roll.result
+    isRolling.value = false
+
+    // Show result after roll animation
+    setTimeout(() => {
+      showResult.value = true
+      if (roll.success) {
+        emit('success')
+      }
+      else {
+        emit('failure')
+      }
+    }, 500)
+  }, 1000)
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  isRolling.value = false
+  showResult.value = false
+  diceResult.value = null
+})
 </script>
 
 <template>
