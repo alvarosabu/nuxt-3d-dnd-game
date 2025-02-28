@@ -4,9 +4,7 @@ import type { ThreeEvent } from '@tresjs/core'
 import { Html } from '@tresjs/cientos'
 import { useUIStore } from '~/stores/useUIStore'
 import { useGameStore } from '~/stores/useGameStore'
-import { Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
-import { storeToRefs } from 'pinia'
 
 // Props for the chest
 const props = defineProps<{
@@ -140,13 +138,13 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
           uiStore.openDiceRollModal({
             title: 'Dexterity Check',
             subtitle: 'Sleight of Hand',
-            difficultyClass: 10,
+            difficultyClass: 18,
             diceType: 20,
             onSuccess: () => {
               isLocked.value = false
               syncChestState()
             },
-          })
+          }, true)
         },
       }]
     : [

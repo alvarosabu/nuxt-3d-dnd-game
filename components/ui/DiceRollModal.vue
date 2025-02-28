@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import Dice20 from '~/assets/icons/d20.svg'
 
 interface DiceRollProps {
@@ -17,6 +18,8 @@ interface DiceRollProps {
     isCriticalSuccess: boolean
     isCriticalFailure: boolean
   }
+  isInitiator?: boolean // Add this prop to control who can roll
+  isHost?: boolean // Add this prop to control who can retry
 }
 
 const props = withDefaults(defineProps<DiceRollProps>(), {
@@ -26,6 +29,8 @@ const props = withDefaults(defineProps<DiceRollProps>(), {
   diceType: 20,
   modifiers: () => [],
   remoteRoll: undefined,
+  isInitiator: false, // Default to false
+  isHost: false, // Default to false
 })
 
 const emit = defineEmits(['success', 'failure', 'close', 'result'])
@@ -124,15 +129,19 @@ watch(() => props.remoteRoll, (roll) => {
   }, 1000)
 }, { immediate: true })
 
-onBeforeUnmount(() => {
+function resetModal() {
   isRolling.value = false
   showResult.value = false
   diceResult.value = null
-})
+  emit('close')
+}
 </script>
 
 <template>
-  <UModal class="dice-roll-modal w-448px mx-auto bg-slate-800/50 backdrop-blur ring-slate-700">
+  <UModal
+    class="dice-roll-modal w-448px mx-auto bg-slate-800/50 backdrop-blur ring-slate-700"
+    @update:open="resetModal"
+  >
     <!-- Header Section -->
     <template #header>
       <div class="text-center mb-4">
@@ -201,7 +210,7 @@ onBeforeUnmount(() => {
         <!-- Action Button -->
         <div class="mt-4">
           <UButton
-            v-if="showResult && isSuccess"
+            v-if="showResult && isSuccess && isInitiator"
             size="lg"
             color="primary"
             variant="solid"
@@ -211,7 +220,7 @@ onBeforeUnmount(() => {
             Continue
           </UButton>
           <UButton
-            v-else-if="diceResult && !isSuccess"
+            v-else-if="diceResult && !isSuccess && isInitiator && isHost"
             size="sm"
             variant="outline"
             color="error"
@@ -221,7 +230,7 @@ onBeforeUnmount(() => {
             Try Again
           </UButton>
           <UButton
-            v-else
+            v-else-if="isInitiator"
             size="sm"
             variant="outline"
             color="neutral"
@@ -230,6 +239,9 @@ onBeforeUnmount(() => {
           >
             Click dice to roll
           </UButton>
+          <p v-else class="text-sm text-slate-400">
+            Waiting for initiator to roll...
+          </p>
         </div>
       </div>
     </template>

@@ -3,6 +3,7 @@ import DiceRollModal from '~/components/ui/DiceRollModal.vue'
 import type { ContextMenuItem, DiceRollModalArgs } from '~/types'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import { useUserStore } from '~/stores/useUserStore'
+import { useLobbyStore } from '~/stores/useLobbyStore'
 
 /**
  * Store for managing UI state like modals and context menus
@@ -11,6 +12,7 @@ export const useUIStore = defineStore('ui', () => {
   const modal = useModal()
   const gameStore = useGameStore()
   const userStore = useUserStore()
+  const lobbyStore = useLobbyStore()
   const isMultiplayer = computed(() => gameStore.isMultiplayer)
   const { sendMsg, data } = useMultiplayer(isMultiplayer.value)
   // Context Menu State
@@ -24,6 +26,7 @@ export const useUIStore = defineStore('ui', () => {
   const diceRollModal = reactive({
     isOpen: false,
     args: undefined as DiceRollModalArgs | undefined,
+    initiatorId: null as string | null,
   })
 
   // Track the current remote roll state
@@ -44,6 +47,7 @@ export const useUIStore = defineStore('ui', () => {
     modal.close()
     diceRollModal.isOpen = false
     diceRollModal.args = undefined
+    diceRollModal.initiatorId = null
     remoteRoll.value = null
   }
 
@@ -77,6 +81,9 @@ export const useUIStore = defineStore('ui', () => {
     diceRollModal.isOpen = true
     remoteRoll.value = null // Reset remote roll state
 
+    // Set initiator ID when opening the modal
+    diceRollModal.initiatorId = sync ? userStore.userId : null
+
     // Sync with other players if needed
     if (sync && isMultiplayer.value) {
       sendMsg({
@@ -93,6 +100,8 @@ export const useUIStore = defineStore('ui', () => {
       difficultyClass: args.difficultyClass,
       diceType: args.diceType,
       remoteRoll: remoteRoll.value === null ? undefined : remoteRoll.value,
+      isInitiator: sync || !isMultiplayer.value, // Set isInitiator based on sync flag and multiplayer state
+      isHost: lobbyStore.isCurrentPlayerHost, // Use the computed property from lobbyStore
       onResult: (result) => {
         // Sync dice roll result with other players
         if (isMultiplayer.value) {
@@ -111,7 +120,7 @@ export const useUIStore = defineStore('ui', () => {
         if (args.onFailure) { args.onFailure() }
       },
       onClose: () => {
-        resetModalState()
+        modal.reset()
       },
     })
   }
@@ -120,7 +129,7 @@ export const useUIStore = defineStore('ui', () => {
    * Closes the dice roll modal
    */
   function closeDiceRollModal() {
-    resetModalState()
+    modal.reset()
   }
 
   /**
@@ -152,6 +161,7 @@ export const useUIStore = defineStore('ui', () => {
     if (data.type === 'DICE_ROLL_START') {
       // Only open modal if we're not the initiator
       if (data.playerId !== userStore.userId) {
+        diceRollModal.initiatorId = data.playerId // Set the initiator ID
         // Open dice roll modal for other players
         openDiceRollModal(data.modalArgs, false) // Pass false to prevent infinite loop
       }
@@ -168,7 +178,10 @@ export const useUIStore = defineStore('ui', () => {
         }
 
         // Update remoteRoll ref directly instead of using modal.patch
-        remoteRoll.value = newRemoteRoll
+        modal.patch({
+          remoteRoll: newRemoteRoll,
+          isInitiator: data.playerId === diceRollModal.initiatorId,
+        })
 
         // Re-open modal with new remote roll if it's not already open
         if (!diceRollModal.isOpen && diceRollModal.args) {
