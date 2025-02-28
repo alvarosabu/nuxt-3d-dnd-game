@@ -260,6 +260,16 @@ function handleDiceRollResult(peer: Peer, data: { result: number, success: boole
   })
 }
 
+function handleDiceRollClose(peer: Peer) {
+  const playerId = peerToPlayer.get(peer.id)
+  if (!playerId) { return }
+
+  broadcastMessage({
+    type: 'DICE_ROLL_CLOSE',
+    playerId,
+  })
+}
+
 export default defineWebSocketHandler({
   open: (peer) => {
     console.warn(`[WS] Client connected: ${peer.id}`)
@@ -333,6 +343,9 @@ export default defineWebSocketHandler({
       },
       DICE_ROLL_RESULT: (peer: Peer, data: { result: number, success: boolean }) => {
         handleDiceRollResult(peer, data)
+      },
+      DICE_ROLL_CLOSE: (peer: Peer) => {
+        handleDiceRollClose(peer)
       },
     }
 

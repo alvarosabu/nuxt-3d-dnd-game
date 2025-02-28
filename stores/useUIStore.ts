@@ -121,6 +121,7 @@ export const useUIStore = defineStore('ui', () => {
       },
       onClose: () => {
         modal.reset()
+        closeDiceRollModal(sync)
       },
     })
   }
@@ -128,8 +129,20 @@ export const useUIStore = defineStore('ui', () => {
   /**
    * Closes the dice roll modal
    */
-  function closeDiceRollModal() {
+  function closeDiceRollModal(sync: boolean = true) {
     modal.reset()
+    diceRollModal.isOpen = false
+    diceRollModal.args = undefined
+    diceRollModal.initiatorId = null
+    remoteRoll.value = null
+
+    // Sync with other players if needed
+    if (isMultiplayer.value && sync) {
+      sendMsg({
+        type: 'DICE_ROLL_CLOSE',
+        playerId: userStore.userId,
+      })
+    }
   }
 
   /**
@@ -187,6 +200,12 @@ export const useUIStore = defineStore('ui', () => {
         if (!diceRollModal.isOpen && diceRollModal.args) {
           openDiceRollModal(diceRollModal.args, false)
         }
+      }
+    }
+    else if (data.type === 'DICE_ROLL_CLOSE') {
+      // Only close modal if we're not the initiator
+      if (data.playerId !== userStore.userId) {
+        closeDiceRollModal(false)
       }
     }
   })

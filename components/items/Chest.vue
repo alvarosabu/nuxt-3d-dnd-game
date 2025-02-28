@@ -144,6 +144,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
               isLocked.value = false
               syncChestState()
             },
+
           }, true)
         },
       }]
