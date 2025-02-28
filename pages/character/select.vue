@@ -39,6 +39,10 @@ const cameraTarget = ref({ x: 0, y: 1, z: 0 })
 // Carousel rotation and positioning
 const radius = 4 // Distance from center
 const carouselRotation = ref(0)
+// Track the actual angle for each character position
+const characterAngle = computed(() => 2 * Math.PI / characters.value.length)
+// Track the current rotation direction (1 for clockwise, -1 for counter-clockwise)
+const rotationDirection = ref(1)
 
 // GSAP spring configuration
 const springConfig = {
@@ -67,19 +71,37 @@ const getCharacterRotation = (index: number) => {
 
 // Handle character selection with animation
 const selectNext = () => {
+  // Update the selected index
   selectedIndex.value = (selectedIndex.value + 1) % characters.value.length
+
+  // Set rotation direction
+  rotationDirection.value = -1
+
+  // Calculate the new rotation - always rotate one step forward
+  const newRotation = carouselRotation.value - characterAngle.value
+
+  // Animate to the new rotation
   gsap.to(carouselRotation, {
-    value: -(2 * Math.PI * selectedIndex.value) / characters.value.length,
+    value: newRotation,
     ...springConfig,
   })
 }
 
 const selectPrevious = () => {
+  // Update the selected index
   selectedIndex.value = selectedIndex.value === 0
     ? characters.value.length - 1
     : selectedIndex.value - 1
+
+  // Set rotation direction
+  rotationDirection.value = 1
+
+  // Calculate the new rotation - always rotate one step backward
+  const newRotation = carouselRotation.value + characterAngle.value
+
+  // Animate to the new rotation
   gsap.to(carouselRotation, {
-    value: -(2 * Math.PI * selectedIndex.value) / characters.value.length,
+    value: newRotation,
     ...springConfig,
   })
 }
