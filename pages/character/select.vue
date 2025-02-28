@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useGameState } from '~/composables/game/useGameState'
 import { onKeyStroke } from '@vueuse/core'
 import CharacterInfoPanel from '~/components/character/CharacterInfoPanel.vue'
 import gsap from 'gsap'
@@ -17,7 +16,7 @@ const { init } = gameStore
 await init()
 const { preloadResources } = useResourcePreloader()
 
-const { send, data, sendMsg } = useMultiplayer()
+const { send, sendMsg } = useMultiplayer()
 
 await preloadResources()
 // Get character templates from game state and ensure consistent order
@@ -80,7 +79,7 @@ const selectPrevious = () => {
     ? characters.value.length - 1
     : selectedIndex.value - 1
   gsap.to(carouselRotation, {
-    value: (2 * Math.PI * selectedIndex.value) / characters.value.length,
+    value: -(2 * Math.PI * selectedIndex.value) / characters.value.length,
     ...springConfig,
   })
 }

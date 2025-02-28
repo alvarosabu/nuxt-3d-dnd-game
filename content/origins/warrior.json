@@ -4,7 +4,7 @@
   "model": "/models/characters/fighter/Fighter.glb",
   "title": "Battle Master",
   "description": "A seasoned warrior who has honed their combat skills through countless battles. Their mastery of weapons and tactical prowess makes them a formidable presence on any battlefield.",
-  "race": "human",
+  "race": "tiefling",
   "class": "fighter",
   "stats": {
     "str": 16,

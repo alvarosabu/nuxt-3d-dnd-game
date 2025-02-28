@@ -63,7 +63,9 @@ watch(data, (newData) => {
 })
 
 // Clipboard handling
-const { copy, copied } = useClipboard()
+const { copy, copied, isSupported } = useClipboard()
+const permissionRead = usePermission('clipboard-read')
+const permissionWrite = usePermission('clipboard-write')
 
 // Form state
 const lobbyFormState = reactive({
@@ -426,6 +428,7 @@ onBeforeUnmount(() => {
               <UButton
                 color="primary"
                 variant="soft"
+                :disabled="!isSupported"
                 icon="i-heroicons-link"
                 @click="copy(currentLobby?.id ?? '')"
               >

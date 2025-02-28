@@ -20,7 +20,7 @@
     "@tresjs/leches": "https://pkg.pr.new/@tresjs/leches@07c672a",
     "@tresjs/nuxt": "4.0.0-next.0",
     "@tresjs/post-processing": "^2.1.0",
-    "@vueuse/core": "^12.5.0",
+    "@vueuse/core": "^12.7.0",
     "@vueuse/nuxt": "^12.5.0",
     "gsap": "^3.12.7",
     "nuxt": "^3.15.4",

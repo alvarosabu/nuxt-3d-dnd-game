@@ -12,6 +12,9 @@ export default defineNuxtConfig({
     'nuxt-svgo',
   ],
   css: ['~/assets/css/main.css'],
+  devServer: {
+    https: true,
+  },
   routeRules: {
     '/': {
       ssr: false,
