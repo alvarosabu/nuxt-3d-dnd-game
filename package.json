@@ -30,6 +30,7 @@
     "three": "^0.173.0",
     "three-stdlib": "^2.35.13",
     "vue": "^3.4.21",
+    "vue-confetti-explosion": "^1.0.2",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {

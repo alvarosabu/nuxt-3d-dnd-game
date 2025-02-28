@@ -34,6 +34,9 @@ export const useUIStore = defineStore('ui', () => {
     isCriticalFailure: boolean
   } | null>(null)
 
+  // Confetti explosion state
+  const showConfetti = ref(false)
+
   /**
    * Reset all modal state
    */
@@ -42,7 +45,26 @@ export const useUIStore = defineStore('ui', () => {
     diceRollModal.isOpen = false
     diceRollModal.args = undefined
     remoteRoll.value = null
-    modal.patch({ remoteRoll: undefined })
+  }
+
+  /**
+   * Triggers the confetti explosion animation
+   * @param duration Optional duration in ms after which to hide the confetti (defaults to 2000ms)
+   */
+  function triggerConfetti(duration: number = 2000) {
+    showConfetti.value = true
+
+    // Automatically hide confetti after the specified duration
+    setTimeout(() => {
+      showConfetti.value = false
+    }, duration)
+  }
+
+  /**
+   * Manually hides the confetti explosion
+   */
+  function hideConfetti() {
+    showConfetti.value = false
   }
 
   /**
@@ -70,7 +92,7 @@ export const useUIStore = defineStore('ui', () => {
       subtitle: args.subtitle,
       difficultyClass: args.difficultyClass,
       diceType: args.diceType,
-      remoteRoll: remoteRoll.value,
+      remoteRoll: remoteRoll.value === null ? undefined : remoteRoll.value,
       onResult: (result) => {
         // Sync dice roll result with other players
         if (isMultiplayer.value) {
@@ -145,10 +167,8 @@ export const useUIStore = defineStore('ui', () => {
           isCriticalFailure: data.isCriticalFailure,
         }
 
-        // Update the modal with the new remote roll
-        modal.patch({
-          remoteRoll: newRemoteRoll,
-        })
+        // Update remoteRoll ref directly instead of using modal.patch
+        remoteRoll.value = newRemoteRoll
 
         // Re-open modal with new remote roll if it's not already open
         if (!diceRollModal.isOpen && diceRollModal.args) {
@@ -163,10 +183,13 @@ export const useUIStore = defineStore('ui', () => {
     contextMenu,
     diceRollModal,
     remoteRoll,
+    showConfetti,
     // Actions
     openDiceRollModal,
     closeDiceRollModal,
     setContextMenuItems,
     handleContextMenuOpen,
+    triggerConfetti,
+    hideConfetti,
   }
 })

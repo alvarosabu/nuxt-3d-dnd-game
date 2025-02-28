@@ -84,6 +84,10 @@ watch(isOpen, (value) => {
     duration: 0.5,
     ease: 'back.out(1.7)',
   })
+
+  if (value) {
+    uiStore.triggerConfetti()
+  }
 })
 
 /**
