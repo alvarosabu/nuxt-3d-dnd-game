@@ -25,9 +25,8 @@ const clonedScene = SkeletonUtils.clone(scene)
 const { nodes } = useGraph(clonedScene)
 
 const model = Object.values(nodes).find(node => node.name.includes('Rig'))
-// Handle hover and selection effects
-const hovered = ref(false)
-const scale = computed(() => props.isSelected ? 1.2 : hovered.value ? 1.1 : 1)
+
+const scale = computed(() => props.isSelected ? 1.2 : 1)
 
 const modelGroup = ref<Group>()
 
@@ -76,8 +75,6 @@ watch(() => props.isSelected, (isSelected) => {
 <template>
   <TresGroup
     :scale="[scale, scale, scale]"
-    @pointerenter="hovered = true"
-    @pointerleave="hovered = false"
   >
     <TresGroup ref="modelGroup">
       <primitive :object="model" />
