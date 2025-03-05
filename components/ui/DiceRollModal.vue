@@ -99,6 +99,53 @@ const resultClass = computed(() => {
   return isSuccess.value ? 'text-gold-500' : 'text-red-500'
 })
 
+// Add karmic dice state
+const KARMA_MEMORY = 3 // How many recent rolls to consider
+const KARMA_WEIGHT = 0.4 // How much to adjust probabilities (0 to 1)
+const recentRolls = ref<number[]>([]) // Store recent rolls for this check type
+
+/**
+ * Calculate the karmic adjustment based on recent rolls
+ * Returns a number between -0.5 and 0.5 to adjust roll probability
+ */
+const getKarmicAdjustment = () => {
+  if (recentRolls.value.length === 0) { return 0 }
+
+  // Calculate average of recent rolls
+  const avg = recentRolls.value.reduce((a, b) => a + b, 0) / recentRolls.value.length
+
+  // Calculate how far from the ideal average (diceTypeValue/2) we are
+  const idealAvg = diceTypeValue.value / 2
+  const deviation = (idealAvg - avg) / diceTypeValue.value
+
+  // Return an adjustment factor, weighted by KARMA_WEIGHT
+  return deviation * KARMA_WEIGHT
+}
+
+/**
+ * Generate a roll with karmic adjustment
+ */
+const generateKarmicRoll = () => {
+  const karmicAdjustment = getKarmicAdjustment()
+
+  // Generate base random number
+  let roll = Math.random()
+
+  // Apply karmic adjustment
+  roll = Math.max(0, Math.min(1, roll + karmicAdjustment))
+
+  // Convert to dice range (1 to diceTypeValue)
+  const result = Math.floor(roll * diceTypeValue.value) + 1
+
+  // Update recent rolls history
+  recentRolls.value.push(result)
+  if (recentRolls.value.length > KARMA_MEMORY) {
+    recentRolls.value.shift()
+  }
+
+  return result
+}
+
 const handleContinue = () => {
   emit('close')
 }
@@ -110,8 +157,8 @@ const rollDice = () => {
 
   // Simulate dice roll animation
   setTimeout(() => {
-    // Generate random roll
-    diceResult.value = Math.floor(Math.random() * diceTypeValue.value) + 1
+    // Use karmic roll instead of pure random
+    diceResult.value = generateKarmicRoll()
 
     // Get roll state and calculate total with modifiers
     const { isCriticalSuccess, isCriticalFailure, isSuccess } = rollState.value
@@ -123,7 +170,7 @@ const rollDice = () => {
       success: isSuccess,
       isCriticalSuccess,
       isCriticalFailure,
-      totalValue, // Now includes the dice roll + all modifiers
+      totalValue,
     })
 
     if (isSuccess) {
