@@ -1,8 +1,8 @@
 {
   "name": "Magical Tinkering",
   "slug": "magical-tinkering",
-  "icon": "solar:wrench-bold",
-  "description": "Imbue tiny objects with minor magical effects",
+  "icon": "i-game-icons-gears",
+  "description": "Using artisan's tools, you can imbue mundane objects with minor magical effects, such as emitting light, playing a recorded message, or producing an odor when opened.",
   "level": 1,
   "school": "Transmutation"
 }

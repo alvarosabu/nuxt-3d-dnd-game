@@ -6,10 +6,39 @@
   "hitDie": "d8",
   "primaryAbility": "Dexterity",
   "savingThrows": ["Dexterity", "Intelligence"],
+  "proficiencies": {
+    "armor": ["Light Armor"],
+    "weapons": [
+      "Simple Weapons",
+      "Hand Crossbows",
+      "Longswords",
+      "Rapiers",
+      "Shortswords"
+    ],
+    "tools": ["Thieves' Tools"],
+    "skills": {
+      "choose": 4,
+      "from": [
+        "Acrobatics",
+        "Athletics",
+        "Deception",
+        "Insight",
+        "Intimidation",
+        "Investigation",
+        "Perception",
+        "Performance",
+        "Persuasion",
+        "Sleight of Hand",
+        "Stealth"
+      ]
+    }
+  },
   "features": [
-    "Cunning Action",
     "Expertise",
     "Sneak Attack",
-    "Thieves' Tools"
-  ]
+    "Thieves' Cant",
+    "Cunning Action"
+  ],
+  "spells": [],
+  "cantrips": []
 }

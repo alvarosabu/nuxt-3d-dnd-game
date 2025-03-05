@@ -1,8 +1,8 @@
 {
   "name": "Mending",
   "slug": "mending",
-  "icon": "solar:hammer-bold",
-  "description": "Repair a single break or tear in an object",
-  "level": 1,
+  "icon": "i-game-icons-magic-palm",
+  "description": "This spell repairs a single break or tear in an object you touch, such as broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin.",
+  "level": 0,
   "school": "Transmutation"
 }

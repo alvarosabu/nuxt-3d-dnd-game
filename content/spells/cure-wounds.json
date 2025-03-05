@@ -1,0 +1,8 @@
+{
+  "name": "Cure Wounds",
+  "slug": "cure-wounds",
+  "icon": "i-game-icons-healing",
+  "description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs.",
+  "level": 1,
+  "school": "Evocation"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Bless",
+  "slug": "bless",
+  "icon": "i-game-icons-holy-grail",
+  "description": "You bless up to three creatures of your choice. Whenever a target makes an attack roll or a saving throw before the spell ends, they can roll a d4 and add the number rolled to the attack roll or saving throw.",
+  "level": 1,
+  "school": "Enchantment"
+}

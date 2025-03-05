@@ -1,0 +1,8 @@
+{
+  "name": "Entangle",
+  "slug": "entangle",
+  "icon": "i-game-icons-vine-whip",
+  "description": "Grasping weeds and vines sprout from the ground in a 20-foot square. Creatures in the area must succeed on a Strength saving throw or be restrained by the entangling plants.",
+  "level": 1,
+  "school": "Conjuration"
+}

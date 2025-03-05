@@ -54,13 +54,6 @@ export interface CharacterTemplate {
     wis: number
     cha: number
   }
-  proficiencies: {
-    weapons: string[]
-    armor: string[]
-    skills: string[]
-  }
-  spells: string[]
-  cantrips: string[]
   spellsData?: Spell[]
   cantripsData?: Cantrip[]
 }
@@ -89,6 +82,16 @@ export interface Class {
   primaryAbility: string
   savingThrows: string[]
   features: string[]
+  proficiencies: {
+    armor: string[]
+    weapons: string[]
+    skills: {
+      choose: number
+      from: string[]
+    }
+  }
+  spells: string[]
+  cantrips: string[]
 }
 
 export interface Spell {

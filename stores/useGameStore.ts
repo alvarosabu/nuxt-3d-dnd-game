@@ -55,17 +55,20 @@ export const useGameStore = defineStore('game', () => {
     const cantripMap = new Map(cantrips.map(cantrip => [cantrip.slug, cantrip]))
 
     // Join the data with proper type assertions
-    characterTemplates.value = templates.map(character => ({
-      ...character,
-      raceData: raceMap.get(character.race) ?? undefined,
-      classData: classMap.get(character.class) ?? undefined,
-      spellsData: character.spells
-        .map(slug => spellMap.get(slug))
-        .filter((spell): spell is NonNullable<typeof spell> => spell !== undefined),
-      cantripsData: character.cantrips
-        .map(slug => cantripMap.get(slug))
-        .filter((cantrip): cantrip is NonNullable<typeof cantrip> => cantrip !== undefined),
-    }))
+    characterTemplates.value = templates.map((character) => {
+      const classData = classMap.get(character.class)
+      const characterTmpl = {
+        ...character,
+        raceData: raceMap.get(character.race),
+        classData,
+        // Map spell slugs to full spell data
+        spellsData: classData?.spells?.map(spellSlug => spellMap.get(spellSlug)) ?? [],
+        // Map cantrip slugs to full cantrip data
+        cantripsData: classData?.cantrips?.map(cantripSlug => cantripMap.get(cantripSlug)) ?? [],
+      }
+
+      return characterTmpl
+    })
   }
 
   /**

@@ -2,13 +2,39 @@
   "name": "Blood Hunter",
   "slug": "blood-hunter",
   "icon": "/icons/classes/blood-hunter.svg",
-  "description": "Through the sacrifice of their own vitality and humanity, blood hunters can tap into dark powers to destroy the evil that plagues the realm.",
+  "description": "Warriors who sacrifice their own vitality and humanity to protect others from supernatural threats.",
   "hitDie": "d10",
-  "primaryAbility": "Strength",
+  "primaryAbility": "Dexterity",
   "savingThrows": ["Dexterity", "Intelligence"],
+  "proficiencies": {
+    "armor": ["Light Armor", "Medium Armor", "Shields"],
+    "weapons": ["Simple Weapons", "Martial Weapons"],
+    "tools": ["Alchemist's Supplies"],
+    "skills": {
+      "choose": 3,
+      "from": [
+        "Acrobatics",
+        "Arcana",
+        "Athletics",
+        "History",
+        "Insight",
+        "Investigation",
+        "Religion",
+        "Survival"
+      ]
+    }
+  },
   "features": [
-    "Blood Curse",
+    "Hunter's Bane",
+    "Blood Maledict",
     "Crimson Rite",
-    "Blood Maledict"
+    "Blood Hunter Order"
+  ],
+  "spells": [
+    "blood-drain",
+    "vampiric-touch"
+  ],
+  "cantrips": [
+    "blood-sense"
   ]
 }

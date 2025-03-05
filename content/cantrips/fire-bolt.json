@@ -1,7 +1,7 @@
 {
   "name": "Fire Bolt",
   "slug": "fire-bolt",
-  "icon": "solar:bolt-circle-bold",
-  "description": "Hurl a mote of fire at a creature or object",
+  "icon": "i-game-icons-fire-ray",
+  "description": "You hurl a mote of fire at a creature or object within range. Make a ranged spell attack. On hit, the target takes 1d10 fire damage.",
   "school": "Evocation"
 }

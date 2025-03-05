@@ -2,28 +2,16 @@
   "name": "Vampire",
   "key": "vampire",
   "model": "/models/characters/vampire/Vampire.glb",
-  "title": "Blood Hunter",
-  "description": "An immortal being who stalks the night, combining supernatural abilities with deadly combat skills. Masters of both physical and dark magic.",
-  "race": "elf",
+  "title": "Bloodthirsty",
+  "description": "A dark hunter who harnesses forbidden blood magic to overcome supernatural threats.",
+  "race": "high-helf",
   "class": "blood-hunter",
   "stats": {
-    "str": 17,
-    "dex": 15,
-    "con": 12,
-    "int": 10,
-    "wis": 8,
-    "cha": 17
-  },
-  "proficiencies": {
-    "weapons": ["Daggers", "Quarterstaffs", "Light Crossbows", "Spears"],
-    "armor": ["Light Armour"],
-    "skills": ["Arcana", "Stealth", "Intimidation", "Insight", "Persuasion"]
-  },
-  "spells": [
-    "blood-drain",
-    "charm-person"
-  ],
-  "cantrips": [
-    "vampiric-touch"
-  ]
+    "str": 14,
+    "dex": 16,
+    "con": 14,
+    "int": 13,
+    "wis": 12,
+    "cha": 10
+  }
 }

@@ -13,17 +13,5 @@
     "int": 14,
     "wis": 13,
     "cha": 11
-  },
-  "proficiencies": {
-    "weapons": ["Daggers", "Short Swords", "Long Swords", "Rapiers", "Hand Crossbows"],
-    "armor": ["Leather", "Chain Mail"],
-    "skills": ["Stealth", "Sleight of Hand", "Thievery"]
-  },
-  "spells": [
-    "thieves-guile",
-    "thieves-guile"
-  ],
-  "cantrips": [
-    "thieves-guile"
-  ]
+  }
 }

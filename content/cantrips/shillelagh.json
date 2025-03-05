@@ -1,0 +1,7 @@
+{
+  "name": "Shillelagh",
+  "slug": "shillelagh",
+  "icon": "i-game-icons-wood-club",
+  "description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for attack and damage rolls, and the weapon's damage die becomes a d8.",
+  "school": "Transmutation"
+}

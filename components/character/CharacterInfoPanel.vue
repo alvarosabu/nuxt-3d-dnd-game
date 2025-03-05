@@ -18,15 +18,11 @@ const getAbilityDisplay = (score: number) => {
   return `${score} (${getAbilityModifier(score)})`
 }
 
-// Add safety checks for arrays
-const hasCantrips = computed(() => props.character.cantripsData?.length > 0)
-const hasSpells = computed(() => props.character.spellsData?.length > 0)
-
 // Update proficiencies group with optional chaining
 const proficiencyGroups = computed(() => ({
-  weapons: props.character.proficiencies?.weapons?.join(', ') ?? '',
-  armor: props.character.proficiencies?.armor?.join(', ') ?? '',
-  skills: props.character.proficiencies?.skills?.join(', ') ?? '',
+  weapons: props.character.classData?.proficiencies?.weapons?.join(', ') ?? '',
+  armor: props.character.classData?.proficiencies?.armor?.join(', ') ?? '',
+  skills: props.character.classData?.proficiencies?.skills?.from?.join(', ') ?? '',
 }))
 
 // Map short stat names to full names

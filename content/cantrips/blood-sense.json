@@ -1,0 +1,7 @@
+{
+  "name": "Blood Sense",
+  "slug": "blood-sense",
+  "icon": "i-game-icons-bleeding-eye",
+  "description": "You can sense the presence of bleeding or injured creatures within 30 feet of you. You learn the relative severity of their injuries and the general direction to their location.",
+  "school": "Divination"
+}

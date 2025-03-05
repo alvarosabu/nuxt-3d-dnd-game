@@ -1,14 +1,39 @@
 {
   "name": "Paladin",
   "slug": "paladin",
-  "icon": "/icons/classes/palading.svg",
-  "description": "Whether sworn before a god's altar and the witness of a priest, in a sacred glade before nature spirits and fey beings, or in a moment of desperation and grief with the dead as the only witness, a paladin's oath is a powerful bond.",
+  "icon": "/icons/classes/paladin.svg",
+  "description": "Holy warriors bound to sacred oaths, combining martial prowess with divine magic.",
   "hitDie": "d10",
-  "primaryAbility": "Charisma",
+  "primaryAbility": "Strength and Charisma",
   "savingThrows": ["Wisdom", "Charisma"],
+  "proficiencies": {
+    "armor": ["Light Armor", "Medium Armor", "Heavy Armor", "Shields"],
+    "weapons": ["Simple Weapons", "Martial Weapons"],
+    "tools": [],
+    "skills": {
+      "choose": 2,
+      "from": [
+        "Athletics",
+        "Insight",
+        "Intimidation",
+        "Medicine",
+        "Persuasion",
+        "Religion"
+      ]
+    }
+  },
   "features": [
     "Divine Sense",
     "Lay on Hands",
-    "Divine Smite"
+    "Divine Smite",
+    "Sacred Oath"
+  ],
+  "spells": [
+    "bless",
+    "divine-shield"
+  ],
+  "cantrips": [
+    "guidance",
+    "light"
   ]
 }
