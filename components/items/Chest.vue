@@ -234,12 +234,13 @@ onMounted(() => {
     <Html
       center
       :distance-factor="4"
-      :scale="2"
+      :scale="[2, 2, 2]"
       :position="[0, 2, 0]"
     >
       <UBadge
         v-if="isHovering"
         label="Chest"
+        size="lg"
         color="neutral"
       />
     </Html>

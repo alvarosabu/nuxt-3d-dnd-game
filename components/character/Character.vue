@@ -212,13 +212,14 @@ onBeforeUnmount(() => {
     >
       <Html
         center
-        :distance-factor="4"
-        :scale="2"
+        :distance-factor="8"
         :position="[0, 3, 0]"
       >
-        <div class="p-1 rounded-xl bg-white text-black text-lg">
-          {{ player.name }}
-        </div>
+        <UBadge
+          :label="player.name"
+          size="xl"
+          color="neutral"
+        />
       </Html>
     </primitive>
   </TresGroup>
