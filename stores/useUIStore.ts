@@ -76,11 +76,20 @@ export const useUIStore = defineStore('ui', () => {
     // Calculate modifiers if this is a skill check and we're the initiator
     let modifiers = args.modifiers
     if (sync && args.skillCheck) {
-      // Get current player from lobby store for multiplayer
-      const currentLobbyId = lobbyStore.currentLobbyId
-      const currentPlayer = currentLobbyId
-        ? (lobbyStore.lobbies[currentLobbyId] as Lobby)?.players?.find((p: Player) => p.id === userStore.userId)
-        : null
+      let currentPlayer = null
+
+      // Get current player based on game mode
+      if (isMultiplayer.value) {
+        // Multiplayer: Get player from lobby
+        const currentLobbyId = lobbyStore.currentLobbyId
+        currentPlayer = currentLobbyId
+          ? (lobbyStore.lobbies[currentLobbyId] as Lobby)?.players?.find((p: Player) => p.id === userStore.userId)
+          : null
+      }
+      else {
+        // Single player: Get first player from game store
+        currentPlayer = gameStore.players[0]
+      }
 
       if (!currentPlayer?.character) {
         console.warn('No character selected')

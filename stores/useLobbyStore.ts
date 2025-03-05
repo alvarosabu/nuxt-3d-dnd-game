@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useUserStore } from './useUserStore'
+import { useGameStore } from './useGameStore'
 import type { Character, Lobby } from '~/types'
 
 /**
@@ -11,6 +12,7 @@ export const useLobbyStore = defineStore(
     // State
     const lobbies = ref<Record<string, Lobby>>({})
     const currentLobbyId = ref<string | null>(null)
+    const gameStore = useGameStore()
 
     // Getters
     const availableLobbies = computed(() =>
@@ -25,6 +27,13 @@ export const useLobbyStore = defineStore(
     // Additional getters
     const isCurrentPlayerHost = computed(() => {
       const userStore = useUserStore()
+
+      // In single player mode, the current player is always the host
+      if (!gameStore.isMultiplayer) {
+        return true
+      }
+
+      // In multiplayer, check if the current user is the host of the lobby
       if (!currentLobby.value) { return false }
       return currentLobby.value.hostId === userStore.userId
     })
