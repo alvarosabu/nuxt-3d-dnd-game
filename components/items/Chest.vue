@@ -5,6 +5,7 @@ import { Html } from '@tresjs/cientos'
 import { useUIStore } from '~/stores/useUIStore'
 import { useGameStore } from '~/stores/useGameStore'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
+import { calculateSkillCheckModifiers } from '~/utils/dice'
 
 // Props for the chest
 const props = defineProps<{
@@ -106,6 +107,23 @@ const syncChestState = () => {
   })
 }
 
+const lockpickAction = () => {
+  uiStore.openDiceRollModal({
+    title: 'Dexterity Check',
+    subtitle: 'Sleight of Hand',
+    difficultyClass: 18,
+    diceType: 'd20',
+    skillCheck: {
+      ability: 'dexterity',
+      skill: 'sleightOfHand',
+    },
+    onSuccess: () => {
+      isLocked.value = false
+      syncChestState()
+    },
+  }, true)
+}
+
 /**
  * Handles the click event on the chest
  * @param e - The pointer event from TresJS
@@ -134,19 +152,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
     ? [{
         label: 'Lockpick',
         icon: 'i-lucide-lock',
-        onSelect: () => {
-          uiStore.openDiceRollModal({
-            title: 'Dexterity Check',
-            subtitle: 'Sleight of Hand',
-            difficultyClass: 18,
-            diceType: 20,
-            onSuccess: () => {
-              isLocked.value = false
-              syncChestState()
-            },
-
-          }, true)
-        },
+        onSelect: lockpickAction,
       }]
     : [
         {

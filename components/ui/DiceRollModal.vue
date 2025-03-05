@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import Dice20 from '~/assets/icons/d20.svg'
+import { checkCritical } from '~/utils/dice'
 
 interface DiceRollProps {
   title?: string
   subtitle?: string
   difficultyClass?: number
-  diceType?: 4 | 6 | 8 | 10 | 12 | 20 // Common D&D dice types
+  diceType?: 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' // Common D&D dice types
   modifiers?: {
     name: string
     value: number
@@ -26,14 +27,30 @@ const props = withDefaults(defineProps<DiceRollProps>(), {
   title: 'Ability Check',
   subtitle: '',
   difficultyClass: 10,
-  diceType: 20,
+  diceType: 'd20',
   modifiers: () => [],
   remoteRoll: undefined,
   isInitiator: false, // Default to false
   isHost: false, // Default to false
 })
 
-const emit = defineEmits(['success', 'failure', 'close', 'result'])
+const emit = defineEmits<{
+  success: []
+  failure: []
+  close: []
+  result: [{
+    result: number
+    success: boolean
+    isCriticalSuccess: boolean
+    isCriticalFailure: boolean
+    totalValue: number // Add total value with modifiers
+  }]
+}>()
+
+const diceTypeValue = computed(() => {
+  // Remove 'd' prefix and convert to number
+  return Number(props.diceType.slice(1))
+})
 
 const isRolling = ref(false)
 const diceResult = ref<number | null>(null)
@@ -41,18 +58,34 @@ const showResult = ref(false)
 
 // Calculate total bonus from modifiers
 const totalBonus = computed(() => {
-  return props.modifiers.reduce((acc, mod) => acc + mod.value, 0)
+  return props.modifiers?.reduce((acc, mod) => acc + mod.value, 0) ?? 0
 })
 
-// Computed properties for roll results
-const isCriticalSuccess = computed(() => diceResult.value === 20)
-const isCriticalFailure = computed(() => diceResult.value === 1)
-const isSuccess = computed(() => {
-  if (!diceResult.value) { return false }
-  if (isCriticalSuccess.value) { return true }
-  if (isCriticalFailure.value) { return false }
-  return (diceResult.value + totalBonus.value) >= props.difficultyClass
+// Computed properties for roll results using our utility functions
+const rollState = computed(() => {
+  if (!diceResult.value) {
+    return {
+      isCriticalSuccess: false,
+      isCriticalFailure: false,
+      isSuccess: false,
+    }
+  }
+
+  const { isCriticalSuccess, isCriticalFailure } = checkCritical(diceResult.value)
+  const totalValue = diceResult.value + totalBonus.value
+
+  return {
+    isCriticalSuccess,
+    isCriticalFailure,
+    isSuccess: isCriticalSuccess || (!isCriticalFailure && totalValue >= (props.difficultyClass ?? 10)),
+    totalValue,
+  }
 })
+
+// Use the computed roll state
+const isCriticalSuccess = computed(() => rollState.value.isCriticalSuccess)
+const isCriticalFailure = computed(() => rollState.value.isCriticalFailure)
+const isSuccess = computed(() => rollState.value.isSuccess)
 
 const resultText = computed(() => {
   if (isCriticalSuccess.value) { return 'Critical Success!' }
@@ -77,18 +110,23 @@ const rollDice = () => {
 
   // Simulate dice roll animation
   setTimeout(() => {
-    diceResult.value = Math.floor(Math.random() * props.diceType) + 1
-    const success = diceResult.value >= props.difficultyClass
+    // Generate random roll
+    diceResult.value = Math.floor(Math.random() * diceTypeValue.value) + 1
+
+    // Get roll state and calculate total with modifiers
+    const { isCriticalSuccess, isCriticalFailure, isSuccess } = rollState.value
+    const totalValue = diceResult.value + totalBonus.value
 
     // Emit the result for multiplayer sync
     emit('result', {
       result: diceResult.value,
-      success,
-      isCriticalSuccess: diceResult.value === 20,
-      isCriticalFailure: diceResult.value === 1,
+      success: isSuccess,
+      isCriticalSuccess,
+      isCriticalFailure,
+      totalValue, // Now includes the dice roll + all modifiers
     })
 
-    if (success) {
+    if (isSuccess) {
       emit('success')
     }
     else {
@@ -134,6 +172,20 @@ function resetModal() {
   showResult.value = false
   diceResult.value = null
   emit('close')
+}
+
+const ABILITY_NAMES = {
+  DEX: 'Dexterity',
+  STR: 'Strength',
+  CON: 'Constitution',
+  INT: 'Intelligence',
+  WIS: 'Wisdom',
+  CHA: 'Charisma',
+} as const
+
+const getModifierLabel = (modifier: { name: string }) => {
+  if (modifier.name === 'Proficiency') { return `${props.subtitle} Proficiency` }
+  return ABILITY_NAMES[modifier.name as keyof typeof ABILITY_NAMES] ?? modifier.name
 }
 </script>
 
@@ -184,13 +236,13 @@ function resetModal() {
                     : isSuccess ? 'text-gold-500' : 'text-red-500',
                 ]"
               >
-                {{ diceResult }}
+                {{ diceResult + totalBonus }}
               </span>
               <span
                 v-else
                 class="absolute text-6xl font-bold text-gold-600 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               >
-                {{ diceType }}
+                {{ diceTypeValue }}
               </span>
             </div>
             <div
@@ -220,7 +272,7 @@ function resetModal() {
             Continue
           </UButton>
           <UButton
-            v-else-if="diceResult && !isSuccess && isInitiator && isHost"
+            v-if="diceResult && !isSuccess && isInitiator && isHost"
             size="sm"
             variant="outline"
             color="error"
@@ -230,7 +282,7 @@ function resetModal() {
             Try Again
           </UButton>
           <UButton
-            v-else-if="isInitiator"
+            v-if="isInitiator && !diceResult"
             size="sm"
             variant="outline"
             color="neutral"
@@ -239,7 +291,7 @@ function resetModal() {
           >
             Click dice to roll
           </UButton>
-          <p v-else class="text-sm text-slate-400">
+          <p v-if="!isInitiator" class="text-sm text-slate-400">
             Waiting for initiator to roll...
           </p>
         </div>
@@ -249,32 +301,90 @@ function resetModal() {
     <!-- Footer Section -->
     <template #footer>
       <!-- Modifiers Section -->
-      <div class="modifiers-section mt-6 space-y-2">
-        <div
-          v-for="modifier in modifiers"
-          :key="modifier.name"
-          class="flex items-center justify-between p-2 bg-slate-900/30 hover:bg-slate-800/50 rounded ring-1 ring-slate-700 transition-colors duration-300"
-        >
-          <div class="flex items-center gap-2">
-            <UIcon
-              v-if="modifier.icon"
-              :name="modifier.icon"
-              class="text-gold-500"
-            />
-            <span class="text-slate-300">{{ modifier.name }}</span>
-          </div>
-          <span class="text-gold-500 font-semibold">
-            {{ modifier.value >= 0 ? '+' : '' }}{{ modifier.value }}
-          </span>
-        </div>
-      </div>
+      <div v-if="modifiers.length > 0" class="modifiers-section mt-6 w-full">
+        <!-- Grid Layout for Modifiers -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div
+            v-for="modifier in modifiers"
+            :key="modifier.name"
+            class="relative group min-h-120px"
+          >
+            <!-- Decorative Border -->
+            <div class="absolute inset-0 bg-gradient-to-b from-gold-500/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-      <!-- Total Bonus -->
-      <div class="mt-4 text-center border-t border-slate-700 pt-4">
-        <p class="text-slate-400">Total Bonus</p>
-        <p class="text-xl font-bold text-gold-500">
-          {{ totalBonus >= 0 ? '+' : '' }}{{ totalBonus }}
-        </p>
+            <!-- Card Content -->
+            <div class="relative h-full text-center flex flex-col items-center p-4 bg-slate-900/80 rounded-lg ring-1 ring-gold-500/30 hover:ring-gold-500/50 transition-all duration-300">
+              <!-- Icon -->
+              <div class="mb-2">
+                <UIcon
+                  v-if="modifier.icon"
+                  :name="modifier.icon"
+                  class="w-8 h-8 text-gold-500"
+                />
+              </div>
+
+              <!-- Value -->
+              <span
+                class="text-xl font-bold font-serif"
+                :class="modifier.value >= 0 ? 'text-emerald-500' : 'text-red-500'"
+              >
+                {{ modifier.value >= 0 ? '+' : '' }}{{ modifier.value }}
+              </span>
+
+              <!-- Name -->
+              <span class="text-sm text-slate-300 mb-1">{{ getModifierLabel(modifier) }}</span>
+
+              <!-- Decorative Corner Lines -->
+              <div class="absolute top-0 left-0 w-12px h-12px">
+                <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
+                <div class="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+              </div>
+              <div class="absolute top-0 right-0 w-12px h-12px">
+                <div class="absolute top-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
+                <div class="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+              </div>
+              <div class="absolute bottom-0 left-0 w-12px h-12px">
+                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+              </div>
+              <div class="absolute bottom-0 right-0 w-12px h-12px">
+                <div class="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
+                <div class="absolute bottom-0 right-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Bonus -->
+        <div v-if="totalBonus !== 0" class="relative">
+          <!-- Decorative Border -->
+          <div class="absolute inset-0 bg-gradient-to-b from-gold-500/10 to-transparent rounded-lg"></div>
+
+          <div class="relative p-4 text-center border-t border-gold-500/30">
+            <span class="text-sm text-slate-400 block mb-2">Total Bonus</span>
+            <span class="text-2xl font-bold font-serif text-gold-500 tabular-nums">
+              {{ totalBonus >= 0 ? '+' : '' }}{{ totalBonus }}
+            </span>
+
+            <!-- Decorative Corner Lines -->
+            <div class="absolute top-0 left-0 w-12px h-12px">
+              <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
+              <div class="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+            </div>
+            <div class="absolute top-0 right-0 w-12px h-12px">
+              <div class="absolute top-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
+              <div class="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 w-12px h-12px">
+              <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
+              <div class="absolute bottom-0 left-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 right-0 w-12px h-12px">
+              <div class="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
+              <div class="absolute bottom-0 right-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
   </UModal>
@@ -282,7 +392,7 @@ function resetModal() {
 
 <style scoped>
 .dice-roll-modal {
-  background-image: linear-gradient(to bottom, rgb(15 23 42 / 0.9), rgb(2 6 23 / 0.9));
+  background-image: linear-gradient(to bottom, rgb(15 23 42 / 0.9), rgb(2 6 23 / 0.95));
 }
 
 .dice-face {
@@ -304,11 +414,12 @@ function resetModal() {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: all 0.5s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+  transform: scale(0.95);
 }
 </style>

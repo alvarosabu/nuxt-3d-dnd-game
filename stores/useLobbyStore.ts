@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useUserStore } from './useUserStore'
 import type { Character, Lobby } from '~/types'
 
 /**
@@ -23,8 +24,9 @@ export const useLobbyStore = defineStore(
 
     // Additional getters
     const isCurrentPlayerHost = computed(() => {
+      const userStore = useUserStore()
       if (!currentLobby.value) { return false }
-      return currentLobby.value.hostId === currentLobby.value.players.find(p => p.isHost)?.id
+      return currentLobby.value.hostId === userStore.userId
     })
 
     const setCurrentLobby = (lobbyId: string) => {

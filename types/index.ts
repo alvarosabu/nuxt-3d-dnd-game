@@ -123,16 +123,19 @@ export interface ContextMenuItem {
   action?: () => void
 }
 
+/**
+ * Arguments for the dice roll modal
+ */
 export interface DiceRollModalArgs {
-  title?: string
+  title: string
   subtitle?: string
   difficultyClass?: number
-  diceType?: 4 | 6 | 8 | 10 | 12 | 20
-  modifiers?: {
-    name: string
-    value: number
-    icon?: string
-  }[]
+  diceType: 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20'
+  modifiers?: { name: string, value: number, icon?: string }[]
+  skillCheck?: {
+    ability: 'strength' | 'dexterity' | 'constitution' | 'intelligence' | 'wisdom' | 'charisma'
+    skill: string
+  }
   onSuccess?: () => void
   onFailure?: () => void
 }
