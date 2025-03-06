@@ -82,7 +82,7 @@ if (rigNode) {
   state.animations = animations
 }
 
-/* const handSlotR = findBoneByName(state.model, 'handslotr')
+const handSlotR = findBoneByName(state.model, 'handslotr')
 
 if (props.player.weapon) {
   const { scene: weaponScene } = getResource('models', props.player.weapon)
@@ -94,7 +94,7 @@ if (props.player.weapon) {
       handSlotR.add(newVal)
     }
   })
-} */
+}
 
 if (gameStore.isMultiplayer) {
   watch(data, (newData) => {
@@ -236,11 +236,11 @@ onBeforeUnmount(() => {
         />
       </Html>
     </primitive>
+    <primitive
+      v-if="state.weapon"
+      ref="weaponRef"
+      :name="player.weapon"
+      :object="state.weapon"
+    />
   </TresGroup>
-  <!--  <primitive
-    v-if="state.weapon"
-    ref="weaponRef"
-    :name="player.weapon"
-    :object="state.weapon"
-  /> -->
 </template>

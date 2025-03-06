@@ -144,6 +144,7 @@ export const useGameStore = defineStore('game', () => {
     if (!players.value[0]) { return }
     players.value[0].character = character.key
     players.value[0].characterName = character.name
+    players.value[0].weapon = characterTemplates.value.find(template => template.key === character.key)?.weapon
   }
 
   /**
@@ -274,7 +275,7 @@ export const useGameStore = defineStore('game', () => {
     handleRemoteItemUpdate,
   }
 }, {
-  persist: {
+  /*  persist: {
     storage: piniaPluginPersistedstate.sessionStorage(),
-  },
+  }, */
 })

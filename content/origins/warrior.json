@@ -13,5 +13,6 @@
     "int": 10,
     "wis": 12,
     "cha": 11
-  }
+  },
+  "weapon": "fighter-sword"
 }

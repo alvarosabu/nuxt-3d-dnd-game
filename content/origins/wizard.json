@@ -13,5 +13,6 @@
     "int": 16,
     "wis": 12,
     "cha": 10
-  }
+  },
+  "weapon": "wizard-staff"
 }

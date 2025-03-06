@@ -13,5 +13,6 @@
     "int": 13,
     "wis": 12,
     "cha": 10
-  }
+  },
+  "weapon": "vampire-sword"
 }
