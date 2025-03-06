@@ -23,6 +23,7 @@ export interface Player {
   character?: string
   characterName?: string
   position: number[] // [x, y, z]
+  weapon?: string
 }
 
 export interface Lobby {

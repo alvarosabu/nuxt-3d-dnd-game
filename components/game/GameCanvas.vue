@@ -21,7 +21,7 @@ const characters = computed(() => {
   if (gameStore.isMultiplayer) {
     return currentLobbyPlayers.value
   }
-  return gameStore.players
+  return gameStore.formattedPlayers
 })
 
 const { sendMsg } = useMultiplayer(gameStore.isMultiplayer)

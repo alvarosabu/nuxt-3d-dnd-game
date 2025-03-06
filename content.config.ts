@@ -45,6 +45,7 @@ export default defineContentConfig({
           wis: z.number(),
           cha: z.number(),
         }),
+        weapon: z.string(),
       }),
     }),
 

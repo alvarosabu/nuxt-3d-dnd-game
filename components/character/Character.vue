@@ -18,7 +18,7 @@ const props = defineProps<{
 const emit = defineEmits(['ready'])
 
 const modelRef = ref<Object3D | null>(null)
-
+const weaponRef = shallowRef<Object3D | null>(null)
 const { getResource } = useResourcePreloader()
 const lobbyStore = useLobbyStore()
 const gameStore = useGameStore()
@@ -81,6 +81,20 @@ if (rigNode) {
   state.model.position.set(props.index * 1.5, 0, 0)
   state.animations = animations
 }
+
+/* const handSlotR = findBoneByName(state.model, 'handslotr')
+
+if (props.player.weapon) {
+  const { scene: weaponScene } = getResource('models', props.player.weapon)
+  state.weapon = weaponScene
+  watch(weaponRef, (newVal) => {
+    if (handSlotR && newVal) {
+      newVal.position.set(0, 0, 0)
+      newVal.rotation.set(0, 0, 0)
+      handSlotR.add(newVal)
+    }
+  })
+} */
 
 if (gameStore.isMultiplayer) {
   watch(data, (newData) => {
@@ -223,4 +237,10 @@ onBeforeUnmount(() => {
       </Html>
     </primitive>
   </TresGroup>
+  <!--  <primitive
+    v-if="state.weapon"
+    ref="weaponRef"
+    :name="player.weapon"
+    :object="state.weapon"
+  /> -->
 </template>

@@ -13,5 +13,6 @@
     "int": 12,
     "wis": 16,
     "cha": 10
-  }
+  },
+  "weapon": "druid-staff"
 }

@@ -35,6 +35,14 @@ export const useGameStore = defineStore('game', () => {
     return (id: string) => items.value[id]
   })
 
+  const formattedPlayers = computed(() => {
+    return players.value.map((player) => {
+      return {
+        ...player,
+        ...characterTemplates.value.find(character => character.key === player.character),
+      }
+    })
+  })
   /**
    * Load and join character templates with their related data
    */
@@ -237,6 +245,7 @@ export const useGameStore = defineStore('game', () => {
   return {
     // State
     players,
+    formattedPlayers,
     activePlayer,
     mode,
     characterTemplates,
