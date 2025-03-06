@@ -275,7 +275,7 @@ export const useGameStore = defineStore('game', () => {
     handleRemoteItemUpdate,
   }
 }, {
-  /*  persist: {
+  persist: {
     storage: piniaPluginPersistedstate.sessionStorage(),
-  }, */
+  },
 })

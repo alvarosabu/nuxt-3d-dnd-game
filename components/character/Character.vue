@@ -84,6 +84,16 @@ if (rigNode) {
 
 const handSlotR = findBoneByName(state.model, 'handslotr')
 
+watch(() => props.player.weapon, (weapon) => {
+  if (weapon && weaponRef.value && handSlotR) {
+    const { scene: weaponScene } = getResource('models', weapon)
+    state.weapon = weaponScene
+    weaponRef.value.position.set(0, 0, 0)
+    weaponRef.value.rotation.set(0, 0, 0)
+    handSlotR.add(weaponRef.value)
+  }
+})
+
 if (props.player.weapon) {
   const { scene: weaponScene } = getResource('models', props.player.weapon)
   state.weapon = weaponScene
@@ -107,6 +117,9 @@ if (gameStore.isMultiplayer) {
           data.player.position[1], // y
           data.player.position[2], // z
         )
+      }
+      if (data.player.state && data.player.id === props.player.id) {
+        Object.assign(state, data.player.state)
       }
     }
   })

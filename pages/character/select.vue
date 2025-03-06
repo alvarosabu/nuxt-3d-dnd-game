@@ -16,7 +16,7 @@ const { init } = gameStore
 await init()
 const { preloadResources } = useResourcePreloader()
 
-const { send, sendMsg } = useMultiplayer()
+const { sendMsg } = useMultiplayer()
 
 await preloadResources()
 // Get character templates from game state and ensure consistent order
@@ -115,12 +115,21 @@ const characterName = ref('Tav')
 
 const handleSelectCharacter = () => {
   if (gameStore.isMultiplayer) {
-    send(JSON.stringify({
+    sendMsg({
       type: 'SELECT_CHARACTER',
       characterName: characterName.value,
       lobbyId: lobbyStore.currentLobby?.id,
       character: selectedCharacter.value?.key,
-    }))
+      weapon: selectedCharacter.value?.weapon,
+    })
+
+    /* sendMsg({
+      type: 'UPDATE_PLAYER_STATE',
+      lobbyId: lobbyStore.currentLobbyId,
+      state: {
+        weapon: selectedCharacter.value?.weapon,
+      },
+    }) */
   }
   else {
     gameStore.setCharacter({
