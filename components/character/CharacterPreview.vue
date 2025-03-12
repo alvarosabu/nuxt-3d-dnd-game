@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AnimationAction, Group } from 'three'
-import { LoopOnce } from 'three'
+import { LoopOnce, Mesh, MeshToonMaterial } from 'three'
 import { useResourcePreloader } from '~/composables/useResourcePreloader'
 import type { CharacterTemplate } from '~/types'
 import { SkeletonUtils } from 'three-stdlib'
@@ -19,13 +19,24 @@ const currentAction = ref<AnimationAction>()
 
 const { getResource } = useResourcePreloader()
 
-const { scene, animations } = getResource('models', props.character.key)
+const { scene, animations, materials } = getResource('models', props.character.key)
 const clonedScene = SkeletonUtils.clone(scene)
 
 const { nodes } = useGraph(clonedScene)
 
 const model = Object.values(nodes).find(node => node.name.includes('Rig'))
 
+/* model?.traverse((child) => {
+  if (child instanceof Mesh) {
+    console.log(child.material)
+    child.material.roughness = 1
+  }
+}) */
+Object.entries(materials).forEach(([key, material]) => {
+  if (!key.includes('metallic')) {
+    material.roughness = 1
+  }
+})
 const scale = computed(() => props.isSelected ? 1.2 : 1)
 
 const modelGroup = ref<Group>()

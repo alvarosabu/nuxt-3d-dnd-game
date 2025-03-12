@@ -18,8 +18,8 @@ importers:
         specifier: ^0.10.0
         version: 0.10.1(magicast@0.3.5)(pinia@3.0.1(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))
       '@tresjs/cientos':
-        specifier: ^4.1.1
-        version: 4.1.1(@tresjs/core@https://pkg.pr.new/@tresjs/core@47bb9e7(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))(@types/three@0.173.0)(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
+        specifier: https://pkg.pr.new/@tresjs/cientos@1281a3b
+        version: https://pkg.pr.new/@tresjs/cientos@1281a3b(@tresjs/core@https://pkg.pr.new/@tresjs/core@47bb9e7(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))(@types/three@0.173.0)(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
       '@tresjs/core':
         specifier: https://pkg.pr.new/@tresjs/core@47bb9e7
         version: https://pkg.pr.new/@tresjs/core@47bb9e7(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
@@ -1380,8 +1380,8 @@ packages:
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
 
-  '@tresjs/cientos@4.1.1':
-    resolution: {integrity: sha512-UrimJI9dwFp8EkqxnADf775YHY4/vI2xh4L74JnDVDEvm1LMHUsblpOliWZjB6Yf1NGU0JHiZsvNro3mdym9UQ==}
+  '@tresjs/cientos@https://pkg.pr.new/@tresjs/cientos@1281a3b':
+    resolution: {tarball: https://pkg.pr.new/@tresjs/cientos@1281a3b}
     version: 4.1.1
     peerDependencies:
       '@tresjs/core': '>=4.2.1'
@@ -7879,7 +7879,7 @@ snapshots:
       '@tanstack/virtual-core': 3.13.2
       vue: 3.5.13(typescript@5.7.3)
 
-  '@tresjs/cientos@4.1.1(@tresjs/core@https://pkg.pr.new/@tresjs/core@47bb9e7(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))(@types/three@0.173.0)(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))':
+  '@tresjs/cientos@https://pkg.pr.new/@tresjs/cientos@1281a3b(@tresjs/core@https://pkg.pr.new/@tresjs/core@47bb9e7(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))(@types/three@0.173.0)(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))':
     dependencies:
       '@tresjs/core': https://pkg.pr.new/@tresjs/core@47bb9e7(three@0.173.0)(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
       '@vueuse/core': 12.7.0(typescript@5.7.3)

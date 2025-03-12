@@ -4,11 +4,9 @@ import { LoopOnce, LoopRepeat, SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'
 import { Html } from '@tresjs/cientos'
-import { useGameCursor, useLobbyStore, useResourcePreloader } from '#imports'
+import { useLobbyStore, useResourcePreloader } from '#imports'
 import { SkeletonUtils } from 'three-stdlib'
 import { dispose } from '@tresjs/core'
-import type { ThreeEvent } from '@tresjs/core'
-import { useUIStore } from '~/stores/useUIStore'
 import { onKeyStroke } from '@vueuse/core'
 
 const props = defineProps<{
@@ -77,7 +75,7 @@ const state = shallowReactive<CharacterStateProps>({
   currentState: CharacterStates.IDLE,
 })
 
-const { scene, animations } = getResource('models', props.player.character)
+const { scene, animations, materials } = getResource('models', props.player.character)
 
 const clonedScene = SkeletonUtils.clone(scene)
 const { nodes } = useGraph(clonedScene)
@@ -98,6 +96,12 @@ if (rigNode) {
   state.model.position.set(props.index * 1.5, 0, 0)
   state.animations = animations
 }
+
+Object.entries(materials).forEach(([key, material]) => {
+  if (!key.includes('metallic')) {
+    material.roughness = 1
+  }
+})
 
 const handSlotR = findBoneByName(state.model, 'handslotr')
 

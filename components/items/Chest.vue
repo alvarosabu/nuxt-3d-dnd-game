@@ -5,13 +5,13 @@ import { Html } from '@tresjs/cientos'
 import { useUIStore } from '~/stores/useUIStore'
 import { useGameStore } from '~/stores/useGameStore'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
-import { calculateSkillCheckModifiers } from '~/utils/dice'
 
 // Props for the chest
 const props = defineProps<{
   id: string
   position?: [number, number, number]
 }>()
+
 const chestRef = ref()
 const vueLogoRef = ref()
 const { getResource } = useResourcePreloader()
@@ -177,7 +177,6 @@ const handlePointerLeave = (e: ThreeEvent<PointerEvent>) => {
   removeObjectOutline(e.object)
   resetCursor()
   uiStore.setContextMenuItems([])
-  isOpen.value = false
   e.stopPropagation()
 }
 

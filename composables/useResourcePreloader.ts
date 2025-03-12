@@ -58,7 +58,7 @@ export const useResourcePreloader = () => {
     { type: 'texture', path: '/models/characters/paladin/paladin_texture_A.png', key: 'paladin-texture-a' },
     { type: 'texture', path: '/models/characters/paladin/paladin_texture_storyblok.png', key: 'paladin-texture-storyblok' },
     // Misc
-    { type: 'model', path: '/models/Vue.glb', key: 'vue' },
+    { type: 'model', path: '/models/vue.glb', key: 'vue' },
   ]
 
   // Loaders

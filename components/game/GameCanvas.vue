@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { ThreeEvent } from '@tresjs/core'
-import { ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import type { Object3D } from 'three'
+import { MOUSE } from 'three'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
 import { BlendFunction, KernelSize } from 'postprocessing'
 import Chest from '~/components/items/Chest.vue'
@@ -124,14 +125,19 @@ const { cursor } = useGameCursor()
       <Environment preset="sunset" :blur="1" background />
     </Suspense>
     <TresPerspectiveCamera
-      :position="[20, 20, 20]"
+      :position="[11, 11, 11]"
       :look-at="[0, 0, 0]"
       :fov="45"
       :near="0.1"
       :far="1000"
     />
 
-    <OrbitControls ref="orbitControlsRef" make-default />
+    <OrbitControls
+      ref="orbitControlsRef"
+      make-default
+      :enableDamping="true"
+      :dampingFactor="0.05"
+    />
 
     <!-- Environment -->
     <TresAmbientLight :intensity="0.5" />
