@@ -27,10 +27,18 @@ Here are some useful commands to get started:
 | `pnpm build` | Build the project. |
 | `node .output/server/index.mjs` | Serve the built project for testing. |
 
+## Contributors
+
+<a href="https://github.com/alvarosabu/nuxt-3d-dnd-game/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=alvarosabu/nuxt-3d-dnd-game" />
+</a>
+
 ## License
 
 <!-- TODO -->
 
 The license for this project is currently undefined. Please check with the project owner for clarification.  
 
+<!-- maybe: -->
+<!-- Published under the [MIT](https://github.com/unjs/rou3/blob/main/LICENSE) license. -->
 <!-- For the full license text, please see the [LICENSE](./LICENSE.md) file. -->
