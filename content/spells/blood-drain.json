@@ -1,0 +1,8 @@
+{
+  "name": "Blood Drain",
+  "slug": "blood-drain",
+  "icon": "i-game-icons-bleeding-wound",
+  "description": "You draw vitality from a creature within range. The target must make a Constitution saving throw or take 2d6 necrotic damage, and you gain temporary hit points equal to half the damage dealt.",
+  "level": 1,
+  "school": "Necromancy"
+}

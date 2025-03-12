@@ -1,0 +1,8 @@
+{
+  "name": "Divine Shield",
+  "slug": "divine-shield",
+  "icon": "i-game-icons-shield-reflect",
+  "description": "A shimmering field of divine energy appears and surrounds a creature of your choice within range, granting them a +2 bonus to AC and resistance to radiant damage for the duration.",
+  "level": 1,
+  "school": "Abjuration"
+}

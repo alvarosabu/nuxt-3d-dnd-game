@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import DiceRollModal from '~/components/ui/DiceRollModal.vue'
-import type { ContextMenuItem, DiceRollModalArgs } from '~/types'
+import type { ContextMenuItem, DiceRollModalArgs, Lobby, Player } from '~/types'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import { useUserStore } from '~/stores/useUserStore'
 import { useLobbyStore } from '~/stores/useLobbyStore'
+import { calculateSkillCheckModifiers } from '~/utils/dice'
+import type { ModalProps } from '@vueuse/core'
+import type { DiceRollProps } from '~/components/ui/DiceRollModal.vue'
 
 /**
  * Store for managing UI state like modals and context menus
@@ -41,17 +44,6 @@ export const useUIStore = defineStore('ui', () => {
   const showConfetti = ref(false)
 
   /**
-   * Reset all modal state
-   */
-  function resetModalState() {
-    modal.close()
-    diceRollModal.isOpen = false
-    diceRollModal.args = undefined
-    diceRollModal.initiatorId = null
-    remoteRoll.value = null
-  }
-
-  /**
    * Triggers the confetti explosion animation
    * @param duration Optional duration in ms after which to hide the confetti (defaults to 2000ms)
    */
@@ -81,28 +73,72 @@ export const useUIStore = defineStore('ui', () => {
     diceRollModal.isOpen = true
     remoteRoll.value = null // Reset remote roll state
 
-    // Set initiator ID when opening the modal
-    diceRollModal.initiatorId = sync ? userStore.userId : null
+    // Calculate modifiers if this is a skill check and we're the initiator
+    let modifiers = args.modifiers
+    if (sync && args.skillCheck) {
+      let currentPlayer = null
+
+      // Get current player based on game mode
+      if (isMultiplayer.value) {
+        // Multiplayer: Get player from lobby
+        const currentLobbyId = lobbyStore.currentLobbyId
+        currentPlayer = currentLobbyId
+          ? (lobbyStore.lobbies[currentLobbyId] as Lobby)?.players?.find((p: Player) => p.id === userStore.userId)
+          : null
+      }
+      else {
+        // Single player: Get first player from game store
+        currentPlayer = gameStore.players[0]
+      }
+
+      if (!currentPlayer?.character) {
+        console.warn('No character selected')
+        return
+      }
+
+      // Get character data from templates
+      const characterTemplate = gameStore.characterTemplates.find(
+        tmpl => tmpl.key === currentPlayer.character,
+      )
+
+      if (characterTemplate) {
+        modifiers = calculateSkillCheckModifiers(
+          {
+            stats: characterTemplate.stats,
+            level: 1, // TODO: Get actual character level when implemented
+            proficiencies: characterTemplate.classData?.proficiencies?.skills?.from ?? [],
+          },
+          args.skillCheck.skill,
+        )
+      }
+    }
 
     // Sync with other players if needed
     if (sync && isMultiplayer.value) {
       sendMsg({
         type: 'DICE_ROLL_START',
-        modalArgs: args,
+        modalArgs: {
+          ...args,
+          modifiers, // Send calculated modifiers to other players
+        },
         playerId: userStore.userId,
         playerName: userStore.username,
       })
     }
 
-    modal.open(DiceRollModal, {
+    // Update modal props interface to include remoteRoll
+    type DiceRollModalProps = DiceRollProps & ModalProps
+
+    modal.open<DiceRollModalProps>(DiceRollModal, {
       title: args.title,
       subtitle: args.subtitle,
       difficultyClass: args.difficultyClass,
       diceType: args.diceType,
+      modifiers,
       remoteRoll: remoteRoll.value === null ? undefined : remoteRoll.value,
-      isInitiator: sync || !isMultiplayer.value, // Set isInitiator based on sync flag and multiplayer state
-      isHost: lobbyStore.isCurrentPlayerHost, // Use the computed property from lobbyStore
-      onResult: (result) => {
+      isInitiator: sync || !isMultiplayer.value,
+      isHost: lobbyStore.isCurrentPlayerHost,
+      onResult: (result: DiceRollProps['result']) => {
         // Sync dice roll result with other players
         if (isMultiplayer.value) {
           sendMsg({

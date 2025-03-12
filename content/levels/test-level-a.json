@@ -13,7 +13,7 @@
     {
       "id": "test-chest",
       "type": "chest",
-      "position": [2, 0, 3],
+      "position": [2, 0, -5],
       "rotation": [0, 0, 0],
       "state": {
         "isLocked": true,

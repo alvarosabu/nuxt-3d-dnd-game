@@ -2,12 +2,51 @@
   "name": "Druid",
   "slug": "druid",
   "icon": "/icons/classes/druid.svg",
-  "description": "A druid is a guardian of nature, a bridge between the natural world and the human world. Druids combine martial prowess with divine magic.",
-  "hitDie": "d10",
-  "primaryAbility": "Strength",
-  "savingThrows": ["Dexterity", "Intelligence"],
+  "description": "Guardians of nature who tap into the divine essence of the natural world to cast spells and assume animal forms.",
+  "hitDie": "d8",
+  "primaryAbility": "Wisdom",
+  "savingThrows": ["Intelligence", "Wisdom"],
+  "proficiencies": {
+    "armor": ["Light Armor", "Medium Armor", "Shields"],
+    "weapons": [
+      "Clubs",
+      "Daggers",
+      "Darts",
+      "Javelins",
+      "Maces",
+      "Quarterstaffs",
+      "Scimitars",
+      "Sickles",
+      "Slings",
+      "Spears"
+    ],
+    "tools": ["Herbalism Kit"],
+    "skills": {
+      "choose": 2,
+      "from": [
+        "Arcana",
+        "Animal Handling",
+        "Insight",
+        "Medicine",
+        "Nature",
+        "Perception",
+        "Religion",
+        "Survival"
+      ]
+    }
+  },
   "features": [
-
+    "Druidic",
+    "Spellcasting",
+    "Wild Shape",
+    "Druid Circle"
+  ],
+  "spells": [
+    "cure-wounds",
+    "entangle"
+  ],
+  "cantrips": [
+    "shillelagh",
+    "thorn-whip"
   ]
-
 }

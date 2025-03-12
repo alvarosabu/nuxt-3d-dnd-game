@@ -1,0 +1,8 @@
+{
+  "name": "Vampiric Touch",
+  "slug": "vampiric-touch",
+  "icon": "i-game-icons-vampire-dracula",
+  "description": "Your touch deals 3d6 necrotic damage, and you regain hit points equal to half the amount of damage dealt. Until the spell ends, you can make the attack again on each of your turns as an action.",
+  "level": 3,
+  "school": "Necromancy"
+}

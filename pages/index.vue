@@ -18,6 +18,7 @@ const handleNavigation = (route: string) => {
       name: userStore.username,
       character: null,
       characterName: null,
+      weapon: null,
       position: [0, 0, 0],
       status: 'in-game',
     })

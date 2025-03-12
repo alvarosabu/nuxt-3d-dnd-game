@@ -45,13 +45,7 @@ export default defineContentConfig({
           wis: z.number(),
           cha: z.number(),
         }),
-        proficiencies: z.object({
-          weapons: z.array(z.string()),
-          armor: z.array(z.string()),
-          skills: z.array(z.string()),
-        }),
-        spells: z.array(z.string()),
-        cantrips: z.array(z.string()),
+        weapon: z.string(),
       }),
     }),
 
@@ -103,6 +97,13 @@ export default defineContentConfig({
         primaryAbility: z.string(),
         savingThrows: z.array(z.string()),
         features: z.array(z.string()),
+        proficiencies: z.object({
+          weapons: z.array(z.string()),
+          armor: z.array(z.string()),
+          skills: z.array(z.string()),
+        }),
+        spells: z.array(z.string()),
+        cantrips: z.array(z.string()),
       }),
     }),
   },

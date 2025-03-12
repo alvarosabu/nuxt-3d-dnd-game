@@ -69,8 +69,6 @@ function createLobby(name: string, hostPeer: Peer, maxPlayers = 4) {
     rotation: [0, 0, 0, 1],
     lobbyId: id,
     isMoving: false,
-    direction: 'UP',
-    isRunning: false,
     isJumping: false,
     isGrounded: true,
   })
@@ -162,7 +160,7 @@ function pauseGame(lobbyId: string) {
   }
 }
 
-function selectCharacter(peer: Peer, lobbyId: string, characterName: string, character: string) {
+function selectCharacter(peer: Peer, lobbyId: string, characterName: string, character: string, weapon: string) {
   const lobby = lobbies.get(lobbyId)
   if (lobby) {
     const playerId = peerToPlayer.get(peer.id)
@@ -171,6 +169,7 @@ function selectCharacter(peer: Peer, lobbyId: string, characterName: string, cha
       if (player) {
         player.character = character
         player.characterName = characterName
+        player.weapon = weapon
       }
     }
   }
@@ -182,11 +181,28 @@ function updatePlayerPosition(peer: Peer, lobbyId: string, position: number[]) {
   if (!playerId) { return }
 
   const player = players.get(playerId)
-  console.log('updatePlayerPosition', position)
   if (player && position.length === 3) {
     if (position.every(component => Number.isFinite(component))) {
       player.position = position
     }
+  }
+  if (lobby) {
+    broadcastMessage({
+      type: 'PLAYER_UPDATE',
+      player,
+    })
+  }
+}
+
+function updatePlayerState(peer: Peer, lobbyId: string, state: Record<string, any>) {
+  const lobby = lobbies.get(lobbyId)
+  const playerId = peerToPlayer.get(peer.id)
+
+  if (!playerId) { return }
+
+  const player = players.get(playerId)
+  if (player) {
+    Object.assign(player, state)
   }
   if (lobby) {
     broadcastMessage({
@@ -319,15 +335,18 @@ export default defineWebSocketHandler({
       PAUSE_GAME: (peer: Peer, data: { lobbyId: string }) => {
         pauseGame(data.lobbyId)
       },
-      SELECT_CHARACTER: (peer: Peer, data: { lobbyId: string, characterName: string, character: string }) => {
-        selectCharacter(peer, data.lobbyId, data.characterName, data.character)
+      SELECT_CHARACTER: (peer: Peer, data: { lobbyId: string, characterName: string, character: string, weapon: string }) => {
+        selectCharacter(peer, data.lobbyId, data.characterName, data.character, data.weapon)
       },
       UPDATE_PLAYER_POSITION: (peer: Peer, data: { lobbyId: string, position: number[] }) => {
         updatePlayerPosition(peer, data.lobbyId, data.position)
         return true
       },
+      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Record<string, any> }) => {
+        updatePlayerState(peer, data.lobbyId, data.state)
+        return true
+      },
       UPDATE_PLAYER_STATUS: (peer: Peer, data: { status: string }) => {
-        console.log('UPDATE_PLAYER_STATUS', data)
         updatePlayerStatus(peer, data.status)
       },
       UPDATE_ITEM_STATE: (peer: Peer, data: {

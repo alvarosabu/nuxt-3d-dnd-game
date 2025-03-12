@@ -1,7 +1,7 @@
 {
   "name": "Guidance",
   "slug": "guidance",
-  "icon": "solar:stars-bold",
-  "description": "Divine guidance improves a creature's ability checks",
+  "icon": "i-game-icons-holy-symbol",
+  "description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice.",
   "school": "Divination"
 }

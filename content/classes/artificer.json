@@ -2,14 +2,47 @@
   "name": "Artificer",
   "slug": "artificer",
   "icon": "/icons/classes/artificer.svg",
-  "description": "Masters of invention, artificers use ingenuity and magic to create marvelous inventions. They see magic as a complex system waiting to be decoded and controlled.",
+  "description": "Masters of invention, artificers use ingenuity and magic to create marvelous inventions.",
   "hitDie": "d8",
   "primaryAbility": "Intelligence",
   "savingThrows": ["Constitution", "Intelligence"],
+  "proficiencies": {
+    "armor": ["Light Armor", "Medium Armor", "Shields"],
+    "weapons": [
+      "Simple Weapons",
+      "Hand Crossbows",
+      "Heavy Crossbows"
+    ],
+    "tools": [
+      "Thieves' Tools",
+      "Tinker's Tools",
+      "One type of artisan's tools"
+    ],
+    "skills": {
+      "choose": 2,
+      "from": [
+        "Arcana",
+        "History",
+        "Investigation",
+        "Medicine",
+        "Nature",
+        "Perception",
+        "Sleight of Hand"
+      ]
+    }
+  },
   "features": [
     "Magical Tinkering",
     "Infuse Item",
     "The Right Tool for the Job",
     "Tool Expertise"
+  ],
+  "spells": [
+    "mending",
+    "magical-tinkering"
+  ],
+  "cantrips": [
+    "fire-bolt",
+    "guidance"
   ]
 }

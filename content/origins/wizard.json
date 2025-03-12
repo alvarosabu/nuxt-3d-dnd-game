@@ -3,30 +3,16 @@
   "key": "wizard",
   "model": "/models/characters/wizard/Wizard.glb",
   "title": "Arcane Scholar",
-  "description": "A dedicated student of the arcane arts, this human wizard has spent years studying ancient tomes and mastering the fundamental forces of magic. Their intelligence and adaptability make them a formidable spellcaster.",
-  "race": "human",
+  "description": "A scholarly magic-user capable of manipulating the structures of reality.",
+  "race": "high-elf",
   "class": "wizard",
   "stats": {
-    "str": 10,
+    "str": 8,
     "dex": 14,
-    "con": 13,
+    "con": 14,
     "int": 16,
     "wis": 12,
-    "cha": 11
+    "cha": 10
   },
-  "proficiencies": {
-    "weapons": ["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"],
-    "armor": [],
-    "skills": ["Arcana", "History", "Investigation", "Insight"]
-  },
-  "spells": [
-    "magic-missile",
-    "shield",
-    "mage-armor"
-  ],
-  "cantrips": [
-    "mage-hand",
-    "prestidigitation",
-    "ray-of-frost"
-  ]
+  "weapon": "wizard-staff"
 }

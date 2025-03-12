@@ -15,7 +15,7 @@
     "@nuxt/content": "^3.1.1",
     "@nuxt/ui": "3.0.0-alpha.11",
     "@pinia/nuxt": "^0.10.0",
-    "@tresjs/cientos": "^4.1.0",
+    "@tresjs/cientos": "https://pkg.pr.new/@tresjs/cientos@1281a3b",
     "@tresjs/core": "https://pkg.pr.new/@tresjs/core@47bb9e7",
     "@tresjs/leches": "https://pkg.pr.new/@tresjs/leches@07c672a",
     "@tresjs/nuxt": "4.0.0-next.0",

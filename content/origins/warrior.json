@@ -14,18 +14,5 @@
     "wis": 12,
     "cha": 11
   },
-  "proficiencies": {
-    "weapons": ["Simple Weapons", "Martial Weapons"],
-    "armor": ["Light Armor", "Medium Armor", "Heavy Armor", "Shields"],
-    "skills": ["Athletics", "Intimidation", "Survival", "Perception"]
-  },
-  "equipment": [
-    "longsword",
-    "shield",
-    "chain-mail",
-    "crossbow-light"
-  ],
-  "spells": [],
-  "cantrips": [],
-  "fighting_style": "Defense"
+  "weapon": "fighter-sword"
 }

@@ -1,0 +1,7 @@
+{
+  "name": "Light",
+  "slug": "light",
+  "icon": "i-game-icons-sunbeams",
+  "description": "You touch one object that is no larger than 10 feet in any dimension. Until the spell ends, the object sheds bright light in a 20-foot radius and dim light for an additional 20 feet.",
+  "school": "Evocation"
+}

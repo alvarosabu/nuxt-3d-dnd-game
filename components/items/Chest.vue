@@ -11,6 +11,7 @@ const props = defineProps<{
   id: string
   position?: [number, number, number]
 }>()
+
 const chestRef = ref()
 const vueLogoRef = ref()
 const { getResource } = useResourcePreloader()
@@ -106,6 +107,23 @@ const syncChestState = () => {
   })
 }
 
+const lockpickAction = () => {
+  uiStore.openDiceRollModal({
+    title: 'Dexterity Check',
+    subtitle: 'Sleight of Hand',
+    difficultyClass: 18,
+    diceType: 'd20',
+    skillCheck: {
+      ability: 'dexterity',
+      skill: 'sleightOfHand',
+    },
+    onSuccess: () => {
+      isLocked.value = false
+      syncChestState()
+    },
+  }, true)
+}
+
 /**
  * Handles the click event on the chest
  * @param e - The pointer event from TresJS
@@ -134,19 +152,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
     ? [{
         label: 'Lockpick',
         icon: 'i-lucide-lock',
-        onSelect: () => {
-          uiStore.openDiceRollModal({
-            title: 'Dexterity Check',
-            subtitle: 'Sleight of Hand',
-            difficultyClass: 18,
-            diceType: 20,
-            onSuccess: () => {
-              isLocked.value = false
-              syncChestState()
-            },
-
-          }, true)
-        },
+        onSelect: lockpickAction,
       }]
     : [
         {
@@ -171,7 +177,6 @@ const handlePointerLeave = (e: ThreeEvent<PointerEvent>) => {
   removeObjectOutline(e.object)
   resetCursor()
   uiStore.setContextMenuItems([])
-  isOpen.value = false
   e.stopPropagation()
 }
 
@@ -228,12 +233,13 @@ onMounted(() => {
     <Html
       center
       :distance-factor="4"
-      :scale="2"
+      :scale="[2, 2, 2]"
       :position="[0, 2, 0]"
     >
       <UBadge
         v-if="isHovering"
         label="Chest"
+        size="lg"
         color="neutral"
       />
     </Html>

@@ -23,6 +23,7 @@ export interface Player {
   character?: string
   characterName?: string
   position: number[] // [x, y, z]
+  weapon?: string
 }
 
 export interface Lobby {
@@ -54,13 +55,6 @@ export interface CharacterTemplate {
     wis: number
     cha: number
   }
-  proficiencies: {
-    weapons: string[]
-    armor: string[]
-    skills: string[]
-  }
-  spells: string[]
-  cantrips: string[]
   spellsData?: Spell[]
   cantripsData?: Cantrip[]
 }
@@ -89,6 +83,16 @@ export interface Class {
   primaryAbility: string
   savingThrows: string[]
   features: string[]
+  proficiencies: {
+    armor: string[]
+    weapons: string[]
+    skills: {
+      choose: number
+      from: string[]
+    }
+  }
+  spells: string[]
+  cantrips: string[]
 }
 
 export interface Spell {
@@ -120,16 +124,19 @@ export interface ContextMenuItem {
   action?: () => void
 }
 
+/**
+ * Arguments for the dice roll modal
+ */
 export interface DiceRollModalArgs {
-  title?: string
+  title: string
   subtitle?: string
   difficultyClass?: number
-  diceType?: 4 | 6 | 8 | 10 | 12 | 20
-  modifiers?: {
-    name: string
-    value: number
-    icon?: string
-  }[]
+  diceType: 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20'
+  modifiers?: { name: string, value: number, icon?: string }[]
+  skillCheck?: {
+    ability: 'strength' | 'dexterity' | 'constitution' | 'intelligence' | 'wisdom' | 'charisma'
+    skill: string
+  }
   onSuccess?: () => void
   onFailure?: () => void
 }

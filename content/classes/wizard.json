@@ -2,15 +2,43 @@
   "name": "Wizard",
   "slug": "wizard",
   "icon": "/icons/classes/wizard.svg",
-  "description": "Scholars of arcane magic, wizards are supreme magic-users, capable of casting powerful spells through careful study and manipulation of the fabric of reality.",
+  "description": "Scholars of the arcane arts who wield powerful spells through careful study and manipulation of magical forces.",
   "hitDie": "d6",
   "primaryAbility": "Intelligence",
   "savingThrows": ["Intelligence", "Wisdom"],
+  "proficiencies": {
+    "armor": [],
+    "weapons": [
+      "Daggers",
+      "Darts",
+      "Slings",
+      "Quarterstaffs",
+      "Light Crossbows"
+    ],
+    "tools": [],
+    "skills": {
+      "choose": 2,
+      "from": [
+        "Arcana",
+        "History",
+        "Insight",
+        "Investigation",
+        "Medicine",
+        "Religion"
+      ]
+    }
+  },
   "features": [
-    "Spellcasting",
     "Arcane Recovery",
-    "Arcane Tradition",
-    "Spell Mastery",
-    "Signature Spells"
+    "Spellcasting",
+    "Arcane Tradition"
+  ],
+  "spells": [
+    "magic-missile",
+    "shield"
+  ],
+  "cantrips": [
+    "fire-bolt",
+    "light"
   ]
 }

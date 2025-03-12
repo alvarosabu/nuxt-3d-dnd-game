@@ -1,29 +1,18 @@
 {
-  "name": "Paladin",
+  "name": "Joyful Paladin",
   "key": "paladin-storyblok",
-  "model": "/models/characters/paladin/Paladin_Helmet_Storyblok.glb",
-  "title": "Holy Warrior",
-  "description": "A holy warrior bound by oath to protect the innocent and uphold justice. Paladins combine martial prowess with divine magic.",
+  "model": "/models/characters/paladin/Paladin.glb",
+  "title": "Holy Knight",
+  "description": "A holy warrior bound by a sacred oath, combining martial prowess with divine magic.",
   "race": "human",
   "class": "paladin",
   "stats": {
-    "str": 15,
+    "str": 16,
     "dex": 10,
-    "con": 13,
+    "con": 14,
     "int": 8,
     "wis": 12,
     "cha": 15
   },
-  "proficiencies": {
-    "weapons": ["Light Crossbows", "Spears", "Pikes", "Halberds", "Glaives"],
-    "armor": ["Light Armour", "Shields"],
-    "skills": ["Arcana", "History", "Investigation", "Insight", "Persuasion"]
-  },
-  "spells": [
-    "divine-smite",
-    "lay-on-hands"
-  ],
-  "cantrips": [
-    "sacred-flame"
-  ]
+  "weapon": "paladin-hammer"
 }
