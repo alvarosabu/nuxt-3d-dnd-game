@@ -8,6 +8,7 @@ import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
 import { BlendFunction, KernelSize } from 'postprocessing'
 import Chest from '~/components/items/Chest.vue'
 import Item from '~/components/game/Item.vue'
+import World from '~/components/environments/World.vue'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
@@ -177,17 +178,13 @@ const { cursor } = useGameCursor()
       </template>
     </template>
 
-    <!-- Floor -->
-    <TresMesh
-      :rotation-x="-Math.PI / 2"
-      class="cursor-pointer"
+    <!-- World -->
+    <Suspense>
+      <World
       @click="handleFloorClick"
       @pointer-move="handleFloorHover"
-      @pointer-leave="handleFloorLeave"
-    >
-      <TresPlaneGeometry :args="[gameStore.currentLevel.grid.size[0], gameStore.currentLevel.grid.size[1]]" />
-      <TresMeshBasicMaterial color="#4f4f4f" />
-    </TresMesh>
+      @pointer-leave="handleFloorLeave"/>
+    </Suspense>
 
     <!-- Postprocessing -->
     <EffectComposerPmndrs>

@@ -52,6 +52,8 @@ export const useResourcePreloader = () => {
     { type: 'model', path: '/models/characters/rogue/Rogue.glb', key: 'rogue' },
     { type: 'model', path: '/models/characters/wizard/Wizard.glb', key: 'wizard' },
     { type: 'model', path: '/models/characters/warrior/Warrior.glb', key: 'warrior' },
+    // World
+    { type: 'model', path: '/models/world/dungeon.gltf', key: 'dungeon' },
     // Items
     { type: 'model', path: '/models/items/Chest.glb', key: 'chest' },
     // Textures
