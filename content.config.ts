@@ -23,6 +23,7 @@ export default defineContentConfig({
           rotation: z.tuple([z.number(), z.number(), z.number()]).optional(),
           state: z.record(z.string(), z.any()),
         })),
+        model: z.string(),
       }),
     }),
 

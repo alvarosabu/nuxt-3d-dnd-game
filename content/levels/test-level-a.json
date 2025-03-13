@@ -1,6 +1,7 @@
 {
   "slug": "test-level-a",
   "name": "Test Level A",
+  "model": "dungeon",
   "ambient": {
     "light": 0.5,
     "environment": "sunset"
