@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   ],
   css: ['~/assets/css/main.css'],
   devServer: {
-    https: true,
+    https: false,
   },
   /*  server: {
     host: '0.0.0.0',
