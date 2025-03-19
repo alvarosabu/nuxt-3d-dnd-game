@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import type { Character, Lobby, Player } from '~/types'
+import type { Lobby, Player } from '~/types'
 
 interface Peer {
   id: string

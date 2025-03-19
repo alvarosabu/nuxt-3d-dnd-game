@@ -67,31 +67,26 @@ export const useResourcePreloader = () => {
 
   const loadResource = async (resource: Resource) => {
     try {
-      switch (resource.type) {
-        case 'model':
-          const result = await useGLTF(resource.path, { draco: true })
+      if (resource.type === 'model') {
+        const result = await useGLTF(resource.path, { draco: true })
 
-          const { scene, animations, nodes, materials } = result
-          // Ensure scene is a Group
-          if (!(scene instanceof Group)) {
-            throw new TypeError('Loaded scene is not a Group')
-          }
-          cache.models.set(resource.key, { scene, animations, nodes, materials })
-          break
-
-        case 'texture':
-          const texture = await textureLoader.loadAsync(resource.path)
-          cache.textures.set(resource.key, texture)
-          break
-
-        case 'audio':
-          const audio = await audioLoader.loadAsync(resource.path)
-          cache.audio.set(resource.key, audio)
-          break
-
-        case 'environment':
-          // Handle environment maps, HDRIs, etc.
-          break
+        const { scene, animations, nodes, materials } = result
+        // Ensure scene is a Group
+        if (!(scene instanceof Group)) {
+          throw new TypeError('Loaded scene is not a Group')
+        }
+        cache.models.set(resource.key, { scene, animations, nodes, materials })
+      }
+      else if (resource.type === 'texture') {
+        const texture = await textureLoader.loadAsync(resource.path)
+        cache.textures.set(resource.key, texture)
+      }
+      else if (resource.type === 'audio') {
+        const audio = await audioLoader.loadAsync(resource.path)
+        cache.audio.set(resource.key, audio)
+      }
+      else if (resource.type === 'environment') {
+        // Handle environment maps, HDRIs, etc.
       }
     }
     catch (error) {

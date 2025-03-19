@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data, send, message, error, status } = useWebSocket('/api/test-websocket', {
+const { data, send } = useWebSocket('/api/test-websocket', {
   immediate: true,
   autoReconnect: true,
 })
@@ -20,7 +20,6 @@ const user = reactive({
 watch(data, (newData) => {
   const data = JSON.parse(newData)
   if (data.type === 'SYNC_SESSIONS') {
-    console.log('SYNC_SESSIONS', data.sessions)
     state.sessions = data.sessions
   }
   if (data.type === 'CONNECTION_ESTABLISHED') {

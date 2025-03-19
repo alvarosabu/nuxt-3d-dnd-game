@@ -1,6 +1,3 @@
-import type { OriginsCollectionItem } from '@nuxt/content'
-import type { Vector3 } from 'three'
-
 export interface Character {
   id: string
   name: string

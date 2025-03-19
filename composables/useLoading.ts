@@ -20,6 +20,6 @@ export const useLoading = () => {
     progress: readonly(progress),
     message: readonly(message),
     isLoading: readonly(isLoading),
-    setProgress
+    setProgress,
   }
-} 
+}
