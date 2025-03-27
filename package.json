@@ -2,6 +2,7 @@
   "name": "fardus-gate",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@10.6.5+sha512.cdf928fca20832cd59ec53826492b7dc25dc524d4370b6b4adbf65803d32efaa6c1c88147c0ae4e8d579a6c9eec715757b50d4fa35eea179d868eada4ed043af",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -12,8 +13,8 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@nuxt/content": "^3.1.1",
-    "@nuxt/ui": "3.0.0-alpha.11",
+    "@nuxt/content": "^3.4.0",
+    "@nuxt/ui": "^3.0.1",
     "@pinia/nuxt": "^0.10.0",
     "@tresjs/cientos": "https://pkg.pr.new/@tresjs/cientos@1281a3b",
     "@tresjs/core": "https://pkg.pr.new/@tresjs/core@47bb9e7",
@@ -22,8 +23,9 @@
     "@tresjs/post-processing": "^2.1.0",
     "@vueuse/core": "^12.7.0",
     "@vueuse/nuxt": "^12.5.0",
+    "better-sqlite3": "^11.9.1",
     "gsap": "^3.12.7",
-    "nuxt": "^3.15.4",
+    "nuxt": "^3.16.1",
     "nuxt-svgo": "4.0.14",
     "pinia": "^3.0.0",
     "pinia-plugin-persistedstate": "^4.2.0",
@@ -38,5 +40,15 @@
     "@types/three": "^0.173.0",
     "typescript": "^5.7.3",
     "unocss": "^65.4.3"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild"
+    ],
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "sharp"
+    ]
   }
 }

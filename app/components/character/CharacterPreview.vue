@@ -2,7 +2,7 @@
 import type { AnimationAction, Group } from 'three'
 import { LoopOnce, Mesh, MeshToonMaterial } from 'three'
 import { useResourcePreloader } from '~/composables/useResourcePreloader'
-import type { CharacterTemplate } from '~/types'
+import type { CharacterTemplate } from '~/shared/types'
 import { SkeletonUtils } from 'three-stdlib'
 
 interface Props {

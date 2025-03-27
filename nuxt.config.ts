@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: [
-    '@tresjs/nuxt',
+    '../nuxt/src', // @tresjs/nuxt local PR
     '@nuxt/ui',
     '@pinia/nuxt',
     '@vueuse/nuxt',
@@ -19,6 +19,9 @@ export default defineNuxtConfig({
     host: '0.0.0.0',
     port: 3000
   }, */
+  future: {
+    compatibilityVersion: 4,
+  },
   routeRules: {
     '/': {
       ssr: false,

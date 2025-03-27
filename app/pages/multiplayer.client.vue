@@ -2,7 +2,7 @@
 import { useUserStore } from '~/stores/useUserStore'
 
 import { useClipboard } from '@vueuse/core'
-import type { Player } from '~/types'
+import type { Player } from '~/shared/types'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 
 // For Nuxt 3

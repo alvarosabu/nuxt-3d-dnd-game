@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { CharacterTemplate, GameItem, Level, Player } from '~/types'
+import type { CharacterTemplate, GameItem, Level, Player } from '~/shared/types'
 
 /**
  * Store for managing game state including characters, players, and templates

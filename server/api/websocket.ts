@@ -1,13 +1,7 @@
 /* eslint-disable no-console */
+import type { Peer } from '~~/shared/server/types/websocket'
+import type { Character, Lobby, Player } from '~~/shared/types'
 
-import type { Character, Lobby, Player } from '~/types'
-
-interface Peer {
-  id: string
-  send: (message: string) => void
-  subscribe: (topic: string) => void
-  publish: (topic: string, message: string) => void
-}
 const connectedPeers = new Map<string, any>()
 const global = 'GLOBAL'
 const lobbies = new Map<string, Lobby>()
@@ -130,6 +124,7 @@ function playerReady(peer: Peer, lobbyId: string, value: boolean) {
     }
   }
 }
+
 function broadcastMessage(message: Record<string, any>) {
   connectedPeers.forEach((p) => {
     p.send(JSON.stringify(message))
