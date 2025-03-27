@@ -1,4 +1,4 @@
-import type { Session } from '~/types'
+import type { Player, Session } from '~~/shared/types'
 
 const connectedPeers = new Map<string, any>()
 const sessions = new Map<string, Session>()

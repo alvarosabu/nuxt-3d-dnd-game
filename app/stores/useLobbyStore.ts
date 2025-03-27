@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useUserStore } from './useUserStore'
 import { useGameStore } from './useGameStore'
-import type { Character, Lobby } from '~/types'
+import type { Character, Lobby } from '~/shared/types'
 
 /**
  * Store to manage multiplayer lobbies

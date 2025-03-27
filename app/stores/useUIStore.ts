@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import DiceRollModal from '~/components/ui/DiceRollModal.vue'
-import type { ContextMenuItem, DiceRollModalArgs, Lobby, Player } from '~/types'
+import type { ContextMenuItem, DiceRollModalArgs, Lobby, Player } from '~/shared/types'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import { useUserStore } from '~/stores/useUserStore'
 import { useLobbyStore } from '~/stores/useLobbyStore'

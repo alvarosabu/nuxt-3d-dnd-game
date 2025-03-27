@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CharacterTemplate } from '~/types'
+import type { CharacterTemplate } from '~/shared/types'
 
 interface Props {
   character: CharacterTemplate

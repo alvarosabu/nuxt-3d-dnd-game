@@ -2,7 +2,7 @@
 import type { AnimationAction, AnimationClip, AnimationMixer, Object3D, Quaternion } from 'three'
 import { LoopOnce, LoopRepeat, SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
-import type { Player } from '~/types'
+import type { Player } from '~/shared/types'
 import { Html } from '@tresjs/cientos'
 import { useLobbyStore, useResourcePreloader } from '#imports'
 import { SkeletonUtils } from 'three-stdlib'

@@ -4,7 +4,7 @@ import { onKeyDown, onKeyUp } from '@vueuse/core'
 import type { Object3D } from 'three'
 import { Quaternion, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
-import type { Player } from '~/types'
+import type { Player } from '~/shared/types'
 import { Html } from '@tresjs/cientos'
 
 const props = defineProps<{
