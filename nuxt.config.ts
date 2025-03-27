@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: [
-    '../nuxt/src', // @tresjs/nuxt local PR
+    '@tresjs/nuxt',
     '@nuxt/ui',
     '@pinia/nuxt',
     '@vueuse/nuxt',
