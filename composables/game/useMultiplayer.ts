@@ -1,5 +1,4 @@
 import { createSharedComposable } from '@vueuse/core'
-import type { UseWebSocketReturn } from '@vueuse/core'
 
 const _useMultiplayer = (enabled: boolean = true) => {
   const wsInstance = useWebSocket('/api/websocket', {

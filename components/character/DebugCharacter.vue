@@ -13,8 +13,6 @@ const props = defineProps<{
   index: number
 }>()
 
-const { getResource } = useResourcePreloader()
-
 const lobbyStore = useLobbyStore()
 
 // Inject websocket methods

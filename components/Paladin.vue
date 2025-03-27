@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { type AnimationAction, AnimationObjectGroup, type Group, type Object3D } from 'three'
+import type { AnimationAction, Object3D } from 'three'
 
 const { nodes, animations } = await useGLTF('/models/characters/paladin/Paladin_with_Helmet.glb')
 
 const model = nodes.Rig
 
-const handSlotR = findBoneByName(model, 'handslotr')
+// const handSlotR = findBoneByName(model, 'handslotr')
 
 const modelRef = ref<Object3D>()
-const animationGroup = ref<AnimationObjectGroup>(new AnimationObjectGroup())
+// const animationGroup = ref<AnimationObjectGroup>(new AnimationObjectGroup())
 const actions = ref<AnimationAction[]>()
 const currentAction = ref<AnimationAction>()
 

@@ -64,8 +64,8 @@ watch(data, (newData) => {
 
 // Clipboard handling
 const { copy, copied, isSupported } = useClipboard()
-const permissionRead = usePermission('clipboard-read')
-const permissionWrite = usePermission('clipboard-write')
+// const permissionRead = usePermission('clipboard-read')
+// const permissionWrite = usePermission('clipboard-write')
 
 // Form state
 const lobbyFormState = reactive({

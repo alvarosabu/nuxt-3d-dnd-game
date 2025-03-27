@@ -86,35 +86,33 @@ export default defineWebSocketHandler({
   message: (peer, message) => {
     console.warn(`[WS] Message from ${peer.id}:`, message)
     const data = JSON.parse(message as string)
-    switch (data.type) {
-      case 'CREATE_SESSION':
-        const session = {
-          id: data.id,
-          name: data.name,
-          hostName: data.hostName,
-        }
-        sessions.set(session.id, session)
-        // Convert sessions Map to an array or object before sending
-        const sessionsArray = Array.from(sessions.values())
-        /*         peer.send(JSON.stringify({
+    if (data.type === 'CREATE_SESSION') {
+      const session = {
+        id: data.id,
+        name: data.name,
+        hostName: data.hostName,
+      }
+      sessions.set(session.id, session)
+      // Convert sessions Map to an array or object before sending
+      // const sessionsArray = Array.from(sessions.values())
+      /*         peer.send(JSON.stringify({
           type: 'SESSION_CREATED',
           session,
           sessions: sessionsArray,
         })) */
-        peer.send(JSON.stringify({
-          type: 'SESSION_CREATED',
-          session,
-        }))
+      peer.send(JSON.stringify({
+        type: 'SESSION_CREATED',
+        session,
+      }))
 
-        syncSessions()
-        break
-      case 'FLUSH_SESSIONS':
-        flushSessions()
-        syncSessions()
-        break
-      case 'PLAYER_CONNECTION_REQUEST':
-        handlePlayerConnection(peer.id, data.userId, data.username)
-        break
+      syncSessions()
+    }
+    else if (data.type === 'FLUSH_SESSIONS') {
+      flushSessions()
+      syncSessions()
+    }
+    else if (data.type === 'PLAYER_CONNECTION_REQUEST') {
+      handlePlayerConnection(peer.id, data.userId, data.username)
     }
   },
   close: (peer) => {

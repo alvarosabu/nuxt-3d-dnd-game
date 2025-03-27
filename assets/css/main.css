@@ -1,18 +1,18 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 @theme {
   --font-sans: 'Quando', sans-serif;
   --font-display: 'Sherwood', sans-serif;
-  --color-gold-50: #FDF8F0;  /* Lightest - Almost white with gold tint */
-  --color-gold-100: #F9ECD8;
-  --color-gold-200: #F1D7B0;
-  --color-gold-300: #E5C088;
-  --color-gold-400: #D0A970;
-  --color-gold-500: #B4945F;  /* Base color */
-  --color-gold-600: #997B4A;
-  --color-gold-700: #7D6339;
-  --color-gold-800: #634D2D;
-  --color-gold-900: #4E3B21;
-  --color-gold-950: #2A1F10;  /* Darkest - Almost black with gold tint */
+  --color-gold-50: #fdf8f0; /* Lightest - Almost white with gold tint */
+  --color-gold-100: #f9ecd8;
+  --color-gold-200: #f1d7b0;
+  --color-gold-300: #e5c088;
+  --color-gold-400: #d0a970;
+  --color-gold-500: #b4945f; /* Base color */
+  --color-gold-600: #997b4a;
+  --color-gold-700: #7d6339;
+  --color-gold-800: #634d2d;
+  --color-gold-900: #4e3b21;
+  --color-gold-950: #2a1f10; /* Darkest - Almost black with gold tint */
 }
