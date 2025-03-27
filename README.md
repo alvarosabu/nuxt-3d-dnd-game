@@ -27,7 +27,7 @@ Here are some useful commands to get started:
 | `pnpm build` | Build the project. |
 | `node .output/server/index.mjs` | Serve the built project for testing. |
 
-### better-sqlite3 Error on Server Start
+### If you already or still have a older install of this repository before Nuxt 3.16.1, you might get a `better-sqlite3` error on server start
 
 If you, with `pnpm dev`, get an `better-sqlite3` error like:
 
@@ -45,14 +45,28 @@ ERROR Cannot start nuxt:  Could not locate the bindings file. Tried:
 [...]
 ```
 
-Then try the following to solve it:
+Then do the following to solve it:
 
-```shell
-cd node_modules/better-sqlite3
-yarn run build-release
+1. Delete the `node_modules` folder.
+2. Delete the `.nuxt` folder.
+3. Delete the `pnpm-lock.yaml` file.
+4. Grab the latest version of the upstream 'package.json' file and replace your current one with it.
+5. Double check if the `package.json` file has the `better-sqlite3` under "pnpm.onlyBuiltDependencies".
+
+```json
+    "pnpm": {
+      "ignoredBuiltDependencies": [
+        "@parcel/watcher",
+      "esbuild"
+    ],
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "sharp"
+    ]
+  }
 ```
-
-If this does fails, use `yarn add -D node-gyp` in the root folder before it and try the build release again.
+5. Run `pnpm install` to install the dependencies.
+6. Run `pnpm dev` to start the development server.
 
 ## Contributors
 
