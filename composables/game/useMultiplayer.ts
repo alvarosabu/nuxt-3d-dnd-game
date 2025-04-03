@@ -1,5 +1,4 @@
 import { createSharedComposable } from '@vueuse/core'
-import type { UseWebSocketReturn } from '@vueuse/core'
 
 const _useMultiplayer = (enabled: boolean = true) => {
   const wsInstance = useWebSocket('/api/websocket', {
@@ -44,7 +43,7 @@ const _useMultiplayer = (enabled: boolean = true) => {
     }
   })
 
-  function sendMsg(message: Record<string, any>) {
+  function sendMsg(message: Record<string, unknown>) {
     if (!enabled) { return }
     wsInstance.send(JSON.stringify(message))
   }

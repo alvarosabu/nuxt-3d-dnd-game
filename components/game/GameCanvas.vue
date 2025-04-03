@@ -2,11 +2,8 @@
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { ThreeEvent } from '@tresjs/core'
 import { computed, ref, shallowRef, watch } from 'vue'
-import type { Object3D } from 'three'
-import { MOUSE } from 'three'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
-import { BlendFunction, KernelSize } from 'postprocessing'
-import Chest from '~/components/items/Chest.vue'
+import { KernelSize } from 'postprocessing'
 import Item from '~/components/game/Item.vue'
 import World from '~/components/environments/World.vue'
 
@@ -136,8 +133,8 @@ const { cursor } = useGameCursor()
     <OrbitControls
       ref="orbitControlsRef"
       make-default
-      :enableDamping="true"
-      :dampingFactor="0.05"
+      :enable-damping="true"
+      :damping-factor="0.05"
     />
 
     <!-- Environment -->

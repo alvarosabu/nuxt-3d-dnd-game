@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AnimationAction, Group } from 'three'
-import { LoopOnce, Mesh, MeshToonMaterial } from 'three'
+import { LoopOnce } from 'three'
 import { useResourcePreloader } from '~/composables/useResourcePreloader'
 import type { CharacterTemplate } from '~/types'
 import { SkeletonUtils } from 'three-stdlib'

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AnimationAction, AnimationClip, AnimationMixer, Object3D, Quaternion } from 'three'
+import type { AnimationAction, AnimationClip, AnimationMixer, Object3D } from 'three'
 import { LoopOnce, LoopRepeat, SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { Player } from '~/types'

@@ -1,5 +1,3 @@
-import type { OriginsCollectionItem } from '@nuxt/content'
-import type { Vector3 } from 'three'
 
 export interface Character {
   id: string
@@ -161,7 +159,7 @@ export interface GameItem {
   type: 'chest' | 'door' // Add more types as needed
   position: [number, number, number]
   rotation?: [number, number, number]
-  state: Record<string, any>
+  state: Record<string, unknown>
 }
 
 /**

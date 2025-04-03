@@ -7,7 +7,6 @@
     "source.organizeImports": "never"
   },
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-  "editor.formatOnSave": false,
   "editor.linkedEditing": true,
   "eslint.rules.customizations": [
     { "rule": "style/*", "severity": "off" },
