@@ -25,8 +25,7 @@ const characters = computed(() => {
 
 const { sendMsg } = useMultiplayer(gameStore.isMultiplayer)
 const orbitControlsRef = ref()
-const showIndicator = ref(false)
-const hoverIndicatorRef = shallowRef()
+
 
 useControls('fpsgraph')
 
@@ -48,52 +47,8 @@ const { edgeStrength, pulseSpeed, visibleEdgeColor, blur } = useControls({
   },
 })
 
-// Custom shader for gradient cylinder
-const cylinderShader = {
-  uniforms: {
-    color: { value: { r: 1.0, g: 1.0, b: 1.0 } },
-  },
-  vertexShader: `
-    varying float vY;
-    void main() {
-      vY = position.y;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    uniform vec3 color;
-    varying float vY;
-    void main() {
-      float alpha = 1.0 - (vY + 0.5); // Gradient from bottom to top
-      gl_FragColor = vec4(color, alpha * 0.5); // Semi-transparent
-    }
-  `,
-}
 
-const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
-  const newPosition = { x: e.point.x, y: 0, z: e.point.z }
-  if (gameStore.isMultiplayer) {
-    sendMsg({
-      type: 'UPDATE_PLAYER_POSITION',
-      lobbyId: lobbyStore.currentLobbyId,
-      position: [newPosition.x, newPosition.y, newPosition.z],
-    })
-  }
-  else {
-    gameStore.setPlayerPosition(gameStore.players[0], newPosition)
-  }
-}
 
-const handleFloorHover = (e: ThreeEvent<PointerEvent>) => {
-  showIndicator.value = true
-  if (hoverIndicatorRef.value) {
-    hoverIndicatorRef.value.position.set(e.point.x, 0, e.point.z)
-  }
-}
-
-const handleFloorLeave = () => {
-  showIndicator.value = false
-}
 
 const outlineRef = ref()
 
@@ -153,19 +108,7 @@ const { cursor } = useGameCursor()
         />
       </template>
     </Suspense>
-    <!-- Hover Indicator -->
-    <TresMesh
-      v-if="showIndicator"
-      ref="hoverIndicatorRef"
-    >
-      <TresCylinderGeometry :args="[0.5, 0.5, 1, 32]" />
-      <TresShaderMaterial
-        transparent
-        :vertex-shader="cylinderShader.vertexShader"
-        :fragment-shader="cylinderShader.fragmentShader"
-        :uniforms="cylinderShader.uniforms"
-      />
-    </TresMesh>
+   
 
     <!-- Level Items -->
     <template v-if="gameStore.currentLevel">
@@ -173,14 +116,19 @@ const { cursor } = useGameCursor()
         <Item :id="item.id" />
       </template>
     </template>
-
+    <!-- <TresMesh
+      v-if="gameStore.currentLevel"
+      :position-y="0.1"
+      :rotation-x="-Math.PI / 2"
+      :scale="100"
+     
+    >
+      <TresPlaneGeometry />
+      <TresMeshBasicMaterial color="red" transparent :opacity="0.2" />
+    </TresMesh> -->
     <!-- World -->
     <Suspense>
-      <World
-        @click="handleFloorClick"
-        @pointer-move="handleFloorHover"
-        @pointer-leave="handleFloorLeave"
-      />
+      <World />
     </Suspense>
 
     <!-- Postprocessing -->
