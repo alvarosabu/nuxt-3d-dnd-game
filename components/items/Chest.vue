@@ -15,8 +15,8 @@ const props = defineProps<{
 const chestRef = ref()
 const vueLogoRef = ref()
 const { getResource } = useResourcePreloader()
-const { nodes } = getResource('models', 'chest') as unknown as { nodes: Record<string, any> }
-const { nodes: vueNodes } = getResource('models', 'vue') as unknown as { nodes: Record<string, any> }
+const { nodes } = getResource('models', 'chest') as unknown as { nodes: Record<string, unknown> }
+const { nodes: vueNodes } = getResource('models', 'vue') as unknown as { nodes: Record<string, unknown> }
 
 const { setCursor, resetCursor } = useGameCursor()
 const uiStore = useUIStore()

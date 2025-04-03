@@ -271,7 +271,7 @@ const getModifierLabel = (modifier: { name: string }) => {
             <div v-if="!showResult" class="relative">
               <Dice20
                 class="mx-auto w-[300px] h-[300px]"
-                :fontControlled="false"
+                :font-controlled="false"
                 :class="{ 'animate-spin': isRolling }"
               />
               <span
@@ -357,7 +357,7 @@ const getModifierLabel = (modifier: { name: string }) => {
             class="relative group min-h-120px"
           >
             <!-- Decorative Border -->
-            <div class="absolute inset-0 bg-gradient-to-b from-gold-500/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-gold-500/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
 
             <!-- Card Content -->
             <div class="relative h-full text-center flex flex-col items-center p-4 bg-slate-900/80 rounded-lg ring-1 ring-gold-500/30 hover:ring-gold-500/50 transition-all duration-300">
@@ -383,20 +383,20 @@ const getModifierLabel = (modifier: { name: string }) => {
 
               <!-- Decorative Corner Lines -->
               <div class="absolute top-0 left-0 w-12px h-12px">
-                <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
-                <div class="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+                <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"/>
+                <div class="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"/>
               </div>
               <div class="absolute top-0 right-0 w-12px h-12px">
-                <div class="absolute top-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
-                <div class="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+                <div class="absolute top-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"/>
+                <div class="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"/>
               </div>
               <div class="absolute bottom-0 left-0 w-12px h-12px">
-                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"/>
+                <div class="absolute bottom-0 left-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"/>
               </div>
               <div class="absolute bottom-0 right-0 w-12px h-12px">
-                <div class="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
-                <div class="absolute bottom-0 right-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+                <div class="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"/>
+                <div class="absolute bottom-0 right-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"/>
               </div>
             </div>
           </div>
@@ -405,7 +405,7 @@ const getModifierLabel = (modifier: { name: string }) => {
         <!-- Total Bonus -->
         <div v-if="totalBonus !== 0" class="relative">
           <!-- Decorative Border -->
-          <div class="absolute inset-0 bg-gradient-to-b from-gold-500/10 to-transparent rounded-lg"></div>
+          <div class="absolute inset-0 bg-gradient-to-b from-gold-500/10 to-transparent rounded-lg"/>
 
           <div class="relative p-4 text-center border-t border-gold-500/30">
             <span class="text-sm text-slate-400 block mb-2">Total Bonus</span>
@@ -415,20 +415,20 @@ const getModifierLabel = (modifier: { name: string }) => {
 
             <!-- Decorative Corner Lines -->
             <div class="absolute top-0 left-0 w-12px h-12px">
-              <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
-              <div class="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+              <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"/>
+              <div class="absolute top-0 left-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"/>
             </div>
             <div class="absolute top-0 right-0 w-12px h-12px">
-              <div class="absolute top-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
-              <div class="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"></div>
+              <div class="absolute top-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"/>
+              <div class="absolute top-0 right-0 h-full w-0.5 bg-gradient-to-b from-gold-500/50 to-transparent"/>
             </div>
             <div class="absolute bottom-0 left-0 w-12px h-12px">
-              <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"></div>
-              <div class="absolute bottom-0 left-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+              <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-gold-500/50 to-transparent"/>
+              <div class="absolute bottom-0 left-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"/>
             </div>
             <div class="absolute bottom-0 right-0 w-12px h-12px">
-              <div class="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"></div>
-              <div class="absolute bottom-0 right-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"></div>
+              <div class="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-gold-500/50 to-transparent"/>
+              <div class="absolute bottom-0 right-0 h-full w-0.5 bg-gradient-to-t from-gold-500/50 to-transparent"/>
             </div>
           </div>
         </div>

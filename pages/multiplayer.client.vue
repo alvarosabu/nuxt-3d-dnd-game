@@ -64,8 +64,6 @@ watch(data, (newData) => {
 
 // Clipboard handling
 const { copy, copied, isSupported } = useClipboard()
-const permissionRead = usePermission('clipboard-read')
-const permissionWrite = usePermission('clipboard-write')
 
 // Form state
 const lobbyFormState = reactive({
@@ -225,7 +223,7 @@ onBeforeUnmount(() => {
             <template #header>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <span class="i-heroicons-users-20-solid text-xl text-gold-500"></span>
+                  <span class="i-heroicons-users-20-solid text-xl text-gold-500"/>
                   <h2 class="text-xl font-bold text-slate-200">
                     Available Lobbies
                   </h2>
@@ -321,7 +319,7 @@ onBeforeUnmount(() => {
           <UCard class="bg-slate-800/50 backdrop-blur ring-slate-700">
             <template #header>
               <div class="flex items-center gap-2">
-                <span class="i-heroicons-plus-circle-20-solid text-xl text-gold-500"></span>
+                <span class="i-heroicons-plus-circle-20-solid text-xl text-gold-500"/>
                 <h2 class="text-xl font-bold text-slate-200">
                   Create New Lobby
                 </h2>
@@ -382,7 +380,7 @@ onBeforeUnmount(() => {
           <UCard class="bg-slate-800/50 backdrop-blur ring-slate-700">
             <template #header>
               <div class="flex items-center gap-2">
-                <span class="i-heroicons-arrow-right-circle-20-solid text-xl text-gold-500"></span>
+                <span class="i-heroicons-arrow-right-circle-20-solid text-xl text-gold-500"/>
                 <h2 class="text-xl font-bold text-slate-200">
                   Join by Lobby ID
                 </h2>
@@ -419,7 +417,7 @@ onBeforeUnmount(() => {
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="i-heroicons-shield-check text-xl text-gold-500"></span>
+              <span class="i-heroicons-shield-check text-xl text-gold-500"/>
               <h3 class="text-xl font-bold text-slate-200">
                 {{ currentLobby?.name }}
               </h3>

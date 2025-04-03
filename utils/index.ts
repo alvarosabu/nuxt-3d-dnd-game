@@ -1,4 +1,4 @@
-import { type Bone, type Object3D, type SkinnedMesh } from 'three'
+import type { Bone, Object3D, SkinnedMesh } from 'three'
 
 /**
  * Finds a bone by name in a 3D model's skeleton

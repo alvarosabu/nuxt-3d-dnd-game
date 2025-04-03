@@ -1,6 +1,4 @@
-/* eslint-disable no-console */
-
-import type { Character, Lobby, Player } from '~/types'
+import type { Lobby, Player } from '~/types'
 
 interface Peer {
   id: string
@@ -8,7 +6,7 @@ interface Peer {
   subscribe: (topic: string) => void
   publish: (topic: string, message: string) => void
 }
-const connectedPeers = new Map<string, any>()
+const connectedPeers = new Map<string, Peer>()
 const global = 'GLOBAL'
 const lobbies = new Map<string, Lobby>()
 // Add new Maps for player tracking
@@ -130,7 +128,7 @@ function playerReady(peer: Peer, lobbyId: string, value: boolean) {
     }
   }
 }
-function broadcastMessage(message: Record<string, any>) {
+function broadcastMessage(message: Record<string, unknown>) {
   connectedPeers.forEach((p) => {
     p.send(JSON.stringify(message))
   })
@@ -194,7 +192,7 @@ function updatePlayerPosition(peer: Peer, lobbyId: string, position: number[]) {
   }
 }
 
-function updatePlayerState(peer: Peer, lobbyId: string, state: Record<string, any>) {
+function updatePlayerState(peer: Peer, lobbyId: string, state: Record<string, unknown>) {
   const lobby = lobbies.get(lobbyId)
   const playerId = peerToPlayer.get(peer.id)
 
@@ -237,7 +235,7 @@ function updatePlayerStatus(peer: Peer, status: string) {
 function updateItemState(peer: Peer, data: {
   itemId: string
   itemType: string
-  state: Record<string, any>
+  state: Record<string, unknown>
   position?: number[]
 }) {
   const playerId = peerToPlayer.get(peer.id)
@@ -253,7 +251,7 @@ function updateItemState(peer: Peer, data: {
   })
 }
 
-function handleDiceRollStart(peer: Peer, data: { modalArgs: any }) {
+function handleDiceRollStart(peer: Peer, data: { modalArgs: unknown }) {
   const playerId = peerToPlayer.get(peer.id)
   if (!playerId) { return }
 
@@ -304,7 +302,7 @@ export default defineWebSocketHandler({
 
     const data = JSON.parse(message.text())
     // Create a map of message handlers for better organization and maintainability
-    const messageHandlers: Record<string, (peer: Peer, data: any) => void | boolean> = {
+    const messageHandlers: Record<string, (peer: Peer, data: unknown) => boolean | undefined> = {
       PLAYER_CONNECTION_REQUEST: (peer: Peer, data: { userId: string, username: string }) => {
         handlePlayerConnection(peer, data.userId, data.username)
       },
@@ -342,7 +340,7 @@ export default defineWebSocketHandler({
         updatePlayerPosition(peer, data.lobbyId, data.position)
         return true
       },
-      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Record<string, any> }) => {
+      UPDATE_PLAYER_STATE: (peer: Peer, data: { lobbyId: string, state: Record<string, unknown> }) => {
         updatePlayerState(peer, data.lobbyId, data.state)
         return true
       },
@@ -352,12 +350,12 @@ export default defineWebSocketHandler({
       UPDATE_ITEM_STATE: (peer: Peer, data: {
         itemId: string
         itemType: string
-        state: Record<string, any>
+        state: Record<string, unknown>
         position?: number[]
       }) => {
         updateItemState(peer, data)
       },
-      DICE_ROLL_START: (peer: Peer, data: { modalArgs: any }) => {
+      DICE_ROLL_START: (peer: Peer, data: { modalArgs: unknown }) => {
         handleDiceRollStart(peer, data)
       },
       DICE_ROLL_RESULT: (peer: Peer, data: { result: number, success: boolean }) => {

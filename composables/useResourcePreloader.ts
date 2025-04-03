@@ -14,7 +14,7 @@ interface ResourceCache {
   models: Map<string, GLTF>
   textures: Map<string, Texture>
   audio: Map<string, AudioBuffer>
-  environment: Map<string, any> // For environment maps, HDRIs, etc.
+  environment: Map<string, unknown> // For environment maps, HDRIs, etc.
 }
 
 // Create a singleton cache outside the composable
@@ -156,7 +156,7 @@ export const useResourcePreloader = () => {
       return resource
     }
 
-    return resource as any
+    return resource as unknown as ResourceCache[T]['get']
   }
 
   return {
