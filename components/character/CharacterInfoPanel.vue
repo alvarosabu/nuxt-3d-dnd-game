@@ -46,7 +46,7 @@ const isPrimaryAbility = (stat: string) => {
   <div class="character-info-panel w-80 fixed top-8 right-8 bg-black/75 backdrop-blur-sm border border-2 border-gold-500 rounded-lg p-4 text-sm">
     <!-- Race & Class -->
     <header class="text-center mb-4">
-      <img :src="character.classData?.icon" alt="Class Icon" class=" w-1/2 mx-auto mb-2" />
+      <img :src="character.classData?.icon" alt="Class Icon" class="w-1/2 mx-auto mb-2" >
       <h2 class="text-gold-500/80  text-lg">{{ character.raceData?.name }}</h2>
       <h2 class="text-gold-200/80  text-xl">Level 1 {{ character.classData?.name }}</h2>
     </header>

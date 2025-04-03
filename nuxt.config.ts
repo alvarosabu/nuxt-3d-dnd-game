@@ -10,10 +10,11 @@ export default defineNuxtConfig({
     '@nuxt/content',
     'pinia-plugin-persistedstate/nuxt',
     'nuxt-svgo',
+    '@nuxt/eslint',
   ],
   css: ['~/assets/css/main.css'],
   devServer: {
-    https: true,
+    https: false,
   },
   /*  server: {
     host: '0.0.0.0',

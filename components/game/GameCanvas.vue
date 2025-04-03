@@ -2,12 +2,10 @@
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import type { ThreeEvent } from '@tresjs/core'
 import { computed, ref, shallowRef, watch } from 'vue'
-import type { Object3D } from 'three'
-import { MOUSE } from 'three'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
-import { BlendFunction, KernelSize } from 'postprocessing'
-import Chest from '~/components/items/Chest.vue'
+import { KernelSize } from 'postprocessing'
 import Item from '~/components/game/Item.vue'
+import World from '~/components/environments/World.vue'
 
 const userStore = useUserStore()
 const lobbyStore = useLobbyStore()
@@ -135,8 +133,8 @@ const { cursor } = useGameCursor()
     <OrbitControls
       ref="orbitControlsRef"
       make-default
-      :enableDamping="true"
-      :dampingFactor="0.05"
+      :enable-damping="true"
+      :damping-factor="0.05"
     />
 
     <!-- Environment -->
@@ -170,24 +168,20 @@ const { cursor } = useGameCursor()
     </TresMesh>
 
     <!-- Level Items -->
-
     <template v-if="gameStore.currentLevel">
       <template v-for="item in gameStore.currentLevel.items" :key="item.id">
         <Item :id="item.id" />
       </template>
     </template>
 
-    <!-- Floor -->
-    <TresMesh
-      :rotation-x="-Math.PI / 2"
-      class="cursor-pointer"
-      @click="handleFloorClick"
-      @pointer-move="handleFloorHover"
-      @pointer-leave="handleFloorLeave"
-    >
-      <TresPlaneGeometry :args="[gameStore.currentLevel.grid.size[0], gameStore.currentLevel.grid.size[1]]" />
-      <TresMeshBasicMaterial color="#4f4f4f" />
-    </TresMesh>
+    <!-- World -->
+    <Suspense>
+      <World
+        @click="handleFloorClick"
+        @pointer-move="handleFloorHover"
+        @pointer-leave="handleFloorLeave"
+      />
+    </Suspense>
 
     <!-- Postprocessing -->
     <EffectComposerPmndrs>

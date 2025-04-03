@@ -20,10 +20,10 @@ const { width, height } = useWindowSize()
   <div>
     <ConfettiExplosion
       v-if="showConfetti"
-      :particleCount="200"
+      :particle-count="200"
       :force="0.3"
-      :stageHeight="height"
-      :stageWidth="width"
+      :stage-height="height"
+      :stage-width="width"
     />
     <UContextMenu
       :disabled="!contextMenu.enabled"
@@ -31,7 +31,7 @@ const { width, height } = useWindowSize()
       :items="contextMenu.items"
       @update:open="handleContextMenuOpen"
     >
-      <slot></slot>
+      <slot/>
     </UContextMenu>
   </div>
 </template>

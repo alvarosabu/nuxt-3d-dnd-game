@@ -1,75 +1,71 @@
-# Nuxt Minimal Starter
+# Nuxt 3D DnD Game
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+This project is a Dungeons & Dragons-like 3D game, built entirely with Nuxt, TresJS, and ThreeJS ❤️
 
-## Setup
+## Development
 
-Make sure to install dependencies:
+While this project uses `pnpm` as the package manager, you can use any package manager of your choice, such as `npm`, `yarn`, or `bun`.
 
-```bash
-# npm
-npm install
+### Getting Started
 
-# pnpm
-pnpm install
+1. Clone the repository.
+2. Install dependencies:
+   ```sh
+   pnpm install --frozen-lockfile
+   ```
+3. No `.env` file is required for this project at the moment.
+4. Happy coding! ❤️
 
-# yarn
-yarn install
+### Scripts
 
-# bun
-bun install
+Here are some useful commands to get started:
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Run the project locally in development mode. |
+| `pnpm dev --host` | Run the project in development mode and expose it on your network. |
+| `pnpm build` | Build the project. |
+| `node .output/server/index.mjs` | Serve the built project for testing. |
+
+### better-sqlite3 Error on Server Start
+
+If you, with `pnpm dev`, get an `better-sqlite3` error like:
+
+```shell
+ERROR Cannot start nuxt:  Could not locate the bindings file. Tried:
+[...]
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/build/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/build/Debug/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/build/Release/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/out/Debug/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/Debug/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/out/Release/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/Release/better_sqlite3.node
+    → node_modules/.pnpm/better-sqlite3@11.8.1/node_modules/better-sqlite3/build/default/better_sqlite3.node
+[...]
 ```
 
-## Development Server
+Then try the following to solve it:
 
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+```shell
+cd node_modules/better-sqlite3
+yarn run build-release
 ```
 
-## Production
+If this does fails, use `yarn add -D node-gyp` in the root folder before it and try the build release again.
 
-Build the application for production:
+## Contributors
 
-```bash
-# npm
-npm run build
+<a href="https://github.com/alvarosabu/nuxt-3d-dnd-game/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=alvarosabu/nuxt-3d-dnd-game" />
+</a>
 
-# pnpm
-pnpm build
+## License
 
-# yarn
-yarn build
+<!-- TODO -->
 
-# bun
-bun run build
-```
+The license for this project is currently undefined. Please check with the project owner for clarification.
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+<!-- maybe: -->
+<!-- Published under the [MIT](https://github.com/unjs/rou3/blob/main/LICENSE) license. -->
+<!-- For the full license text, please see the [LICENSE](./LICENSE.md) file. -->

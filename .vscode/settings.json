@@ -1,0 +1,51 @@
+{
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.linkedEditing": true,
+  "eslint.rules.customizations": [
+    { "rule": "style/*", "severity": "off" },
+    { "rule": "format/*", "severity": "off" },
+    { "rule": "*-indent", "severity": "off" },
+    { "rule": "*-spacing", "severity": "off" },
+    { "rule": "*-spaces", "severity": "off" },
+    { "rule": "*-order", "severity": "off" },
+    { "rule": "*-dangle", "severity": "off" },
+    { "rule": "*-newline", "severity": "off" },
+    { "rule": "*quotes", "severity": "off" },
+    { "rule": "*semi", "severity": "off" }
+  ],
+  "eslint.useFlatConfig": true,
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "vue",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "yaml",
+    "css"
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "files.autoSave": "onFocusChange",
+  "npm.packageManager": "pnpm",
+  "prettier.enable": false,
+  "search.exclude": {
+    "**/.output": true,
+    "**/.pnp.*": true,
+    "**/dist": true,
+    "node_modules": true,
+    "pnpm-lock.yaml": true
+  },
+  "search.useIgnoreFiles": false,
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

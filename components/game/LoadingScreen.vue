@@ -74,18 +74,18 @@ onMounted(() => {
         :src="backgrounds[currentBg]"
         class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
         :class="{ 'opacity-0': isTransitioning }"
-      />
+      >
       <!-- Next background -->
       <img
         :src="backgrounds[nextBg]"
         class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
         :class="{ 'opacity-100': isTransitioning }"
         :style="{ opacity: 0 }"
-      />
+      >
     </div>
 
     <!-- Dark overlay with slight transparency -->
-    <div class="fixed top-0 right-0 bottom-0 left-0 bg-black/60 backdrop-blur-[2px] z-10"></div>
+    <div class="fixed top-0 right-0 bottom-0 left-0 bg-black/60 backdrop-blur-[2px] z-10"/>
 
     <!-- Loading spinner container - Bottom Right -->
     <div class="fixed bottom-8 right-8 z-30 flex flex-col items-center gap-2">

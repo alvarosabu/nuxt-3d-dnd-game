@@ -14,7 +14,7 @@ interface ResourceCache {
   models: Map<string, GLTF>
   textures: Map<string, Texture>
   audio: Map<string, AudioBuffer>
-  environment: Map<string, any> // For environment maps, HDRIs, etc.
+  environment: Map<string, unknown> // For environment maps, HDRIs, etc.
 }
 
 // Create a singleton cache outside the composable
@@ -52,6 +52,13 @@ export const useResourcePreloader = () => {
     { type: 'model', path: '/models/characters/rogue/Rogue.glb', key: 'rogue' },
     { type: 'model', path: '/models/characters/wizard/Wizard.glb', key: 'wizard' },
     { type: 'model', path: '/models/characters/warrior/Warrior.glb', key: 'warrior' },
+    // World
+    { type: 'model', path: '/models/world/dungeon.gltf', key: 'dungeon' },
+    { type: 'model', path: '/models/world/lights.gltf', key: 'lights' },
+    { type: 'model', path: '/models/world/chests.gltf', key: 'chests' },
+    { type: 'model', path: '/models/world/doors.gltf', key: 'doors' },
+    { type: 'model', path: '/models/world/spikes.gltf', key: 'spikes' },
+    { type: 'model', path: '/models/world/visual_blocker.gltf', key: 'visual_blocker' },
     // Items
     { type: 'model', path: '/models/items/Chest.glb', key: 'chest' },
     // Textures
@@ -140,14 +147,16 @@ export const useResourcePreloader = () => {
     key: string,
   ): NonNullable<ResourceCache[T]['get']> => {
     const resource = cache[type].get(key)
-    if (!resource) { throw new Error(`Resource ${key} not found in ${type} cache`) }
+    if (!resource) {
+      throw new Error(`Resource ${key} not found in ${type} cache`)
+    }
 
     // For models, return a clone to allow multiple instances
     if (type === 'models') {
       return resource
     }
 
-    return resource as any
+    return resource as unknown as ResourceCache[T]['get']
   }
 
   return {

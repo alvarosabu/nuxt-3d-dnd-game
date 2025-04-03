@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { CharacterTemplate, GameItem, Level, Player } from '~/types'
+import type { Character, CharacterTemplate, GameItem, Level, Player } from '~/types'
 
 /**
  * Store for managing game state including characters, players, and templates
@@ -16,7 +16,7 @@ export const useGameStore = defineStore('game', () => {
 
   // Characters
   const characterTemplates = ref<CharacterTemplate[]>([])
-  const characters = ref<any[]>([]) // TODO: Define proper type
+  const characters = ref<Character[]>([]) // TODO: Define proper type
 
   // Items State - Using a Record instead of Map for better persistence
   const items = ref<Record<string, GameItem>>({})
@@ -178,7 +178,7 @@ export const useGameStore = defineStore('game', () => {
    * @param itemId The ID of the item to update
    * @param state The new state to merge with the existing state
    */
-  function updateItemState(itemId: string, state: Record<string, any>) {
+  function updateItemState(itemId: string, state: Record<string, unknown>) {
     const item = items.value[itemId]
     if (item) {
       items.value = {
@@ -224,7 +224,7 @@ export const useGameStore = defineStore('game', () => {
    * @param state The new state to merge
    * @param position Optional new position as [x, y, z]
    */
-  function handleRemoteItemUpdate(itemId: string, state: Record<string, any>, position?: [number, number, number]) {
+  function handleRemoteItemUpdate(itemId: string, state: Record<string, unknown>, position?: [number, number, number]) {
     // Update item in items state
     updateItemState(itemId, state)
     if (position) {
