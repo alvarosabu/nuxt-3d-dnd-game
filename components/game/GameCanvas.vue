@@ -148,12 +148,12 @@ const { cursor } = useGameCursor()
 
     <Suspense>
       <template v-for="(player, index) in characters" :key="player.id">
-        <Character
+        <!-- <Character
           :character="player.character"
           :player="player"
           :is-current-player="player.id === userStore.userId"
           :index="index"
-        />
+        /> -->
       </template>
     </Suspense>
     <!-- Hover Indicator -->
