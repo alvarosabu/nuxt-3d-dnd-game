@@ -52,13 +52,6 @@ export const useResourcePreloader = () => {
     { type: 'model', path: '/models/characters/rogue/Rogue.glb', key: 'rogue' },
     { type: 'model', path: '/models/characters/wizard/Wizard.glb', key: 'wizard' },
     { type: 'model', path: '/models/characters/warrior/Warrior.glb', key: 'warrior' },
-    // World
-    { type: 'model', path: '/models/world/dungeon.gltf', key: 'dungeon' },
-    { type: 'model', path: '/models/world/lights.gltf', key: 'lights' },
-    { type: 'model', path: '/models/world/chests.gltf', key: 'chests' },
-    { type: 'model', path: '/models/world/doors.gltf', key: 'doors' },
-    { type: 'model', path: '/models/world/spikes.gltf', key: 'spikes' },
-    { type: 'model', path: '/models/world/visual_blocker.gltf', key: 'visual_blocker' },
     // Items
     { type: 'model', path: '/models/items/Chest.glb', key: 'chest' },
     // Textures

@@ -1,70 +1,50 @@
 <script setup lang="ts">
+import { dungeonScene, getNode as getNodeDungeon } from '~/assets/models/world/dungeon.gltf.js'
+import { getNode as getNodeLights, lightsScene } from '~/assets/models/world/lights.gltf.js'
+import { chestsScene, getNode as getNodeChests } from '~/assets/models/world/chests.gltf.js'
+import { doorsScene, getNode as getNodeDoors } from '~/assets/models/world/doors.gltf.js'
+import { getNode as getNodeSpikes, spikesScene } from '~/assets/models/world/spikes.gltf.js'
+import { getNode as getNodeVisual_blocker, visual_blockerScene } from '~/assets/models/world/visual_blocker.gltf.js'
+import { shallowRef, watch } from 'vue'
 import type { Group } from 'three'
 
-const { getResource } = useResourcePreloader()
+const modelgetNodeDungeon = await getNodeDungeon(dungeonScene)
+const modelgetNodeLights = await getNodeLights(lightsScene)
+const modelgetNodeChests = await getNodeChests(chestsScene)
+const modelgetNodeDoors = await getNodeDoors(doorsScene)
+const modelgetNodeSpikes = await getNodeSpikes(spikesScene)
+const modelgetNodeVisual_blocker = await getNodeVisual_blocker(visual_blockerScene)
 
-const { scene: model_dungeon } = getResource('models', 'dungeon')
-const { scene: model_lights } = getResource('models', 'lights')
-const { scene: model_chests } = getResource('models', 'chests')
-const { scene: model_doors } = getResource('models', 'doors')
-const { scene: model_spikes } = getResource('models', 'spikes')
-const { scene: model_visual_blocker } = getResource('models', 'visual_blocker')
+const groupWrapperRef = shallowRef()
 
-const model_dungeon_ref = ref()
-const model_lights_ref = ref()
-const model_chests_ref = ref()
-const model_doors_ref = ref()
-const model_spikes_ref = ref()
-const model_visual_blocker_ref = shallowRef()
-
-// Hide the visual blocker for the starting room for now - just for demonstration purposes
-const { stop } = watch(model_visual_blocker_ref, (newValue: Group | undefined) => {
+const { stop } = watch(groupWrapperRef, (newValue: Group | undefined) => {
   if (!newValue) {
     return
   }
+
+  // Add all models to one group - just for demonstration purposes //TODO refactor later
+  newValue.add(modelgetNodeDungeon)
+  newValue.add(modelgetNodeLights)
+  newValue.add(modelgetNodeChests)
+  newValue.add(modelgetNodeDoors)
+  newValue.add(modelgetNodeSpikes)
+  newValue.add(modelgetNodeVisual_blocker)
+
+  // Hide the visual blocker for the starting room for now - just for demonstration purposes //TODO refactor later
   const rooms = newValue.children.filter(child => child.name.startsWith('room1'))
   rooms.forEach((room) => {
     room.visible = false
   })
+
   stop()
 })
 </script>
 
 <template>
-  <primitive
-    v-if="model_dungeon"
-    ref="model_dungeon_ref"
-    :name="model_dungeon"
-    :object="model_dungeon"
-  />
-  <primitive
-    v-if="model_lights"
-    ref="model_lights_ref"
-    :name="model_lights"
-    :object="model_lights"
-  />
-  <primitive
-    v-if="model_chests"
-    ref="model_chests_ref"
-    :name="model_chests"
-    :object="model_chests"
-  />
-  <primitive
-    v-if="model_doors"
-    ref="model_doors_ref"
-    :name="model_doors"
-    :object="model_doors"
-  />
-  <primitive
-    v-if="model_spikes"
-    ref="model_spikes_ref"
-    :name="model_spikes"
-    :object="model_spikes"
-  />
-  <primitive
-    v-if="model_visual_blocker"
-    ref="model_visual_blocker_ref"
-    :name="model_visual_blocker"
-    :object="model_visual_blocker"
+  <TresGroup
+    ref="groupWrapperRef"
   />
 </template>
+
+<style scoped>
+</style>
