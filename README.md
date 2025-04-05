@@ -2,6 +2,10 @@
 
 This project is a Dungeons & Dragons-like 3D game, built entirely with Nuxt, TresJS, and ThreeJS ❤️
 
+## Production
+
+Currently deployed on: [nuxt-3d-dnd-game.fly.dev](https://nuxt-3d-dnd-game.fly.dev/)
+
 ## Development
 
 While this project uses `pnpm` as the package manager, you can use any package manager of your choice, such as `npm`, `yarn`, or `bun`.
