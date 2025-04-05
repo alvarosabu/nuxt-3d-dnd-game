@@ -1,0 +1,36 @@
+import gltfLoader from "@todde.tv/gltf-type-toolkit/gltf-loader";
+import gltfPath from "./paladin_hammer.gltf";
+
+const path = Symbol();
+
+export const SceneScene = {
+  [path]: [0],
+  paladin_hammer: {
+    [path]: [0, 0],
+    paladin_hammer_1: {
+      [path]: [0, 0, 0],
+    },
+    paladin_hammer_2: {
+      [path]: [0, 0, 1],
+    },
+  },
+};
+
+export async function getNode(spec) {
+  let node = { children: (await loadModel()).scenes };
+  for (const idx of spec[path]) {
+    node = node.children[idx];
+  }
+
+  return node;
+}
+
+let modelPromise;
+
+function loadModel() {
+  if (!modelPromise) {
+    modelPromise = gltfLoader.loadAsync(gltfPath);
+  }
+
+  return modelPromise;
+}
