@@ -69,13 +69,13 @@ const { cursor } = useGameCursor()
 
 <template>
   <TresCanvas
-    clear-color="#2f2f2f"
+    clear-color="#080808"
     window-size
     class="cursor-game"
     :class="[`custom-cursor-${cursor}`]"
   >
     <Suspense>
-      <Environment preset="sunset" :blur="1" background />
+      <Environment preset="sunset" :blur="1" />
     </Suspense>
     <TresPerspectiveCamera
       :position="[11, 11, 11]"

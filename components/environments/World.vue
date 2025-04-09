@@ -1,34 +1,36 @@
 <script setup lang="ts">
+import type { ThreeEvent, TresEvent } from '@tresjs/core'
 import type { Group } from 'three'
 import { MeshBasicMaterial } from 'three'
 const { getResource } = useResourcePreloader()
 const gameStore = useGameStore()
 
-const { scene: model_dungeon } = getResource('models', 'dungeon')
-const { scene: model_lights } = getResource('models', 'lights')
-const { scene: model_chests } = getResource('models', 'chests')
-const { scene: model_doors } = getResource('models', 'doors')
-const { scene: model_spikes } = getResource('models', 'spikes')
-const { scene: model_visual_blocker, nodes: model_visual_blocker_nodes } = getResource('models', 'visual_blocker')
+const { scene: modelDungeon } = getResource('models', 'dungeon')
+const { scene: modelLights } = getResource('models', 'lights')
+const { scene: modelChests } = getResource('models', 'chests')
+const { scene: modelDoors } = getResource('models', 'doors')
+const { scene: modelSpikes } = getResource('models', 'spikes')
+const { scene: modelVisualBlocker, nodes: modelVisualBlockerNodes } = getResource('models', 'visual_blocker')
 
-const floor = model_visual_blocker_nodes['room1001'].clone()
+const floor = modelVisualBlockerNodes['room1001'].clone()
 
 floor.material = new MeshBasicMaterial({
   transparent: true,
   opacity: 0,
 })
-const model_dungeon_ref = ref()
-const model_lights_ref = ref()
-const model_chests_ref = ref()
-const model_doors_ref = ref()
-const model_spikes_ref = ref()
-const model_visual_blocker_ref = shallowRef()
+const modelDungeonRef = ref()
+const modelLightsRef = ref()
+const modelChestsRef = ref()
+const modelDoorsRef = ref()
+const modelSpikesRef = ref()
+const modelVisualBlockerRef = shallowRef()
 
 // Hide the visual blocker for the starting room for now - just for demonstration purposes
-const { stop } = watch(model_visual_blocker_ref, (newValue: Group | undefined) => {
+const { stop } = watch(modelVisualBlockerRef, (newValue: Group | undefined) => {
   if (!newValue) {
     return
   }
+  newValue.position.set(0, -0.2, 0)
   const rooms = newValue.children.filter(child => child.name.startsWith('room1'))
   rooms.forEach((room) => {
     room.visible = false
@@ -88,40 +90,40 @@ watch(hoverIndicatorRef, (newValue) => {
 <template>
   
   <primitive
-    v-if="model_dungeon"
-    ref="model_dungeon_ref"
-    :name="model_dungeon"
-    :object="model_dungeon"
+    v-if="modelDungeon"
+    ref="modelDungeonRef"
+    :name="modelDungeon"
+    :object="modelDungeon"
   />
   <primitive
-    v-if="model_lights"
-    ref="model_lights_ref"
-    :name="model_lights"
-    :object="model_lights"
+    v-if="modelLights"
+    ref="modelLightsRef"
+    :name="modelLights"
+    :object="modelLights"
   />
   <primitive
-    v-if="model_chests"
-    ref="model_chests_ref"
-    :name="model_chests"
-    :object="model_chests"
+    v-if="modelChests"
+    ref="modelChestsRef"
+    :name="modelChests"
+    :object="modelChests"
   />
   <primitive
-    v-if="model_doors"
-    ref="model_doors_ref"
-    :name="model_doors"
-    :object="model_doors"
+    v-if="modelDoors"
+    ref="modelDoorsRef"
+    :name="modelDoors"
+    :object="modelDoors"
   />
   <primitive
-    v-if="model_spikes"
-    ref="model_spikes_ref"
-    :name="model_spikes"
-    :object="model_spikes"
+    v-if="modelSpikes"
+    ref="modelSpikesRef"
+    :name="modelSpikes"
+    :object="modelSpikes"
   />
   <primitive
-    v-if="model_visual_blocker"
-    ref="model_visual_blocker_ref"
-    :name="model_visual_blocker"
-    :object="model_visual_blocker"
+    v-if="modelVisualBlocker"
+    ref="modelVisualBlockerRef"
+    name="modelVisualBlocker"
+    :object="modelVisualBlocker"
   />
   <primitive
     v-if="floor"
