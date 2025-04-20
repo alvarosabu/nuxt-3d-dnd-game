@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import type { Vector3 } from 'three'
 import type { Character, CharacterTemplate, GameItem, Level, Player } from '~/types'
 
 /**

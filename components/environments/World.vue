@@ -2,6 +2,7 @@
 import type { ThreeEvent, TresEvent } from '@tresjs/core'
 import type { Group } from 'three'
 import { MeshBasicMaterial } from 'three'
+import { useMultiplayer } from '~/composables/game/useMultiplayer'
 const { getResource } = useResourcePreloader()
 const gameStore = useGameStore()
 
@@ -11,6 +12,7 @@ const { scene: modelChests } = getResource('models', 'chests')
 const { scene: modelDoors } = getResource('models', 'doors')
 const { scene: modelSpikes } = getResource('models', 'spikes')
 const { scene: modelVisualBlocker, nodes: modelVisualBlockerNodes } = getResource('models', 'visual_blocker')
+const lobbyStore = useLobbyStore()
 
 const floor = modelVisualBlockerNodes['room1001'].clone()
 
@@ -63,10 +65,20 @@ const cylinderShader = {
 const showIndicator = ref(false)
 const hoverIndicatorRef = shallowRef()
 
+const { sendMsg } = useMultiplayer(gameStore.isMultiplayer)
 
 const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
   const newPosition = { x: e.point.x, y: 0, z: e.point.z }
-  gameStore.setPlayerPosition(gameStore.players[0], newPosition)
+  if (gameStore.isMultiplayer) {
+    sendMsg({
+      type: 'UPDATE_PLAYER_POSITION',
+      lobbyId: lobbyStore.currentLobbyId,
+      position: [newPosition.x, newPosition.y, newPosition.z],
+    })
+  }
+  else {
+    gameStore.setPlayerPosition(gameStore.players[0], newPosition)
+  }
 
 }
 
