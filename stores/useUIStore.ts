@@ -12,7 +12,8 @@ import type { DiceRollProps } from '~/components/ui/DiceRollModal.vue'
  * Store for managing UI state like modals and context menus
  */
 export const useUIStore = defineStore('ui', () => {
-  const modal = useModal()
+  const overlay = useOverlay()
+  const diceRollModal = overlay.create(DiceRollModal)
   const gameStore = useGameStore()
   const userStore = useUserStore()
   const lobbyStore = useLobbyStore()
@@ -26,7 +27,7 @@ export const useUIStore = defineStore('ui', () => {
   })
 
   // Dice Roll Modal State
-  const diceRollModal = reactive({
+  const diceRollModalState = reactive({
     isOpen: false,
     args: undefined as DiceRollModalArgs | undefined,
     initiatorId: null as string | null,
@@ -69,8 +70,8 @@ export const useUIStore = defineStore('ui', () => {
    * @param sync Whether to sync this action with other players
    */
   function openDiceRollModal(args: DiceRollModalArgs, sync: boolean = true) {
-    diceRollModal.args = args
-    diceRollModal.isOpen = true
+    diceRollModalState.args = args
+    diceRollModalState.isOpen = true
     remoteRoll.value = null // Reset remote roll state
 
     // Calculate modifiers if this is a skill check and we're the initiator
@@ -129,7 +130,7 @@ export const useUIStore = defineStore('ui', () => {
     // Update modal props interface to include remoteRoll
     type DiceRollModalProps = DiceRollProps & ModalProps
 
-    modal.open<DiceRollModalProps>(DiceRollModal, {
+    diceRollModal.open({
       title: args.title,
       subtitle: args.subtitle,
       difficultyClass: args.difficultyClass,
@@ -156,7 +157,6 @@ export const useUIStore = defineStore('ui', () => {
         if (args.onFailure) { args.onFailure() }
       },
       onClose: () => {
-        modal.reset()
         closeDiceRollModal(sync)
       },
     })
@@ -166,10 +166,9 @@ export const useUIStore = defineStore('ui', () => {
    * Closes the dice roll modal
    */
   function closeDiceRollModal(sync: boolean = true) {
-    modal.reset()
-    diceRollModal.isOpen = false
-    diceRollModal.args = undefined
-    diceRollModal.initiatorId = null
+    diceRollModalState.isOpen = false
+    diceRollModalState.args = undefined
+    diceRollModalState.initiatorId = null
     remoteRoll.value = null
 
     // Sync with other players if needed
@@ -210,7 +209,7 @@ export const useUIStore = defineStore('ui', () => {
     if (data.type === 'DICE_ROLL_START') {
       // Only open modal if we're not the initiator
       if (data.playerId !== userStore.userId) {
-        diceRollModal.initiatorId = data.playerId // Set the initiator ID
+        diceRollModalState.initiatorId = data.playerId // Set the initiator ID
         // Open dice roll modal for other players
         openDiceRollModal(data.modalArgs, false) // Pass false to prevent infinite loop
       }
@@ -227,14 +226,14 @@ export const useUIStore = defineStore('ui', () => {
         }
 
         // Update remoteRoll ref directly instead of using modal.patch
-        modal.patch({
+        diceRollModal.patch({
           remoteRoll: newRemoteRoll,
-          isInitiator: data.playerId === diceRollModal.initiatorId,
+          isInitiator: data.playerId === diceRollModalState.initiatorId,
         })
 
         // Re-open modal with new remote roll if it's not already open
-        if (!diceRollModal.isOpen && diceRollModal.args) {
-          openDiceRollModal(diceRollModal.args, false)
+        if (!diceRollModalState.isOpen && diceRollModalState.args) {
+          openDiceRollModal(diceRollModalState.args, false)
         }
       }
     }

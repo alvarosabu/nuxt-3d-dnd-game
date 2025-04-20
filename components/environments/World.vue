@@ -84,7 +84,6 @@ const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
 
 const handleFloorHover = (e: ThreeEvent<PointerEvent>) => {
   showIndicator.value = true
-  console.log('hoverIndicatorRef', hoverIndicatorRef.value)
   if (hoverIndicatorRef.value) {
     hoverIndicatorRef.value.position.set(e.point.x, 0.2, e.point.z)
   }
@@ -94,9 +93,6 @@ const handleFloorLeave = () => {
   showIndicator.value = false
 }
 
-watch(hoverIndicatorRef, (newValue) => {
-  console.log('hoverIndicatorRef',newValue)
-})
 </script>
 
 <template>
