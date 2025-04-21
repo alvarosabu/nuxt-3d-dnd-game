@@ -2,7 +2,7 @@
 import type { AnimationAction, AnimationClip, AnimationMixer, Object3D } from 'three'
 import { LoopOnce, LoopRepeat, SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
-import type { Player } from '~/types'
+import type { Character, Player } from '~/types'
 import { Html } from '@tresjs/cientos'
 import { useLobbyStore, useResourcePreloader } from '#imports'
 import { SkeletonUtils } from 'three-stdlib'
@@ -75,7 +75,7 @@ const state = shallowReactive<CharacterStateProps>({
   currentState: CharacterStates.IDLE,
 })
 
-const { scene, animations, materials } = getResource('models', props.player.character)
+const { scene, animations, materials } = getResource('models', props.character.key)
 
 const clonedScene = SkeletonUtils.clone(scene)
 const { nodes } = useGraph(clonedScene)

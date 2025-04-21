@@ -1,26 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
-import { KernelSize } from 'postprocessing'
 import DebugControls from '~/components/ui/DebugControls.vue'
 import CameraControls from '~/components/game/CameraControls.vue'
 import World from '~/components/game/World.vue'
 
-const userStore = useUserStore()
-const lobbyStore = useLobbyStore()
-const gameStore = useGameStore()
-const { currentLobbyPlayers } = storeToRefs(lobbyStore)
 
 // Initialize outline objects composable
 const { outlinedObjects } = useOutlinedObjects()
 
-// Compute characters based on game mode
-const characters = computed(() => {
-  if (gameStore.isMultiplayer) {
-    return currentLobbyPlayers.value
-  }
-  return gameStore.players
-})
 
 // const { sendMsg } = useMultiplayer(gameStore.isMultiplayer)
 
@@ -61,16 +49,6 @@ const { cursor } = useGameCursor()
     <!-- Camera Controls -->
     <CameraControls />
 
-    <Suspense>
-      <template v-for="(player, index) in characters" :key="player.id">
-        <Character
-          :character="player.character"
-          :player="player"
-          :is-current-player="player.id === userStore.userId"
-          :index="index"
-        />
-      </template>
-    </Suspense>
     <World />
     <!-- Postprocessing -->
     <EffectComposerPmndrs>

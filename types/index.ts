@@ -2,8 +2,18 @@
 export interface Character {
   id: string
   name: string
-  description: string
-  image: string
+  key: string
+  /**
+   * The user ID of the character
+   */
+  userId: string
+  /**
+   * Whether the character is custom or companion
+   * @default false
+   */
+  custom?: boolean,
+  position: number[] // [x, y, z]
+  weapon?: string
 }
 
 export interface Player {
@@ -16,12 +26,6 @@ export interface Player {
   lobbyId?: string
   isHost?: boolean
   ready?: boolean
-
-  // Game related
-  character?: string
-  characterName?: string
-  position: number[] // [x, y, z]
-  weapon?: string
 }
 
 export interface Lobby {

@@ -1,13 +1,11 @@
 export default defineNuxtRouteMiddleware(() => {
-  /* const userStore = useUserStore()
-  const lobbyStore = useLobbyStore()
-
-  console.log('character middleware', userStore.isConnected, lobbyStore.currentLobby)
-
-  // Check if user is connected and in a lobby
-  if (!userStore.isConnected || !lobbyStore.currentLobby) {
-    return navigateTo('/multiplayer')
-  } */
+  // Single player only
+  const gameStore = useGameStore()
+  const { currentUserCharacters } = storeToRefs(gameStore)
+  const customCharacters = computed(() => currentUserCharacters.value.filter(character => character.custom))
+  if (customCharacters.value.length === 0) {
+    return navigateTo('/character/select')
+  }
 
   return true
 })
