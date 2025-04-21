@@ -2,6 +2,7 @@
   "name": "Joyful Paladin",
   "key": "paladin-storyblok",
   "model": "/models/characters/paladin/Paladin.glb",
+  "originName": "Joyful",
   "title": "Holy Knight",
   "description": "A holy warrior bound by a sacred oath, combining martial prowess with divine magic.",
   "race": "human",

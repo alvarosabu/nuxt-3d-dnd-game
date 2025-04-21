@@ -3,6 +3,8 @@
   "key": "artificer",
   "model": "/models/characters/artificer/Artificer.glb",
   "title": "Master Inventor",
+  "originName": "Torbun",
+  "lastName": "Copperblink",
   "description": "A brilliant inventor who combines arcane magic with mechanical ingenuity.",
   "race": "dwarf",
   "class": "artificer",

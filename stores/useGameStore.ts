@@ -154,6 +154,7 @@ export const useGameStore = defineStore('game', () => {
   function addCharacter(character: Partial<Character>) {
     characters.value = [...characters.value, {
       ...character,
+      name: character.name ?? 'New Character',
       userId: userId.value,
       custom: true,
     }]

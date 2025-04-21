@@ -44,6 +44,8 @@ export default defineContentConfig({
         key: z.string(),
         model: z.string(),
         title: z.string(),
+        originName: z.string(),
+        lastName: z.string().optional(),
         description: z.string(),
         race: z.string(),
         class: z.string(),
