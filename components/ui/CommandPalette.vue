@@ -12,9 +12,11 @@ interface Command {
 
 interface CommandParameter {
   name: string
-  type: 'string' | 'number' | 'boolean'
+  type: 'string' | 'number' | 'boolean' | 'select'
   required: boolean
   description: string
+  options?: { label: string; value: string }[]
+  badgeColor?: 'primary' | 'neutral' | 'error' | 'warning' | 'success'
 }
 
 const props = defineProps<{
@@ -55,12 +57,18 @@ const commands = ref<Command[]>([
         type: 'string',
         required: true,
         description: 'Character name',
+        badgeColor: 'error'
       },
       {
         name: 'template',
-        type: 'string',
+        type: 'select',
         required: false,
         description: 'Character template key',
+        badgeColor: 'neutral',
+        options: characterTemplates.value.map(template => ({
+          label: template.name,
+          value: template.key,
+        })),
       },
     ],
   },
@@ -124,6 +132,42 @@ watch(inputValue, (newValue) => {
   }
 })
 
+// Handle select parameter changes
+const handleSelectChange = (value: { label: string; value: string }) => {
+  if (isCommandMode.value && currentCommand.value && currentParameterIndex.value >= 0) {
+    const currentParam = currentCommand.value.parameters[currentParameterIndex.value]
+    if (currentParam) {
+      commandParameters.value[currentParam.name] = value.value
+      // Move to next parameter after selection
+      currentParameterIndex.value++
+      inputValue.value = ''
+      
+      // If we've filled all parameters, execute the command
+      if (currentParameterIndex.value >= currentCommand.value.parameters.length) {
+        executeCommand()
+      }
+    }
+  }
+}
+
+// Reset all command state
+const resetCommandState = () => {
+  isCommandMode.value = false
+  currentCommand.value = null
+  commandParameters.value = {}
+  currentParameterIndex.value = -1
+  inputValue.value = ''
+  commandInput.value = ''
+  searchTerm.value = ''
+}
+
+// Watch open state to reset when closed
+watch(open, (newValue) => {
+  if (!newValue) {
+    resetCommandState()
+  }
+})
+
 // Execute command when Enter is pressed
 const executeCommand = () => {
   if (!currentCommand.value) return
@@ -135,13 +179,9 @@ const executeCommand = () => {
       addCharacter({
         name,
         key: template,
+        custom: false,
       })
       open.value = false
-      commandInput.value = ''
-      inputValue.value = ''
-      currentParameterIndex.value = -1
-      commandParameters.value = {}
-      isCommandMode.value = false
     }
   }
 }
@@ -176,6 +216,7 @@ defineShortcuts({
   ...extractShortcuts(groups.value),
   'meta_k': () => {
     open.value = true
+    resetCommandState() // Reset state when opening with shortcut too
   },
 })
 </script>
@@ -192,25 +233,41 @@ defineShortcuts({
               /{{ currentCommand.id }}
             </UBadge>
             <template v-for="(value, name) in commandParameters" :key="name">
-              <UBadge color="neutral" variant="soft">
+              <UBadge 
+                v-if="value" 
+                :color="currentCommand.parameters.find(p => p.name === name)?.badgeColor || 'neutral'" 
+                variant="soft"
+              >
                 {{ value }}
               </UBadge>
             </template>
           </div>
-          <UInput
-            v-if="isCommandMode"
-            v-model="inputValue"
-            :placeholder="currentCommand 
-              ? currentParameterIndex >= 0 
-                ? `Enter ${currentCommand.parameters[currentParameterIndex].name}...`
-                : 'Enter command...'
-              : 'Search'"
-            :icon="'i-lucide-chevron-left'"
-            :class="props.ui?.input"
-            variant="none"
-            @keydown="handleKeyDown"
-            @keyup.enter="executeCommand"
-          />
+          <template v-if="isCommandMode">
+            <UInputMenu
+              v-if="currentCommand && currentParameterIndex >= 0 && currentCommand.parameters[currentParameterIndex].type === 'select'"
+              v-model="commandParameters[currentCommand.parameters[currentParameterIndex].name]"
+              :items="currentCommand.parameters[currentParameterIndex].options || []"
+              :placeholder="`Select ${currentCommand.parameters[currentParameterIndex].name}...`"
+              autofocus
+              :class="props.ui?.input"
+              variant="none"
+              @update:model-value="handleSelectChange"
+            />
+            <UInput
+              v-else
+              v-model="inputValue"
+              :placeholder="currentCommand 
+                ? currentParameterIndex >= 0 
+                  ? `Enter ${currentCommand.parameters[currentParameterIndex].name}...`
+                  : 'Enter command...'
+                : 'Search'"
+              :class="props.ui?.input"
+              variant="none"
+              autofocus
+              @keydown="handleKeyDown"
+              @keyup.enter="executeCommand"
+            />
+          </template>
           <UInput
             v-else
             v-model="commandInput"
@@ -218,6 +275,7 @@ defineShortcuts({
             :icon="appConfig.ui.icons.search"
             :class="props.ui?.input"
             variant="none"
+            autofocus
             @keydown="handleKeyDown"
           />
         </div>
@@ -233,11 +291,16 @@ defineShortcuts({
           <div v-if="currentCommand.parameters.length" class="space-y-2">
             <div class="text-sm font-medium">Parameters:</div>
             <div
-v-for="(param, index) in currentCommand.parameters" :key="param.name" 
+              v-for="(param, index) in currentCommand.parameters" 
+              :key="param.name" 
               class="flex items-center gap-2"
               :class="{ 'opacity-50': index < currentParameterIndex }"
             >
-              <UBadge :color="param.required ? 'error' : 'neutral'" variant="soft" size="sm">
+              <UBadge 
+                :color="param.badgeColor || (param.required ? 'error' : 'neutral')" 
+                variant="soft" 
+                size="sm"
+              >
                 {{ param.name }}
               </UBadge>
               <span class="text-sm text-gray-500">{{ param.description }}</span>
