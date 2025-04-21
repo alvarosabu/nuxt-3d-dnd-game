@@ -46,6 +46,7 @@ export interface CharacterTemplate {
   title: string
   originName: string
   description: string
+  portrait: string
   race: string
   class: string
   raceData?: Race

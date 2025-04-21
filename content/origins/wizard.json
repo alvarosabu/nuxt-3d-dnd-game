@@ -5,6 +5,7 @@
   "title": "Arcane Scholar",
   "originName": "Ginevra",
   "lastName": "Bramblewink",
+  "portrait": "/portraits/ginevra.png",
   "description": "A scholarly magic-user capable of manipulating the structures of reality.",
   "race": "high-elf",
   "class": "wizard",

@@ -27,8 +27,8 @@ export const useGameStore = defineStore('game', () => {
   const characterTemplates = ref<CharacterTemplate[]>([])
   const characters = ref<Character[]>([]) // TODO: Define proper type
   const customCharacters = computed(() => characters.value.filter(character => character.custom))
-  const currentUserCharacters = computed(() => characters.value.filter(character => character.userId === userId.value))
-
+  const party = computed(() => characters.value.filter(character => character.userId === userId.value))
+  const activeCharacter = ref<Character | null>(party.value[0] ?? null)
   // Items State - Using a Record instead of Map for better persistence
   const items = ref<Record<string, GameItem>>({})
 
@@ -292,7 +292,8 @@ export const useGameStore = defineStore('game', () => {
     characters,
     getCharacterById,
     customCharacters,
-    currentUserCharacters,
+    party,
+    activeCharacter,
     addCharacter,
     removeCharacter,
     // Items
