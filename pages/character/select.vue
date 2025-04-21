@@ -6,7 +6,6 @@ import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import { useGameStore } from '~/stores/useGameStore'
 
 definePageMeta({
-  middleware: ['character'],
   colorMode: 'dark',
 })
 
@@ -14,11 +13,9 @@ const gameStore = useGameStore()
 const lobbyStore = useLobbyStore()
 const { init } = gameStore
 await init()
-const { preloadResources } = useResourcePreloader()
 
 const { sendMsg } = useMultiplayer()
 
-await preloadResources()
 // Get character templates from game state and ensure consistent order
 const characters = computed(() => {
   const templates = gameStore.characterTemplates
@@ -132,7 +129,7 @@ const handleSelectCharacter = () => {
     }) */
   }
   else {
-    gameStore.setCharacter({
+    gameStore.addCharacter({
       name: characterName.value,
       key: selectedCharacter.value?.key,
     })

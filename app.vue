@@ -3,8 +3,8 @@
 
 <template>
   <UApp>
-    <Suspense>
+    <NuxtLayout>
       <NuxtPage />
-    </Suspense>
+    </NuxtLayout>
   </UApp>
 </template>

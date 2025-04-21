@@ -8,6 +8,8 @@ import type { Character, CharacterTemplate, GameItem, Level, Player } from '~/ty
  * @returns {object} Game store methods and state
  */
 export const useGameStore = defineStore('game', () => {
+  const userStore = useUserStore()
+  const { userId } = storeToRefs(userStore)
   // Global 
   const { debug } = useControls({
     debug: true,
@@ -24,6 +26,8 @@ export const useGameStore = defineStore('game', () => {
   // Characters
   const characterTemplates = ref<CharacterTemplate[]>([])
   const characters = ref<Character[]>([]) // TODO: Define proper type
+  const customCharacters = computed(() => characters.value.filter(character => character.custom))
+  const currentUserCharacters = computed(() => characters.value.filter(character => character.userId === userId.value))
 
   // Items State - Using a Record instead of Map for better persistence
   const items = ref<Record<string, GameItem>>({})
@@ -147,11 +151,20 @@ export const useGameStore = defineStore('game', () => {
    * Set the selected character for the player
    * @param character The character template to set
    */
-  function setCharacter(character: Pick<CharacterTemplate, 'key' | 'name'>) {
-    if (!players.value[0]) { return }
-    players.value[0].character = character.key
-    players.value[0].characterName = character.name
-    players.value[0].weapon = characterTemplates.value.find(template => template.key === character.key)?.weapon
+  function addCharacter(character: Partial<Character>) {
+    characters.value = [...characters.value, {
+      ...character,
+      userId: userId.value,
+      custom: true,
+    }]
+  }
+
+  function removeCharacter(character: Character) {
+    characters.value = characters.value.filter(c => c.id !== character.id)
+  }
+
+  function removeAllCharacters() {
+    characters.value = []
   }
 
   /**
@@ -170,6 +183,14 @@ export const useGameStore = defineStore('game', () => {
    */
   function addPlayer(player: Player) {
     players.value = [...players.value, player]
+  }
+
+  function removePlayer(player: Player) {
+    players.value = players.value.filter(p => p.id !== player.id)
+  }
+
+  function removeAllPlayers() {
+    players.value = []
   }
 
   /**
@@ -250,37 +271,54 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
+  function clearGame() {
+    removeAllPlayers()
+    removeAllCharacters()
+    // removeAllItems()
+    setCurrentLevel('test-level-a')
+  }
+
   return {
-    // State
+    // Players
     players,
     formattedPlayers,
     activePlayer,
-    mode,
-    characterTemplates,
-    characters,
-    items,
-    levels,
-    currentLevelSlug,
-    // Computed
-    isMultiplayer,
-    currentLevel,
-    getCharacterById,
-    getItemById,
-    isDebug,
-    // Actions
-    loadCharacterTemplates,
-    loadLevels,
-    init,
-    setMode,
-    setCharacter,
     addPlayer,
     setPlayerPosition,
+    // Characters
+    characterTemplates,
+    loadCharacterTemplates,
+    characters,
+    getCharacterById,
+    customCharacters,
+    currentUserCharacters,
+    addCharacter,
+    removeCharacter,
+    // Items
+    items,
     setItem,
     updateItemState,
     updateItemPosition,
     removeItem,
-    setCurrentLevel,
     handleRemoteItemUpdate,
+    // Levels
+    levels,
+    setCurrentLevel,
+    currentLevelSlug,
+    loadLevels,
+    // Mode
+    mode,
+    isMultiplayer,
+    // Actions
+    removePlayer,
+    removeAllPlayers,
+    setMode,
+    currentLevel,
+    getItemById,
+    isDebug,
+    // Actions
+    init,
+    clearGame,
   }
 }, {
   persist: {

@@ -7,34 +7,6 @@ const gameStore = useGameStore()
 const usernameInput = ref(userStore.username)
 
 /**
- * Handles navigation to different sections of the game
- * @param route - The route to navigate to
- */
-const handleNavigation = (route: string) => {
-  if (route === '/game') {
-    gameStore.setMode('single')
-    gameStore.addPlayer({
-      id: userStore.userId,
-      name: userStore.username,
-      character: null,
-      characterName: null,
-      weapon: null,
-      position: [0, 0, 0],
-      status: 'in-game',
-    })
-    if (gameStore.characters.length > 0) {
-      navigateTo('/game')
-    }
-    else {
-      navigateTo('/character/select')
-    }
-  }
-  else {
-    navigateTo(route)
-  }
-}
-
-/**
  * Saves the new username and exits edit mode
  */
 const saveUsername = () => {
@@ -54,8 +26,44 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-const buttons = ['New Game', 'Load Game', 'Multiplayer', 'Options']
-const buttonLinks = ['/game', '/load-game', '/multiplayer', '/options']
+const buttons = [
+  {
+    label: 'New Game',
+    link: '/game',
+    cb: () => {
+      gameStore.clearGame()
+      gameStore.setMode('single')
+      gameStore.addPlayer({
+        id: userStore.userId,
+        name: userStore.username,
+        character: null,
+        characterName: null,
+        weapon: null,
+        position: [0, 0, 0],
+        status: 'in-game',
+      })
+      navigateTo('/character/select')
+    }
+  },
+  {
+    label: 'Continue',
+    link: '/continue',
+    cb: () => {
+      gameStore.setMode('single')
+      navigateTo('/game')
+    }
+  },
+  {
+    label: 'Multiplayer',
+    link: '/multiplayer',
+  },
+  {
+    label: 'Options',
+    link: '/options',
+    disabled: true,
+  },
+]
+
 </script>
 
 <template>
@@ -76,9 +84,10 @@ const buttonLinks = ['/game', '/load-game', '/multiplayer', '/options']
             color="primary"
             :variant="index === 0 ? 'solid' : 'outline'"
             class="w-full text-xl font-medium cursor-pointer"
-            @click="handleNavigation(buttonLinks[index])"
+            :disabled="button.disabled"
+            @click="button?.cb()"
           >
-            {{ button }}
+            {{ button.label }}
           </UButton>
         </div>
 
