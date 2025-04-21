@@ -4,6 +4,7 @@
   "model": "/models/characters/rogue/Rogue.glb",
   "title": "Thief",
   "originName": "Zynrae Vexshade",
+  "portrait": "/portraits/zynrae.png",
   "description": "A master of stealth and deception, rogues excel at thievery and evasion.",
   "race": "drow",
   "class": "rogue",

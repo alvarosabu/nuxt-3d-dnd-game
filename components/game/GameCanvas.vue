@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useOutlinedObjects } from '~/composables/useOutlinedObjects'
-import DebugControls from '~/components/ui/DebugControls.vue'
 import CameraControls from '~/components/game/CameraControls.vue'
 import World from '~/components/game/World.vue'
-import CommandPalette from '~/components/ui/CommandPalette.vue'
 
 // Initialize outline objects composable
 const { outlinedObjects } = useOutlinedObjects()
@@ -39,8 +37,7 @@ const { cursor } = useGameCursor()
 </script>
 
 <template>
-  <CommandPalette />
-  <DebugControls />
+
   <TresCanvas
     clear-color="#080808"
     window-size

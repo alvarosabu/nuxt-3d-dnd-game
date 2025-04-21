@@ -47,6 +47,7 @@ export default defineContentConfig({
         originName: z.string(),
         lastName: z.string().optional(),
         description: z.string(),
+        portrait: z.string(),
         race: z.string(),
         class: z.string(),
         stats: z.object({
