@@ -176,9 +176,11 @@ export interface ChestItem extends GameItem {
 /**
  * Interface for level ambient settings
  */
-export interface LevelAmbient {
-  light: number
-  environment: 'sunset' | 'dawn' | 'night' | 'day'
+export interface LevelEnvironment {
+  fogColor: string
+  ambientLight: number
+  background: 'sunset' | 'dawn' | 'night' | 'day'
+  blur: number
 }
 
 /**
@@ -196,7 +198,7 @@ export interface Level {
   id: string
   slug: string
   name: string
-  ambient: LevelAmbient
+  environment: LevelEnvironment
   grid: LevelGrid
   items: GameItem[]
 }

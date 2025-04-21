@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Vector3 } from 'three'
+import { useControls } from '@tresjs/leches'
 import type { Character, CharacterTemplate, GameItem, Level, Player } from '~/types'
 
 /**
@@ -7,6 +8,11 @@ import type { Character, CharacterTemplate, GameItem, Level, Player } from '~/ty
  * @returns {object} Game store methods and state
  */
 export const useGameStore = defineStore('game', () => {
+  // Global 
+  const { debug } = useControls({
+    debug: true,
+  })
+  const isDebug = computed(() => debug.value)
   // Players State
   const players = ref<Player[]>([])
   const activePlayer = ref<Player | null>(null)
@@ -260,6 +266,7 @@ export const useGameStore = defineStore('game', () => {
     currentLevel,
     getCharacterById,
     getItemById,
+    isDebug,
     // Actions
     loadCharacterTemplates,
     loadLevels,
