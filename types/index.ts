@@ -44,6 +44,7 @@ export interface CharacterTemplate {
   key: string
   model: string
   title: string
+  originName: string
   description: string
   race: string
   class: string

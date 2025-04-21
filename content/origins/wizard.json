@@ -3,6 +3,8 @@
   "key": "wizard",
   "model": "/models/characters/wizard/Wizard.glb",
   "title": "Arcane Scholar",
+  "originName": "Ginevra",
+  "lastName": "Bramblewink",
   "description": "A scholarly magic-user capable of manipulating the structures of reality.",
   "race": "high-elf",
   "class": "wizard",

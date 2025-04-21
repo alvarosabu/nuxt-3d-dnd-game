@@ -108,7 +108,11 @@ onKeyStroke('ArrowRight', selectNext)
 onKeyStroke('ArrowLeft', selectPrevious)
 
 // Add character name with default value
-const characterName = ref('Tav')
+const characterName = ref(selectedCharacter.value?.originName)
+
+watch(selectedCharacter, (newVal) => {
+  characterName.value = newVal?.originName
+})
 
 const handleSelectCharacter = () => {
   if (gameStore.isMultiplayer) {
