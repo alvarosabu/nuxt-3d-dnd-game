@@ -17,9 +17,31 @@ interface CommandParameter {
   description: string
 }
 
+const props = defineProps<{
+  ui?: {
+    root?: string
+    content?: string
+    input?: string
+  }
+}>()
+
+const gameStore = useGameStore()
+const { addCharacter } = gameStore
+const { characterTemplates } = storeToRefs(gameStore)
+const open = ref(false)
+
+const appConfig = useAppConfig()
+
+const commandPaletteUi = computed(() => tailwindVariants({ extend: tailwindVariants(theme), ...(appConfig.ui?.commandPalette || {}) })())
+const searchTerm = defineModel<string>('searchTerm', { default: '' })
+
+// Command mode state
 const isCommandMode = ref(false)
 const currentCommand = ref<Command | null>(null)
 const commandParameters = ref<Record<string, string>>({})
+const currentParameterIndex = ref(-1)
+const inputValue = ref('')
+const commandInput = ref('')
 
 // Available commands
 const commands = ref<Command[]>([
@@ -44,68 +66,82 @@ const commands = ref<Command[]>([
   },
 ])
 
-const props = defineProps<{
-  ui?: {
-    root?: string
-    content?: string
-    input?: string
-  }
-}>()
-
-const gameStore = useGameStore()
-const { addCharacter } = gameStore
-const { characterTemplates } = storeToRefs(gameStore)
-const open = ref(false)
-
-const appConfig = useAppConfig()
-
-const commandPaletteUi = computed(() => tailwindVariants({ extend: tailwindVariants(theme), ...(appConfig.ui?.commandPalette || {}) })())
-console.log('ui', commandPaletteUi.value)
-const searchTerm = defineModel<string>('searchTerm', { default: '' })
-
-// Command mode handling
-watch(searchTerm, (newValue) => {
-  if (newValue.startsWith('/')) {
-    isCommandMode.value = true
-    const commandId = newValue.slice(1).split(' ')[0]
-    currentCommand.value = commands.value.find(cmd => cmd.id === commandId) || null
-  } else {
-    isCommandMode.value = false
-    currentCommand.value = null
-    commandParameters.value = {}
-  }
-})
-
-// Handle tab completion for commands
+// Handle tab completion for commands and parameters
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Tab' && isCommandMode.value && searchTerm.value.startsWith('/')) {
+  if (e.key === 'Tab') {
     e.preventDefault()
-    const commandId = searchTerm.value.slice(1).split(' ')[0]
-    const matchingCommand = commands.value.find(cmd => cmd.id.startsWith(commandId))
-    if (matchingCommand) {
-      searchTerm.value = `/${matchingCommand.id}`
-      currentCommand.value = matchingCommand
+    
+    if (!isCommandMode.value && commandInput.value.startsWith('/')) {
+      // Command completion
+      const commandId = commandInput.value.slice(1).split(' ')[0]
+      const matchingCommand = commands.value.find(cmd => cmd.id.startsWith(commandId))
+      if (matchingCommand) {
+        commandInput.value = `/${matchingCommand.id}`
+        currentCommand.value = matchingCommand
+        isCommandMode.value = true
+        currentParameterIndex.value = 0
+        inputValue.value = ''
+      }
+    } else if (isCommandMode.value && currentCommand.value) {
+      // Parameter completion
+      const currentParam = currentCommand.value.parameters[currentParameterIndex.value]
+      if (currentParam && inputValue.value) {
+        commandParameters.value[currentParam.name] = inputValue.value
+        inputValue.value = ''
+        currentParameterIndex.value++
+        
+        // If we've filled all parameters, execute the command
+        if (currentParameterIndex.value >= currentCommand.value.parameters.length) {
+          executeCommand()
+        }
+      }
+    }
+  } else if (e.key === 'Backspace' && inputValue.value === '') {
+    // Handle backspace to go back to previous parameter
+    if (currentParameterIndex.value > 0) {
+      currentParameterIndex.value--
+      const prevParam = currentCommand.value?.parameters[currentParameterIndex.value]
+      if (prevParam) {
+        inputValue.value = commandParameters.value[prevParam.name] || ''
+      }
+    } else {
+      // Go back to command input
+      currentParameterIndex.value = -1
+      isCommandMode.value = false
+      commandInput.value = `/${currentCommand.value?.id || ''}`
+      inputValue.value = ''
     }
   }
 }
+
+// Handle input value changes for parameters
+watch(inputValue, (newValue) => {
+  if (isCommandMode.value && currentCommand.value && currentParameterIndex.value >= 0) {
+    const currentParam = currentCommand.value.parameters[currentParameterIndex.value]
+    if (currentParam) {
+      commandParameters.value[currentParam.name] = newValue
+    }
+  }
+})
 
 // Execute command when Enter is pressed
 const executeCommand = () => {
   if (!currentCommand.value) return
 
-  const args = searchTerm.value.slice(1).split(' ')
-  const parameters = args.slice(1)
-
   if (currentCommand.value.id === 'add-character') {
-    const name = parameters[0]
-    const template = parameters[1]
+    const name = commandParameters.value.name
+    const template = commandParameters.value.template
     if (name) {
       addCharacter({
         name,
         key: template,
       })
       open.value = false
-      searchTerm.value = ''
+      commandInput.value = ''
+      inputValue.value = ''
+      currentParameterIndex.value = -1
+      commandParameters.value = {}
+      isCommandMode.value = false
     }
   }
 }
@@ -150,13 +186,41 @@ defineShortcuts({
       :class="commandPaletteUi.root({ class: props.ui?.root })"
     >
       <ListboxFilter v-model="searchTerm" as-child>
-        <UInput
-          :placeholder="isCommandMode ? 'Enter command parameters...' : 'Search'"
-          :icon="appConfig.ui.icons.search"
-          :class="props.ui?.input"
-          @keydown="handleKeyDown"
-          @keyup.enter="executeCommand"
-        />
+        <div class="flex items-center gap-2 p-2">
+          <div v-if="isCommandMode && currentCommand" class="flex items-center gap-2">
+            <UBadge color="primary" variant="soft">
+              /{{ currentCommand.id }}
+            </UBadge>
+            <template v-for="(value, name) in commandParameters" :key="name">
+              <UBadge color="neutral" variant="soft">
+                {{ value }}
+              </UBadge>
+            </template>
+          </div>
+          <UInput
+            v-if="isCommandMode"
+            v-model="inputValue"
+            :placeholder="currentCommand 
+              ? currentParameterIndex >= 0 
+                ? `Enter ${currentCommand.parameters[currentParameterIndex].name}...`
+                : 'Enter command...'
+              : 'Search'"
+            :icon="'i-lucide-chevron-left'"
+            :class="props.ui?.input"
+            variant="none"
+            @keydown="handleKeyDown"
+            @keyup.enter="executeCommand"
+          />
+          <UInput
+            v-else
+            v-model="commandInput"
+            placeholder="Search or type / for commands..."
+            :icon="appConfig.ui.icons.search"
+            :class="props.ui?.input"
+            variant="none"
+            @keydown="handleKeyDown"
+          />
+        </div>
       </ListboxFilter>
       <ListboxContent :class="commandPaletteUi.content({ class: props.ui?.content })">
         <div v-if="isCommandMode && currentCommand" class="p-4 space-y-4">
@@ -168,7 +232,11 @@ defineShortcuts({
           </div>
           <div v-if="currentCommand.parameters.length" class="space-y-2">
             <div class="text-sm font-medium">Parameters:</div>
-            <div v-for="param in currentCommand.parameters" :key="param.name" class="flex items-center gap-2">
+            <div
+v-for="(param, index) in currentCommand.parameters" :key="param.name" 
+              class="flex items-center gap-2"
+              :class="{ 'opacity-50': index < currentParameterIndex }"
+            >
               <UBadge :color="param.required ? 'error' : 'neutral'" variant="soft" size="sm">
                 {{ param.name }}
               </UBadge>
@@ -176,7 +244,7 @@ defineShortcuts({
             </div>
           </div>
         </div>
-        <div v-else-if="isCommandMode" class="p-4">
+        <div v-else-if="commandInput.startsWith('/')" class="p-4">
           <div class="text-sm font-medium mb-2">Available Commands:</div>
           <div class="space-y-2">
             <div v-for="cmd in commands" :key="cmd.id" class="flex items-center gap-2">
