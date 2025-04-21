@@ -1,0 +1,23 @@
+{
+  "slug": "dungeon-test",
+  "name": "Dungeon Test",
+  "environment": {
+    "fogColor": "#000000",
+    "ambientLight": 0.1,
+    "blur": 1,
+    "clearColor": "#000000"
+  },
+  "grid": {
+    "size": [40, 60],
+    "cellSize": 1
+  },
+  "spawnPoints": {
+    "player": {
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0]
+    }
+  },
+  "items": [
+
+  ]
+}

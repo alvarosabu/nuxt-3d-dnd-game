@@ -8,13 +8,22 @@ export default defineContentConfig({
       schema: z.object({
         slug: z.string(),
         name: z.string(),
-        ambient: z.object({
-          light: z.number(),
-          environment: z.enum(['sunset', 'dawn', 'night', 'day']),
+        environment: z.object({
+          fogColor: z.string(),
+          ambientLight: z.number(),
+          background: z.string().optional(),
+          blur: z.number(),
+          clearColor: z.string(),
         }),
         grid: z.object({
           size: z.tuple([z.number(), z.number()]),
           cellSize: z.number(),
+        }),
+        spawnPoints: z.object({
+          player: z.object({
+            position: z.tuple([z.number(), z.number(), z.number()]),
+            rotation: z.tuple([z.number(), z.number(), z.number()]),
+          }),
         }),
         items: z.array(z.object({
           id: z.string(),

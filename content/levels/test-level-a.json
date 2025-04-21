@@ -1,13 +1,22 @@
 {
   "slug": "test-level-a",
   "name": "Test Level A",
-  "ambient": {
-    "light": 0.5,
-    "environment": "sunset"
+  "environment": {
+    "fogColor": "#123",
+    "ambientLight": 2,
+    "background": "sunset",
+    "blur": 1,
+    "clearColor": "#123"
   },
   "grid": {
     "size": [40, 60],
     "cellSize": 1
+  },
+  "spawnPoints": {
+    "player": {
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0]
+    }
   },
   "items": [
     {
