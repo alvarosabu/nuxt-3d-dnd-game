@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { useUserStore } from '~/stores/useUserStore'
+import { useRaceStore } from '~/stores/useRaceStore'
 
 const userStore = useUserStore()
 const gameStore = useGameStore()
+const raceStore = useRaceStore()
+
 // Local state for the input
 const usernameInput = ref(userStore.username)
 

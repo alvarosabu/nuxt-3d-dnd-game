@@ -22,7 +22,7 @@ const { width, height } = useWindowSize()
   <div>
     <CommandPalette />
     <DebugControls />
-    <HudParty />
+    <Hud />
     <ConfettiExplosion
       v-if="showConfetti"
       :particle-count="200"

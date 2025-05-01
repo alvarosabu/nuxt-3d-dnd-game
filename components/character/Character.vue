@@ -147,16 +147,16 @@ if (gameStore.isMultiplayer) {
   })
 }
 else {
-  const playerPosition = gameStore.players[0]?.position
+  const playerPosition = props.character.position
   if (playerPosition) {
     state.model?.position.set(playerPosition[0], playerPosition[1], playerPosition[2])
     nextPosition.value.set(playerPosition[0], playerPosition[1], playerPosition[2])
   }
 
-  watch(() => gameStore.players, (newPlayers) => {
-    const player = newPlayers[0]
-    if (player?.id === props.player.id) {
-      nextPosition.value.set(player.position[0], player.position[1], player.position[2])
+  watch(() => gameStore.characters, (newCharacters) => {
+    const character = newCharacters.find(c => c.id === props.character.id)
+    if (character?.id === props.character.id) {
+      nextPosition.value.set(character.position[0], character.position[1], character.position[2])
     }
   }, { deep: true })
 }
