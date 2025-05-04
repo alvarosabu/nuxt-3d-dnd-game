@@ -3,8 +3,12 @@
   "slug": "artificer",
   "icon": "/icons/classes/artificer.svg",
   "description": "Masters of invention, artificers use ingenuity and magic to create marvelous inventions.",
+  "baseHitPoints": 8,
+  "hpPerLevel": 5,
   "hitDie": "d8",
   "primaryAbility": "Intelligence",
+  "spellCastingAbility": "intelligence",
+  "hasGod": false,
   "savingThrows": ["Constitution", "Intelligence"],
   "proficiencies": {
     "armor": ["Light Armor", "Medium Armor", "Shields"],

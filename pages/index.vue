@@ -39,10 +39,6 @@ const buttons = [
       gameStore.addPlayer({
         id: userStore.userId,
         name: userStore.username,
-        character: null,
-        characterName: null,
-        weapon: null,
-        position: [0, 0, 0],
         status: 'in-game',
       })
       navigateTo('/character/select')
@@ -65,6 +61,21 @@ const buttons = [
     link: '/options',
     disabled: true,
   },
+  {
+    label: 'Test Level',
+    link: '/test',
+    cb: () => {
+     
+      // Get a random character template
+      // Add the player with the random character
+      gameStore.addPlayer({
+        id: userStore.userId,
+        name: userStore.username,
+        status: 'in-game',
+      })
+      navigateTo('/test')
+    }
+  }
 ]
 
 </script>

@@ -21,9 +21,7 @@ const getCharacterPortrait = (character: Character) => {
         @click="activeCharacterId = character.id"
       >
         <img :src="getCharacterPortrait(character)" :alt="character.name" class="rounded-lg w-full h-full object-cover">
-        <div class="absolute bottom-0 left-0 mx-0 w-full text-white text-sm text-center text-shadow-lg">
-          12/12
-        </div>
+        <HudCharacterHPDisplay :character="character" />
       </div>
       <div>
        

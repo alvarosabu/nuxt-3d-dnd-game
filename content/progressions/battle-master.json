@@ -1,0 +1,24 @@
+[
+  {
+    "class": "fighter",
+    "subclass": "battle-master",
+    "level": 3,
+    "passivesAdded": ["Superiority Dice", "Manoeuvres"],
+    "passivesRemoved": [],
+    "boosts": ["SuperiorityDice:4d8"],
+    "allowImprovement": false,
+    "selectors": ["SelectManoeuvres(3)"],
+    "isMulticlass": false
+  },
+  {
+    "class": "fighter",
+    "subclass": "battle-master",
+    "level": 7,
+    "passivesAdded": ["Know Your Enemy"],
+    "passivesRemoved": [],
+    "boosts": [],
+    "allowImprovement": false,
+    "selectors": [],
+    "isMulticlass": false
+  }
+] 

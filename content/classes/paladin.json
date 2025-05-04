@@ -3,8 +3,12 @@
   "slug": "paladin",
   "icon": "/icons/classes/paladin.svg",
   "description": "Holy warriors bound to sacred oaths, combining martial prowess with divine magic.",
+  "baseHitPoints": 10,
+  "hpPerLevel": 6,
   "hitDie": "d10",
   "primaryAbility": "Strength and Charisma",
+  "spellCastingAbility": "charisma",
+  "hasGod": true,
   "savingThrows": ["Wisdom", "Charisma"],
   "proficiencies": {
     "armor": ["Light Armor", "Medium Armor", "Heavy Armor", "Shields"],

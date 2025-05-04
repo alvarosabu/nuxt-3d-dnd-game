@@ -3,11 +3,15 @@
   "slug": "druid",
   "icon": "/icons/classes/druid.svg",
   "description": "Guardians of nature who tap into the divine essence of the natural world to cast spells and assume animal forms.",
+  "baseHitPoints": 8,
+  "hpPerLevel": 5,
   "hitDie": "d8",
-  "primaryAbility": "Wisdom",
-  "savingThrows": ["Intelligence", "Wisdom"],
+  "primaryAbility": "wisdom",
+  "spellCastingAbility": "wisdom",
+  "hasGod": true,
+  "savingThrows": ["intelligence", "wisdom"],
   "proficiencies": {
-    "armor": ["Light Armor", "Medium Armor", "Shields"],
+    "armor": ["light armor", "medium armor", "shields"],
     "weapons": [
       "Clubs",
       "Daggers",

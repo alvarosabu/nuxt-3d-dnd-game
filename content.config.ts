@@ -87,6 +87,87 @@ export default defineContentConfig({
       }),
     }),
 
+    features: defineCollection({
+      type: 'data',
+      source: 'features/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        description: z.string(),
+        source: z.string(),
+        mechanics: z.object({
+          bonus: z.string(),
+        }),
+      }),
+    }),
+
+    abilities: defineCollection({
+      type: 'data',
+      source: 'abilities/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        short: z.string(),
+        description: z.string(),
+        icon: z.string(),
+        mechanics: z.string(),
+      }),
+    }),
+
+    feats: defineCollection({
+      type: 'data',
+      source: 'feats/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        description: z.string(),
+        source: z.string(),
+        mechanics: z.string(),
+      }),
+    }),
+
+    progressions: defineCollection({
+      type: 'data',
+      source: 'progressions/**.json',
+      schema: z.object({
+        class: z.string(),
+        subclass: z.string().optional(),
+        level: z.number(),
+        passivesAdded: z.array(z.string()),
+        passivesRemoved: z.array(z.string()),
+        boosts: z.array(z.string()),
+        allowImprovement: z.boolean(),
+        selectors: z.array(z.string()),
+        isMulticlass: z.boolean(),
+      }),
+    }),
+
+    subclasses: defineCollection({
+      type: 'data',
+      source: 'subclasses/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        class: z.string(),
+        description: z.string(),
+        icon: z.string(),
+        features: z.array(z.string()),
+      }),
+    }),
+
+    passives: defineCollection({
+      type: 'data',
+      source: 'passives/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        description: z.string(),
+        icon: z.string(),
+        enabledConditions: z.string(),
+        boosts: z.array(z.string()),
+      }),
+    }),
+
     races: defineCollection({
       type: 'data',
       source: 'races/**.json',
@@ -106,8 +187,12 @@ export default defineContentConfig({
         slug: z.string(),
         icon: z.string(),
         description: z.string(),
+        baseHitPoints: z.number(),
+        hpPerLevel: z.number(),
         hitDie: z.string(),
         primaryAbility: z.string(),
+        spellCastingAbility: z.string(),
+        hasGod: z.boolean(),
         savingThrows: z.array(z.string()),
         features: z.array(z.string()),
         proficiencies: z.object({

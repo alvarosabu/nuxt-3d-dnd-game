@@ -1,0 +1,8 @@
+{
+  "name": "Wisdom",
+  "slug": "wisdom",
+  "short": "WIS",
+  "description": "Wisdom reflects how attuned you are to the world around you and represents perceptiveness and intuition.",
+  "icon": "/icons/abilities/wisdom.svg",
+  "mechanics": "Affects Animal Handling, Insight, Medicine, Perception, and Survival checks. Important for spellcasting for some classes."
+} 

@@ -1,0 +1,7 @@
+{
+  "name": "Ability Improvement",
+  "slug": "ability-improvement",
+  "description": "Increase one Ability by 2, or two Abilities by 1, to a maximum of 20.",
+  "source": "Baldur's Gate 3 / Player's Handbook",
+  "mechanics": "When you gain this feat, increase one ability score of your choice by 2, or two ability scores of your choice by 1. You can't increase an ability score above 20 using this feat."
+} 

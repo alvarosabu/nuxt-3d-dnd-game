@@ -1,0 +1,8 @@
+{
+  "name": "Charisma",
+  "slug": "charisma",
+  "short": "CHA",
+  "description": "Charisma measures your ability to interact effectively with others. It includes such factors as confidence and eloquence.",
+  "icon": "/icons/abilities/charisma.svg",
+  "mechanics": "Affects Deception, Intimidation, Performance, and Persuasion checks. Important for spellcasting for some classes."
+} 

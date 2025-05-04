@@ -1,0 +1,32 @@
+[
+  {
+    "class": "fighter",
+    "level": 1,
+    "passivesAdded": ["Second Wind", "Fighting Style"],
+    "passivesRemoved": [],
+    "boosts": ["ProficiencyBonus(SavingThrows)", "ActionSurgeResource"],
+    "allowImprovement": false,
+    "selectors": ["SelectSkills", "SelectFightingStyle"],
+    "isMulticlass": false
+  },
+  {
+    "class": "fighter",
+    "level": 2,
+    "passivesAdded": ["Action Surge"],
+    "passivesRemoved": [],
+    "boosts": [],
+    "allowImprovement": false,
+    "selectors": [],
+    "isMulticlass": false
+  },
+  {
+    "class": "fighter",
+    "level": 3,
+    "passivesAdded": ["Martial Archetype"],
+    "passivesRemoved": [],
+    "boosts": [],
+    "allowImprovement": true,
+    "selectors": ["SelectMartialArchetype"],
+    "isMulticlass": false
+  }
+] 
