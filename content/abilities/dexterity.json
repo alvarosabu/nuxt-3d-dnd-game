@@ -1,0 +1,8 @@
+{
+  "name": "Dexterity",
+  "slug": "dexterity",
+  "short": "DEX",
+  "description": "Dexterity measures agility, reflexes, and balance.",
+  "icon": "/icons/abilities/dexterity.svg",
+  "mechanics": "Affects Acrobatics, Sleight of Hand, and Stealth checks, as well as Armor Class and initiative. Ranged attack rolls also use Dexterity."
+} 

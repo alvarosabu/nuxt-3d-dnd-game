@@ -1,4 +1,3 @@
-
 export interface Character {
   id: string
   name: string
@@ -12,8 +11,39 @@ export interface Character {
    * @default false
    */
   custom?: boolean,
-  position: number[] // [x, y, z]
-  weapon?: string
+  position?: number[] // [x, y, z]
+  level?: number
+  weapon?: string,
+  /**
+   * Maximum hit points of the character
+   */
+  maxHP: number
+  /**
+   * Current hit points of the character
+   */
+  currentHP: number
+  /**
+   * Character's ability scores
+   */
+  stats?: {
+    str: number
+    dex: number
+    con: number
+    int: number
+    wis: number
+    cha: number
+  }
+  /**
+   * Character's ability modifiers
+   */
+  modifiers?: {
+    strength: number
+    dexterity: number
+    constitution: number
+    intelligence: number
+    wisdom: number
+    charisma: number
+  }
 }
 
 export interface Player {
@@ -49,6 +79,12 @@ export interface CharacterTemplate {
   portrait: string
   race: string
   class: string
+  baseHitPoints: number
+  hpPerLevel: number
+  hitDie: string
+  primaryAbility: string
+  spellCastingAbility: string
+  hasGod: boolean
   raceData?: Race
   classData?: Class
   stats: {
@@ -97,6 +133,8 @@ export interface Class {
   }
   spells: string[]
   cantrips: string[]
+  baseHitPoints: number
+  hpPerLevel: number
 }
 
 export interface Spell {
@@ -207,4 +245,25 @@ export interface Level {
   environment: LevelEnvironment
   grid: LevelGrid
   items: GameItem[]
+}
+
+export interface Subclass {
+  name: string
+  slug: string
+  class: string // parent class slug
+  description: string
+  icon: string
+  features: string[]
+}
+
+export interface Progression {
+  class: string
+  subclass?: string
+  level: number
+  passivesAdded: string[]
+  passivesRemoved: string[]
+  boosts: string[]
+  allowImprovement: boolean
+  selectors: string[]
+  isMulticlass: boolean
 }

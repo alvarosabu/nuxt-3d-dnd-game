@@ -3,8 +3,12 @@
   "slug": "wizard",
   "icon": "/icons/classes/wizard.svg",
   "description": "Scholars of the arcane arts who wield powerful spells through careful study and manipulation of magical forces.",
+  "baseHitPoints": 6,
+  "hpPerLevel": 4,
   "hitDie": "d6",
   "primaryAbility": "Intelligence",
+  "spellCastingAbility": "intelligence",
+  "hasGod": false,
   "savingThrows": ["Intelligence", "Wisdom"],
   "proficiencies": {
     "armor": [],

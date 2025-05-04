@@ -3,8 +3,12 @@
   "slug": "rogue",
   "icon": "/icons/classes/rogue.svg",
   "description": "A master of stealth and deception, rogues excel at thievery and evasion.",
+  "baseHitPoints": 8,
+  "hpPerLevel": 5,
   "hitDie": "d8",
   "primaryAbility": "Dexterity",
+  "spellCastingAbility": "none",
+  "hasGod": false,
   "savingThrows": ["Dexterity", "Intelligence"],
   "proficiencies": {
     "armor": ["Light Armor"],

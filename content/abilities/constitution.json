@@ -1,0 +1,8 @@
+{
+  "name": "Constitution",
+  "slug": "constitution",
+  "short": "CON",
+  "description": "Constitution measures health, stamina, and vital force.",
+  "icon": "/icons/abilities/constitution.svg",
+  "mechanics": "Affects hit points, concentration checks, and resistance to certain effects."
+} 

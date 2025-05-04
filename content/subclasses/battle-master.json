@@ -1,0 +1,12 @@
+{
+  "name": "Battle Master",
+  "slug": "battle-master",
+  "class": "fighter",
+  "description": "As a paragon of tactical superiority, you employ a wide array of combat manoeuvres to dominate every fight. You gain Superiority Dice and can learn special Manoeuvres.",
+  "icon": "/icons/subclasses/battle-master.svg",
+  "features": [
+    "Superiority Dice",
+    "Manoeuvres",
+    "Choose 3 Manoeuvres at level 3"
+  ]
+} 

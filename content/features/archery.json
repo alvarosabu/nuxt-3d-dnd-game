@@ -1,0 +1,9 @@
+{
+  "name": "Archery",
+  "slug": "archery",
+  "description": "You gain a +2 bonus to attack rolls you make with ranged weapons.",
+  "source": "Baldur's Gate 3 / Player's Handbook",
+  "mechanics": {
+    "bonus": "+2 to attack rolls with ranged weapons"
+  }
+} 

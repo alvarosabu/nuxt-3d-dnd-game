@@ -1,0 +1,8 @@
+{
+  "name": "Commander's Strike",
+  "slug": "commander-strike",
+  "description": "Direct an ally to strike a foe by expending one attack and a bonus action. The ally uses their reaction to make a weapon attack.",
+  "icon": "/icons/passives/commander-strike.svg",
+  "enabledConditions": "OnStatusApplied; OnTurn; AllyInRange",
+  "boosts": ["UnlockSpellVariant(CommanderStrike)"]
+} 

@@ -1,0 +1,8 @@
+{
+  "name": "Intelligence",
+  "slug": "intelligence",
+  "short": "INT",
+  "description": "Intelligence measures mental acuity, information recall, and analytical skill.",
+  "icon": "/icons/abilities/intelligence.svg",
+  "mechanics": "Affects Arcana, History, Investigation, Nature, and Religion checks. Important for spellcasting for some classes."
+} 

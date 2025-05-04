@@ -44,7 +44,7 @@ const handleFloorClick = (e: ThreeEvent<PointerEvent>) => {
     })
   }
   else {
-    gameStore.setPlayerPosition(gameStore.players[0], newPosition)
+    gameStore.setCurrentCharacterPosition(newPosition)
   }
 }
 
