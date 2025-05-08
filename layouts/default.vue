@@ -2,11 +2,14 @@
 const { preloadResources, isLoading, progress } = useResourcePreloader()
 const raceStore = useRaceStore()
 const featureStore = useFeatureStore()
+const actionStore = useActionStore()
 
 onMounted(async () => {
   await preloadResources()
   await raceStore.loadRaces()
   await featureStore.loadFeatures()
+  await actionStore.loadActions()
+  await actionStore.loadActionResources()
 })
 </script>
 

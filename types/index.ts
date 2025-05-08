@@ -43,7 +43,15 @@ export interface Character {
     intelligence: number
     wisdom: number
     charisma: number
-  }
+  },
+  /**
+   * List of action slugs that this character can perform
+   * These are loaded from the character's class, race, and other sources
+   */
+  actions: string[],
+  actionsState: Record<string, {
+    uses: number,
+  }>
 }
 
 export interface Player {
@@ -266,4 +274,33 @@ export interface Progression {
   allowImprovement: boolean
   selectors: string[]
   isMulticlass: boolean
+}
+
+/**
+ * Represents an action resource (like Action Point, Bonus Action, etc)
+ */
+export interface ActionResource {
+  name: string
+  slug: string
+  description: string
+  icon: string
+  color: string
+  replenishType: 'turn' | 'short-rest' | 'long-rest' | 'never'
+}
+
+/**
+ * Represents a game action that can be performed
+ */
+export interface Action {
+  name: string
+  slug: string
+  icon: string
+  description: string
+  kbds: string[]
+  cost: string // Array of action resource slugs
+  category: 'target' | 'shout' | 'zone' | 'projectile'
+  source: 'common' | 'class' | 'racial' | 'weapon' | 'spell' | 'situational'
+  tags?: string[] // For filtering/searching
+  usedThisTurn?: boolean // Whether the action has been used this turn
+  highlighted?: boolean // Whether the action is highlighted
 }

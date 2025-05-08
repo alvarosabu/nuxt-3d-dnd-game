@@ -1,0 +1,8 @@
+{
+  "name": "Action Point",
+  "slug": "action-point",
+  "icon": "i-tabler-circle-filled",
+  "color": "text-teal-500",
+  "description": "Your primary resource in combat.",
+  "replenishType": "turn"
+}

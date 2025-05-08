@@ -204,5 +204,41 @@ export default defineContentConfig({
         cantrips: z.array(z.string()),
       }),
     }),
+
+    actionResources: defineCollection({
+      type: 'data',
+      source: 'action-resources/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        description: z.string(),
+        replenishType: z.enum(['turn', 'short-rest', 'long-rest', 'never']),
+        icon: z.string(),
+        color: z.string(),
+      }),
+    }),
+
+    actions: defineCollection({
+      type: 'data',
+      source: 'actions/**.json',
+      schema: z.object({
+        name: z.string(),
+        slug: z.string(),
+        description: z.string(),
+        icon: z.string(),
+        cost: z.array(z.string()),
+        kbds: z.array(z.string()).optional(),
+        category: z.enum([
+          'common',
+          'class',
+          'racial',
+          'weapon',
+          'spell',
+          'situational',
+        ]),
+        source: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+      }),
+    }),
   },
 })

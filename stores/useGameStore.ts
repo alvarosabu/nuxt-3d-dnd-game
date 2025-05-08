@@ -12,6 +12,7 @@ import { calculateAbilityModifiers } from '~/utils/abilityModifiers'
  */
 export const useGameStore = defineStore('game', () => {
   const userStore = useUserStore()
+  const actionStore = useActionStore()
   const { userId } = storeToRefs(userStore)
   // Global 
   const { debug } = useControls({
@@ -197,6 +198,15 @@ export const useGameStore = defineStore('game', () => {
     const constitutionModifier = modifiers.constitution 
     const maxHP = calculateHitPoints(classData.baseHitPoints, classData.hpPerLevel, character.level ?? 1, constitutionModifier)
 
+    const actions = actionStore.getActionsByFilters({
+      source: 'common',
+    })
+    const actionsState = actions.reduce((acc, action) => {
+      acc[action.slug] = {
+        uses: 0,
+      }
+      return acc
+    }, {} as Record<string, { uses: number }>)
     const newCharacter: Character = {
       id: MathUtils.generateUUID(),
       name: character.name ?? 'New Character',
@@ -210,6 +220,8 @@ export const useGameStore = defineStore('game', () => {
       modifiers,
       position: character.position,
       weapon: character.weapon,
+      actions: actions.map(action => action.slug),
+      actionsState: actionsState,
     }
 
     characters.value = [...characters.value, newCharacter]

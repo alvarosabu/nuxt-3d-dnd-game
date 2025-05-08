@@ -1,0 +1,29 @@
+[{
+  "name": "Dash",
+  "slug": "dash",
+  "icon": "i-game-icons-walking-boot",
+  "category": "shout",
+  "description": "Cover more distance this turn: double your Movement Speed.",
+  "source": "common",
+  "kbds": ["D"],
+  "cost": "action-point:1"
+},
+{
+  "name": "Crouch",
+  "slug": "crouch",
+  "icon": "i-game-icons-hooded-assassin",
+  "category": "shout",
+  "kbds": ["C"],
+  "description": "Lower your center of gravity, reducing your height by 10%.",
+  "source": "common",
+  "cost": "action-point:1"
+}, {
+  "name": "Jump",
+  "slug": "jump",
+  "icon": "i-game-icons-jump-across",
+  "category": "shout",
+  "kbds": ["Z"],
+  "description": "Jump to a higher position, gaining a 10% bonus to your Jump Distance.",
+  "source": "common",
+  "cost": "action-point:1"
+}]

@@ -1,0 +1,20 @@
+[{
+  "name": "Main Hand Attack",
+  "slug": "main-hand-attack",
+  "icon": "i-ph-sword",
+  "category": "target",
+  "description": "Make a melee attack with your main hand.",
+  "source": "weapon",
+  "cost": "action-point:1",
+  "targetConditions": ["not:self", "not:dead"]
+},
+{
+  "name": "Secondary Hand Attack",
+  "slug": "secondary-hand-attack",
+  "icon": "i-game-icons-plain-dagger",
+  "category": "target",
+  "description": "Make a melee attack with your secondary hand.",
+  "source": "weapon",
+  "cost": "action-point:1",
+  "targetConditions": ["not:self", "not:dead"]
+}]

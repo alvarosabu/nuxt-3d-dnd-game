@@ -1,0 +1,8 @@
+{
+  "name": "Bonus Action Point",
+  "slug": "bonus-action-point",
+  "icon": "i-tabler-triangle",
+  "color": "text-orange-500",
+  "description": "Your secondary resource in combat.",
+  "replenishType": "turn"
+}

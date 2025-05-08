@@ -2,6 +2,10 @@
 import { useUserStore } from '~/stores/useUserStore'
 import { useGameStore } from '~/stores/useGameStore'
 
+definePageMeta({
+  colorMode: 'dark',
+})
+
 const { progress, isLoading } = useResourcePreloader()
 
 const userStore = useUserStore()
@@ -29,10 +33,6 @@ onMounted(async () => {
       key: randomCharacter.key,
     })
   }
-})
-
-definePageMeta({
-  middleware: 'game',
 })
 </script>
 

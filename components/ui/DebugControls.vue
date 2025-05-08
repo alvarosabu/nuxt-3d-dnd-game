@@ -6,5 +6,5 @@ useControls('fpsgraph')
 </script>
 
 <template>
-  <TresLeches v-if="isDev" />
+ <!--  <TresLeches v-if="isDev" /> -->
 </template>
