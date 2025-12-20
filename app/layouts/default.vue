@@ -4,7 +4,7 @@ const raceStore = useRaceStore()
 const featureStore = useFeatureStore()
 
 onMounted(async () => {
-  await preloadResources()
+  await  preloadResources()
   await raceStore.loadRaces()
   await featureStore.loadFeatures()
 })
@@ -13,8 +13,8 @@ onMounted(async () => {
 <template>
   <div>
     <GameLoadingScreen
-      v-if="isLoading"
-      :progress="progress"
+      v-if="false"
+      :progress="0"
       message="Loading game assets..."
     />
     <slot v-else />

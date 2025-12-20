@@ -19,12 +19,6 @@ const outlineState = reactive({
   kernelSize: 3,
 })
 
-const outlineRef = ref()
-
-watch(outlineRef, ({ effect }) => {
-  effect.blurPass.kernelSize = 4
-})
-
 const { cursor } = useGameCursor()
 
 // Temporary
@@ -49,17 +43,19 @@ const { cursor } = useGameCursor()
 
     <World />
     <!-- Postprocessing -->
-    <EffectComposerPmndrs>
-      <OutlinePmndrs
-        ref="outlineRef"
-        :outlined-objects="outlinedObjects"
-        :blur="outlineState.blur"
-        :edge-strength="outlineState.edgeStrength"
-        :pulse-speed="outlineState.pulseSpeed"
-        :visible-edge-color="outlineState.visibleEdgeColor"
-        :kernel-size="outlineState.kernelSize"
-      />
-    </EffectComposerPmndrs>
+    <Suspense>
+      <EffectComposerPmndrs>
+        <OutlinePmndrs
+          :outlined-objects="outlinedObjects"
+          :blur="outlineState.blur"
+          :edge-strength="outlineState.edgeStrength"
+          :pulse-speed="outlineState.pulseSpeed"
+          :visible-edge-color="outlineState.visibleEdgeColor"
+          :kernel-size="outlineState.kernelSize"
+        />
+      </EffectComposerPmndrs>
+    </Suspense>
+    
   </TresCanvas>
 </template>
 

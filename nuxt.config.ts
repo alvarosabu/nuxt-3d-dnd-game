@@ -1,14 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
   modules: [
+    '@nuxt/devtools',
     '@tresjs/nuxt',
     '@nuxt/ui',
     '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
     '@vueuse/nuxt',
     '@nuxt/content',
-    'pinia-plugin-persistedstate/nuxt',
     'nuxt-svgo',
     '@nuxt/eslint',
   ],
@@ -31,11 +30,6 @@ export default defineNuxtConfig({
     },
     '/test': {
       ssr: false,
-    },
-  },
-  ui: {
-    theme: {
-      colors: ['primary', 'secondary', 'success', 'error', 'warning'],
     },
   },
   nitro: {

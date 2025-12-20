@@ -2,12 +2,12 @@
 import type { AnimationAction, AnimationClip, AnimationMixer, Object3D } from 'three'
 import { LoopOnce, LoopRepeat, SkinnedMesh, Vector3 } from 'three'
 import { useMultiplayer } from '~/composables/game/useMultiplayer'
-import type { Character, Player } from '~/types'
 import { Html } from '@tresjs/cientos'
 import { useLobbyStore, useResourcePreloader } from '#imports'
 import { SkeletonUtils } from 'three-stdlib'
 import { dispose } from '@tresjs/core'
 import { onKeyStroke } from '@vueuse/core'
+import type { Character, Player } from '~/types'
 
 const props = defineProps<{
   character: Character
@@ -75,10 +75,10 @@ const state = shallowReactive<CharacterStateProps>({
   currentState: CharacterStates.IDLE,
 })
 
-const { scene, animations, materials } = getResource('models', props.character.key)
+const { scene , animations, materials } = getResource('models', props.character.key)
 
 const clonedScene = SkeletonUtils.clone(scene)
-const { nodes } = useGraph(clonedScene)
+const { nodes } = buildGraph(clonedScene)
 
 const rigNode = Object.values(nodes).find(node => node.name.includes('Rig'))
 if (rigNode) {
@@ -87,7 +87,7 @@ if (rigNode) {
 
   // Ensure the skeleton is properly cloned and bound
   if (clonedRig instanceof SkinnedMesh) {
-    clonedRig.skeleton = (rigNode as SkinnedMesh).skeleton.clone()
+    clonedRig.skeleton = rigNode.skeleton.clone()
     clonedRig.bind(clonedRig.skeleton)
   }
 

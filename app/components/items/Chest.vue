@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
-import type { ThreeEvent } from '@tresjs/core'
+import type { TresEvent } from '@tresjs/core'
 import { Html } from '@tresjs/cientos'
 import { useUIStore } from '~/stores/useUIStore'
 import { useGameStore } from '~/stores/useGameStore'
@@ -128,7 +128,7 @@ const lockpickAction = () => {
  * Handles the click event on the chest
  * @param e - The pointer event from TresJS
  */
-const handleClick = (e: ThreeEvent<PointerEvent>) => {
+const handleClick = (e: TresEvent) => {
   if (!isLocked.value) {
     isOpen.value = !isOpen.value
     syncChestState()
@@ -143,7 +143,7 @@ const { outlineObject, removeObjectOutline } = useOutlinedObjects()
  * Handle pointer enter event
  * Sets the appropriate cursor and outline
  */
-const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
+const handlePointerEnter = (e: TresEvent) => {
   isHovering.value = true
   outlineObject(e.object)
   setCursor(isLocked.value ? 'locked' : 'pointer')
@@ -170,7 +170,7 @@ const handlePointerEnter = (e: ThreeEvent<PointerEvent>) => {
  * Handle pointer leave event
  * Resets cursor and removes outline
  */
-const handlePointerLeave = (e: ThreeEvent<PointerEvent>) => {
+const handlePointerLeave = (e: TresEvent) => {
   if (uiStore.contextMenu.isOpen) { return }
   isHovering.value = false
   uiStore.contextMenu.enabled = false
@@ -223,6 +223,7 @@ onMounted(() => {
 
 <template>
   <TresGroup
+    v-if="item"
     ref="chestRef"
     :name="item.id"
     :position="chestPosition"
@@ -232,8 +233,8 @@ onMounted(() => {
   >
     <Html
       center
-      :distance-factor="4"
-      :scale="[2, 2, 2]"
+      :distance-factor="8"
+      :scale="[4,4,4]"
       :position="[0, 2, 0]"
     >
       <UBadge

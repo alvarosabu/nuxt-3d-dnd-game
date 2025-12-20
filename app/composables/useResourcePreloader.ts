@@ -1,6 +1,7 @@
 import type { Texture } from 'three'
-import { AudioLoader, Group, TextureLoader } from 'three'
+import { AudioLoader, TextureLoader } from 'three'
 import type { GLTF } from 'three-stdlib'
+import { GLTFLoader, DRACOLoader } from 'three-stdlib'
 
 type ResourceType = 'model' | 'texture' | 'audio' | 'environment'
 
@@ -69,21 +70,24 @@ export const useResourcePreloader = () => {
   ]
 
   // Loaders
+  const gltfLoader = new GLTFLoader()
   const textureLoader = new TextureLoader()
+  const dracoLoader = new DRACOLoader()
   const audioLoader = new AudioLoader()
+
+
+  // Setup DRACO loader
+  dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+  gltfLoader.setDRACOLoader(dracoLoader);
+
 
   const loadResource = async (resource: Resource) => {
     try {
       switch (resource.type) {
         case 'model':
-          const result = await useGLTF(resource.path, { draco: true })
-
-          const { scene, animations, nodes, materials } = result
-          // Ensure scene is a Group
-          if (!(scene instanceof Group)) {
-            throw new TypeError('Loaded scene is not a Group')
-          }
-          cache.models.set(resource.key, { scene, animations, nodes, materials })
+          const model =  await gltfLoader.loadAsync(resource.path)
+          const { nodes, materials } = buildGraph(model.scene)
+          cache.models.set(resource.key, { scene: model.scene, nodes, materials, animations: model.animations })
           break
 
         case 'texture':

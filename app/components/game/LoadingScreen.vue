@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import bgMedievalCity from '~/public/bgs/bg-medieval-city.webp'
-import bgDungeon from '~/public/bgs/bg-dungeon.webp'
-import bgCamp from '~/public/bgs/bg-camp.webp'
+import bgMedievalCity from '/bgs/bg-medieval-city.webp'
+import bgDungeon from '/bgs/bg-dungeon.webp'
+import bgCamp from '/bgs/bg-camp.webp'
 
 interface Props {
   /**

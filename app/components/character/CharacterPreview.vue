@@ -22,7 +22,7 @@ const { getResource } = useResourcePreloader()
 const { scene, animations, materials } = getResource('models', props.character.key)
 const clonedScene = SkeletonUtils.clone(scene)
 
-const { nodes } = useGraph(clonedScene)
+const { nodes } = buildGraph(clonedScene)
 
 const model = Object.values(nodes).find(node => node.name.includes('Rig'))
 
@@ -68,10 +68,10 @@ watch(() => props.isSelected, (isSelected) => {
         currentAction.value = animActions.Idle
         currentAction.value?.reset().fadeIn(0.5).play()
         // Remove the listener
-        mixer.removeEventListener('finished', onFinished)
+        mixer.value?.removeEventListener('finished', onFinished)
       }
 
-      mixer.addEventListener('finished', onFinished)
+      mixer.value.addEventListener('finished', onFinished)
     }, 800) // Delay matches roughly when the spring animation settles
   }
   else {

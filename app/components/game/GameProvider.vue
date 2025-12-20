@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import '@tresjs/leches/styles'
 import ConfettiExplosion from 'vue-confetti-explosion'
-import CommandPalette from '~/components/ui/CommandPalette.vue'
-import DebugControls from '~/components/ui/DebugControls.vue'
 
 const gameStore = useGameStore()
 const { init, setCurrentLevel } = gameStore
@@ -20,8 +17,8 @@ const { width, height } = useWindowSize()
 
 <template>
   <div>
-    <CommandPalette />
-    <DebugControls />
+    <UiCommandPalette />
+    <UiDebugControls />
     <Hud />
     <ConfettiExplosion
       v-if="showConfetti"
