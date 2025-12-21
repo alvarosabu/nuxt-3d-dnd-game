@@ -1,0 +1,101 @@
+# Cursor Rules for Nuxt 3D DnD Game
+
+You are working on a 3D Dungeons & Dragons-like game built with Nuxt 4, TresJS, and Pinia.
+
+## Project Context
+
+**IMPORTANT**: Before working on any task, read the relevant documentation from the `.claude/` directory:
+- `.claude/architecture.md` - Directory structure, state management, SSR config
+- `.claude/game-systems.md` - Character, item, and multiplayer system details
+- `.claude/tech-stack.md` - Framework-specific notes and constraints
+- `.claude/development.md` - Commands, patterns, debugging
+
+## Key Architectural Patterns
+
+### Static Data + Dynamic State
+- **Static**: Character templates, races, classes loaded from `content/` directory (read-only)
+- **Dynamic**: Character instances, items, positions in Pinia stores (mutable runtime state)
+- **Rule**: Never modify templates; always create instances from templates
+
+### Critical Implementation Rules
+
+1. **Character Stats**: Always use utilities from `app/utils/characterStats.ts`
+   - Never calculate HP or modifiers manually
+   - HP formula: `base + (hpPerLevel × (level - 1)) + (conMod × level)`
+   - CON modifier applies to EVERY level, not just current
+
+2. **Data Loading**: Use `queryCollection('collection-name').all()` for content
+   - Create Map lookups for joins: `new Map(items.map(i => [i.slug, i]))`
+
+3. **Items**: Store as `Record<id, GameItem>` for O(1) lookup and persistence
+
+4. **WebSocket**: Use shared composable pattern (`createSharedComposable`) for singleton
+
+5. **Type Safety**: Import types from `~/types`, not inline definitions
+
+## Framework Constraints
+
+- **Nuxt 4** (not Nuxt 3) - check migration guides
+- **TresJS v5** - Use `<TresCanvas>`, `<TresMesh>` components
+- **SSR**: WebGL routes MUST use `ssr: false`
+- **Content Schema**: JSON files must match TypeScript types exactly
+
+## Development Commands
+
+```bash
+pnpm dev              # Start dev server
+pnpm dev --host       # Expose on network (for multiplayer testing)
+pnpm build            # Build for production
+pnpm lint:fix         # Auto-fix linting issues
+```
+
+## Common Patterns
+
+### Character Creation
+```typescript
+// CORRECT - uses utility
+const modifiers = calculateAbilityModifiers(stats)
+const maxHP = calculateHitPoints(baseHP, hpPerLevel, level, modifiers.constitution)
+
+// WRONG - manual calculation
+const maxHP = baseHP + (level * 5) // ❌ Missing proper HP formula
+```
+
+### Content Loading with Joins
+```typescript
+// Load all collections
+const [templates, races, classes] = await Promise.all([
+  queryCollection('origins').all(),
+  queryCollection('races').all(),
+  queryCollection('classes').all()
+])
+
+// Create lookup maps
+const raceMap = new Map(races.map(r => [r.slug, r]))
+const classMap = new Map(classes.map(c => [c.slug, c]))
+
+// Join data
+const enriched = templates.map(t => ({
+  ...t,
+  raceData: raceMap.get(t.race),
+  classData: classMap.get(t.class)
+}))
+```
+
+### Store Access
+```typescript
+// Reactive state needs storeToRefs
+const gameStore = useGameStore()
+const { characters, activeCharacter } = storeToRefs(gameStore)
+
+// Methods don't need refs
+gameStore.addCharacter(character)
+```
+
+## Code Quality
+
+- Prefer composition over inheritance
+- Keep components focused on single responsibility
+- Use TypeScript strict mode - no `any` types
+- Follow existing naming conventions in the codebase
+- Add JSDoc comments to complex utility functions
