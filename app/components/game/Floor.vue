@@ -66,8 +66,8 @@ const handleFloorLeave = () => {
     name="floor"
     :rotation-x="-Math.PI / 2"
     @click="handleFloorClick"
-    @pointer-move="handleFloorHover"
-    @pointer-leave="handleFloorLeave"
+    @pointermove="handleFloorHover"
+    @pointerleave="handleFloorLeave"
   >
     <TresPlaneGeometry :args="[currentLevel.grid.size[0], currentLevel.grid.size[1]]" />
     <TresMeshBasicMaterial :opacity="0" transparent :color="'#C2D05C'" />
