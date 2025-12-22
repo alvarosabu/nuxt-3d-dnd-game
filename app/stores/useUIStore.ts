@@ -24,6 +24,8 @@ export const useUIStore = defineStore('ui', () => {
     enabled: false,
     isOpen: false,
     items: [] as ContextMenuItem[],
+    x: 0,
+    y: 0,
   })
 
   // Dice Roll Modal State
@@ -181,14 +183,6 @@ export const useUIStore = defineStore('ui', () => {
   }
 
   /**
-   * Sets the context menu items
-   * @param items The items to show in the context menu
-   */
-  function setContextMenuItems(items: ContextMenuItem[]) {
-    contextMenu.items = items
-  }
-
-  /**
    * Handles the context menu open state change
    * @param open Whether the context menu is open
    */
@@ -198,7 +192,23 @@ export const useUIStore = defineStore('ui', () => {
     if (!open) {
       contextMenu.items = []
       contextMenu.enabled = false
+      contextMenu.x = 0
+      contextMenu.y = 0
     }
+  }
+
+  /**
+   * Opens the context menu at the specified coordinates with the given items
+   * @param x The x coordinate (screen pixels)
+   * @param y The y coordinate (screen pixels)
+   * @param items The items to show in the context menu
+   */
+  function openContextMenu(x: number, y: number, items: ContextMenuItem[]) {
+    contextMenu.x = x
+    contextMenu.y = y
+    contextMenu.items = items
+    contextMenu.enabled = true
+    contextMenu.isOpen = true
   }
 
   // Watch for remote dice roll events
@@ -254,8 +264,8 @@ export const useUIStore = defineStore('ui', () => {
     // Actions
     openDiceRollModal,
     closeDiceRollModal,
-    setContextMenuItems,
     handleContextMenuOpen,
+    openContextMenu,
     triggerConfetti,
     hideConfetti,
   }

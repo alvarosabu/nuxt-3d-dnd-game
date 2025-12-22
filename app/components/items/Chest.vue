@@ -136,19 +136,16 @@ const handleClick = (e: TresEvent) => {
   e.stopPropagation()
 }
 
-// Outline the chest
-const { outlineObject, removeObjectOutline } = useOutlinedObjects()
-
 /**
- * Handle pointer enter event
- * Sets the appropriate cursor and outline
+ * Handles the context menu event on the chest
+ * @param e - The pointer event from TresJS
  */
-const handlePointerEnter = (e: TresEvent) => {
-  isHovering.value = true
-  outlineObject(e.object)
-  setCursor(isLocked.value ? 'locked' : 'pointer')
-  uiStore.contextMenu.enabled = true
-  uiStore.setContextMenuItems(isLocked.value
+const handleContextMenu = (e: TresEvent) => {
+  // Get screen coordinates from pointer event
+  const x = e.clientX ?? e.pointer.x
+  const y = e.clientY ?? e.pointer.y
+
+  uiStore.openContextMenu(x, y, isLocked.value
     ? [{
         label: 'Lockpick',
         icon: 'i-lucide-lock',
@@ -163,6 +160,19 @@ const handlePointerEnter = (e: TresEvent) => {
           },
         },
       ])
+}
+
+// Outline the chest
+const { outlineObject, removeObjectOutline } = useOutlinedObjects()
+
+/**
+ * Handle pointer enter event
+ * Sets the appropriate cursor and outline
+ */
+const handlePointerEnter = (e: TresEvent) => {
+  isHovering.value = true
+  outlineObject(e.object)
+  setCursor(isLocked.value ? 'locked' : 'pointer')
   e.stopPropagation()
 }
 
@@ -173,10 +183,8 @@ const handlePointerEnter = (e: TresEvent) => {
 const handlePointerLeave = (e: TresEvent) => {
   if (uiStore.contextMenu.isOpen) { return }
   isHovering.value = false
-  uiStore.contextMenu.enabled = false
   removeObjectOutline(e.object)
   resetCursor()
-  uiStore.setContextMenuItems([])
   e.stopPropagation()
 }
 
@@ -228,6 +236,7 @@ onMounted(() => {
     :name="item.id"
     :position="chestPosition"
     @click="handleClick"
+    @contextmenu="handleContextMenu"
     @pointerenter="handlePointerEnter"
     @pointerleave="handlePointerLeave"
   >

@@ -5,6 +5,9 @@ const { cameraPosition, cameraLookAt } = useControls('🎥 camera', {
   position: new Vector3(25, 25, 25),
   lookAt: new Vector3(0, 0, 0),
 })
+
+const uiStore = useUIStore()
+const { contextMenu } = storeToRefs(uiStore)
 </script>
 <template>
   <TresPerspectiveCamera
@@ -19,5 +22,6 @@ const { cameraPosition, cameraLookAt } = useControls('🎥 camera', {
     make-default
     :enable-damping="true"
     :damping-factor="0.05"
+    :enabled="!contextMenu.isOpen"
   />
 </template>

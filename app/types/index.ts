@@ -163,7 +163,7 @@ export interface Session {
 export interface ContextMenuItem {
   label: string
   icon?: string
-  action?: () => void
+  onSelect?: () => void
 }
 
 /**
@@ -188,6 +188,8 @@ export interface UIState {
     enabled: boolean
     isOpen: boolean
     items: ContextMenuItem[]
+    x: number
+    y: number
   }
   diceRollModal: {
     isOpen: boolean

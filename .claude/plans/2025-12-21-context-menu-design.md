@@ -298,3 +298,371 @@ contextMenu: {
 - Submenu support (if needed)
 - Loading states for async actions
 - Disabled item states
+
+---
+
+# Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use @superpowers:executing-plans to implement this plan task-by-task.
+
+## Task 1: Update Type Definitions
+
+**Files:**
+- Modify: `app/types/index.ts:187-191`
+
+**Step 1: Add x and y coordinates to contextMenu interface**
+
+In `app/types/index.ts`, find the contextMenu interface (around line 187) and update:
+
+```typescript
+contextMenu: {
+  enabled: boolean
+  isOpen: boolean
+  items: ContextMenuItem[]
+  x: number
+  y: number
+}
+```
+
+**Step 2: Verify no TypeScript errors**
+
+Run: `pnpm typecheck` (or check IDE for errors)
+Expected: No errors related to contextMenu
+
+**Step 3: Commit**
+
+```bash
+git add app/types/index.ts
+git commit -m "feat: add x,y coordinates to contextMenu type"
+```
+
+---
+
+## Task 2: Update UIStore with openContextMenu Method
+
+**Files:**
+- Modify: `app/stores/useUIStore.ts:23-27`
+
+**Step 1: Add x and y to contextMenu reactive state**
+
+In `app/stores/useUIStore.ts`, update the contextMenu reactive object (around line 23):
+
+```typescript
+const contextMenu = reactive({
+  enabled: false,
+  isOpen: false,
+  items: [] as ContextMenuItem[],
+  x: 0,
+  y: 0,
+})
+```
+
+**Step 2: Create openContextMenu function**
+
+Add this function after the `handleContextMenuOpen` function (around line 202):
+
+```typescript
+/**
+ * Opens the context menu at the specified coordinates with the given items
+ * @param x The x coordinate (screen pixels)
+ * @param y The y coordinate (screen pixels)
+ * @param items The items to show in the context menu
+ */
+function openContextMenu(x: number, y: number, items: ContextMenuItem[]) {
+  contextMenu.x = x
+  contextMenu.y = y
+  contextMenu.items = items
+  contextMenu.enabled = true
+  contextMenu.isOpen = true
+}
+```
+
+**Step 3: Update handleContextMenuOpen to reset coordinates**
+
+Modify the existing `handleContextMenuOpen` function:
+
+```typescript
+function handleContextMenuOpen(open: boolean) {
+  contextMenu.isOpen = open
+
+  if (!open) {
+    contextMenu.items = []
+    contextMenu.enabled = false
+    contextMenu.x = 0
+    contextMenu.y = 0
+  }
+}
+```
+
+**Step 4: Export openContextMenu in return statement**
+
+In the return statement at the bottom (around line 248), add `openContextMenu`:
+
+```typescript
+return {
+  // State
+  contextMenu,
+  diceRollModal,
+  remoteRoll,
+  showConfetti,
+  // Actions
+  openDiceRollModal,
+  closeDiceRollModal,
+  setContextMenuItems,
+  handleContextMenuOpen,
+  openContextMenu, // NEW
+  triggerConfetti,
+  hideConfetti,
+}
+```
+
+**Step 5: Verify no errors**
+
+Check IDE for TypeScript errors
+Expected: No errors
+
+**Step 6: Commit**
+
+```bash
+git add app/stores/useUIStore.ts
+git commit -m "feat: add openContextMenu method to UIStore"
+```
+
+---
+
+## Task 3: Create GameContextMenu Component
+
+**Files:**
+- Create: `app/components/game/GameContextMenu.vue`
+
+**Step 1: Create the component file**
+
+Create `app/components/game/GameContextMenu.vue` with the full code from the "GameContextMenu Component" section above.
+
+**Step 2: Verify component renders without errors**
+
+Start dev server: `pnpm dev`
+Check browser console for errors
+Expected: No errors (menu won't be visible yet since isOpen is false)
+
+**Step 3: Commit**
+
+```bash
+git add app/components/game/GameContextMenu.vue
+git commit -m "feat: create GameContextMenu component"
+```
+
+---
+
+## Task 4: Update CameraControls to Disable When Menu Open
+
+**Files:**
+- Modify: `app/components/game/CameraControls.vue:1-24`
+
+**Step 1: Import UIStore and get contextMenu ref**
+
+In `app/components/game/CameraControls.vue`, add to script setup (after line 2):
+
+```typescript
+const uiStore = useUIStore()
+const { contextMenu } = storeToRefs(uiStore)
+```
+
+**Step 2: Add :enabled prop to OrbitControls**
+
+Update the `<OrbitControls>` component (around line 17):
+
+```vue
+<OrbitControls
+  ref="orbitControlsRef"
+  make-default
+  :enable-damping="true"
+  :damping-factor="0.05"
+  :enabled="!contextMenu.isOpen"
+/>
+```
+
+**Step 3: Test in browser**
+
+Start dev: `pnpm dev`
+Open browser, verify no errors
+Expected: Camera controls work normally (menu not open yet)
+
+**Step 4: Commit**
+
+```bash
+git add app/components/game/CameraControls.vue
+git commit -m "feat: disable OrbitControls when context menu is open"
+```
+
+---
+
+## Task 5: Update GameProvider to Use GameContextMenu
+
+**Files:**
+- Modify: `app/components/game/GameProvider.vue:1-40`
+
+**Step 1: Remove UContextMenu wrapper, add GameContextMenu component**
+
+Replace the template content in `app/components/game/GameProvider.vue`:
+
+```vue
+<template>
+  <div>
+    <UiCommandPalette />
+    <UiDebugControls />
+    <Hud />
+    <GameContextMenu />
+    <ConfettiExplosion
+      v-if="showConfetti"
+      :particle-count="200"
+      :force="0.3"
+      :stage-height="height"
+      :stage-width="width"
+    />
+    <slot/>
+  </div>
+</template>
+```
+
+**Step 2: Remove unused contextMenu destructuring from script**
+
+In the script setup, remove unused destructuring (line 7).
+
+**Step 3: Verify in browser**
+
+Run: `pnpm dev`
+Check console for errors
+Expected: No errors, app renders normally
+
+**Step 4: Commit**
+
+```bash
+git add app/components/game/GameProvider.vue
+git commit -m "feat: replace UContextMenu with GameContextMenu"
+```
+
+---
+
+## Task 6: Update Chest Component with @contextmenu Handler
+
+**Files:**
+- Modify: `app/components/items/Chest.vue:146-189`
+
+**Step 1: Create handleContextMenu function**
+
+In `app/components/items/Chest.vue`, add this function after `handleClick` (around line 137):
+
+```typescript
+/**
+ * Handles the context menu event on the chest
+ * @param e - The pointer event from TresJS
+ */
+const handleContextMenu = (e: TresEvent) => {
+  e.stopPropagation()
+  e.preventDefault() // Prevent browser's default context menu
+
+  // Get screen coordinates from pointer event
+  const x = e.clientX ?? e.pointer.x
+  const y = e.clientY ?? e.pointer.y
+
+  uiStore.openContextMenu(x, y, isLocked.value
+    ? [{
+        label: 'Lockpick',
+        icon: 'i-lucide-lock',
+        onSelect: lockpickAction,
+      }]
+    : [
+        {
+          label: 'Open',
+          onSelect: () => {
+            isOpen.value = true
+            syncChestState()
+          },
+        },
+      ])
+}
+```
+
+**Step 2: Update handlePointerEnter to remove context menu logic**
+
+Modify `handlePointerEnter` (around line 146) to remove lines 150-165 (setContextMenuItems calls).
+
+**Step 3: Update handlePointerLeave to simplify**
+
+Modify `handlePointerLeave` (around line 173) to remove context menu state management.
+
+**Step 4: Add @contextmenu to TresGroup**
+
+Update the `<TresGroup>` template (around line 225):
+
+```vue
+<TresGroup
+  v-if="item"
+  ref="chestRef"
+  :name="item.id"
+  :position="chestPosition"
+  @click="handleClick"
+  @contextmenu="handleContextMenu"
+  @pointerenter="handlePointerEnter"
+  @pointerleave="handlePointerLeave"
+>
+```
+
+**Step 5: Test in browser**
+
+Run: `pnpm dev`
+Navigate to the game
+Right-click on the chest
+Expected: Context menu appears at cursor position with "Lockpick" option
+
+**Step 6: Commit**
+
+```bash
+git add app/components/items/Chest.vue
+git commit -m "feat: add @contextmenu handler to Chest component"
+```
+
+---
+
+## Task 7: Manual Testing & Cleanup
+
+**Step 1: Test all context menu behaviors**
+
+- Right-click on locked chest → menu appears
+- Click "Lockpick" → dice roll modal, menu closes
+- Right-click again → click outside → menu closes
+- Right-click again → press Escape → menu closes
+- Verify camera controls disabled while menu open
+- Verify camera controls work after menu closes
+
+**Step 2: Check if setContextMenuItems is still used**
+
+Search codebase:
+```bash
+grep -r "setContextMenuItems" app/
+```
+
+If unused, remove from `app/stores/useUIStore.ts`
+
+**Step 3: Final commit**
+
+```bash
+git add .
+git commit -m "refactor: cleanup unused context menu methods"
+```
+
+---
+
+## Success Criteria
+
+✅ Right-click on chest opens context menu at cursor position
+✅ Menu items render with correct labels and icons
+✅ Clicking menu item executes action and closes menu
+✅ Clicking outside menu closes it
+✅ Pressing Escape closes menu
+✅ Camera controls disabled while menu is open
+✅ Camera controls re-enable when menu closes
+✅ Menu matches Nuxt UI visual styling
+✅ No TypeScript errors
+✅ No console errors
