@@ -3,7 +3,15 @@ import { watch } from 'vue'
 import Dice20 from '~/assets/icons/d20.svg'
 import { checkCritical } from '~/utils/dice'
 
-interface DiceRollProps {
+export interface DiceRollResult {
+  result: number
+  success: boolean
+  isCriticalSuccess: boolean
+  isCriticalFailure: boolean
+  totalValue: number
+}
+
+export interface DiceRollProps {
   title?: string
   subtitle?: string
   difficultyClass?: number
@@ -21,6 +29,11 @@ interface DiceRollProps {
   }
   isInitiator?: boolean // Add this prop to control who can roll
   isHost?: boolean // Add this prop to control who can retry
+  // Callback props for programmatic modal
+  onResult?: (result: DiceRollResult) => void
+  onSuccess?: () => void
+  onFailure?: () => void
+  onClose?: () => void
 }
 
 const props = withDefaults(defineProps<DiceRollProps>(), {
@@ -38,13 +51,7 @@ const emit = defineEmits<{
   success: []
   failure: []
   close: []
-  result: [{
-    result: number
-    success: boolean
-    isCriticalSuccess: boolean
-    isCriticalFailure: boolean
-    totalValue: number // Add total value with modifiers
-  }]
+  result: [DiceRollResult]
 }>()
 
 const diceTypeValue = computed(() => {
@@ -148,6 +155,7 @@ const generateKarmicRoll = () => {
 
 const handleContinue = () => {
   emit('close')
+  props.onClose?.()
 }
 
 const rollDice = () => {
@@ -165,19 +173,23 @@ const rollDice = () => {
     const totalValue = diceResult.value + totalBonus.value
 
     // Emit the result for multiplayer sync
-    emit('result', {
+    const resultData = {
       result: diceResult.value,
       success: isSuccess,
       isCriticalSuccess,
       isCriticalFailure,
       totalValue,
-    })
+    }
+    emit('result', resultData)
+    props.onResult?.(resultData)
 
     if (isSuccess) {
       emit('success')
+      props.onSuccess?.()
     }
     else {
       emit('failure')
+      props.onFailure?.()
     }
     isRolling.value = false
 
@@ -206,9 +218,11 @@ watch(() => props.remoteRoll, (roll) => {
       showResult.value = true
       if (roll.success) {
         emit('success')
+        props.onSuccess?.()
       }
       else {
         emit('failure')
+        props.onFailure?.()
       }
     }, 500)
   }, 1000)
@@ -219,6 +233,7 @@ function resetModal() {
   showResult.value = false
   diceResult.value = null
   emit('close')
+  props.onClose?.()
 }
 
 const ABILITY_NAMES = {

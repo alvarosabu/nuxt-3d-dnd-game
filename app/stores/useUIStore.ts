@@ -5,8 +5,7 @@ import { useMultiplayer } from '~/composables/game/useMultiplayer'
 import { useUserStore } from '~/stores/useUserStore'
 import { useLobbyStore } from '~/stores/useLobbyStore'
 import { calculateSkillCheckModifiers } from '~/utils/dice'
-import type { ModalProps } from '@vueuse/core'
-import type { DiceRollProps } from '~/components/ui/DiceRollModal.vue'
+import type { DiceRollResult } from '~/components/ui/DiceRollModal.vue'
 
 /**
  * Store for managing UI state like modals and context menus
@@ -129,9 +128,6 @@ export const useUIStore = defineStore('ui', () => {
       })
     }
 
-    // Update modal props interface to include remoteRoll
-    type DiceRollModalProps = DiceRollProps & ModalProps
-
     diceRollModal.open({
       title: args.title,
       subtitle: args.subtitle,
@@ -141,7 +137,7 @@ export const useUIStore = defineStore('ui', () => {
       remoteRoll: remoteRoll.value === null ? undefined : remoteRoll.value,
       isInitiator: sync || !isMultiplayer.value,
       isHost: lobbyStore.isCurrentPlayerHost,
-      onResult: (result: DiceRollProps['result']) => {
+      onResult: (result: DiceRollResult) => {
         // Sync dice roll result with other players
         if (isMultiplayer.value) {
           sendMsg({

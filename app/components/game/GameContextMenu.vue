@@ -38,7 +38,7 @@ function handleItemClick(item: ContextMenuItem) {
         v-if="contextMenu.isOpen"
         ref="menuRef"
         :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }"
-        class="fixed z-50 rounded-md border border-gray-200/10 bg-gray-800 shadow-lg ring-1 ring-gray-200/10 p-1 overflow-hidden"
+        class="cursor-pointer fixed z-50 rounded-md border border-gray-200/10 bg-gray-800 shadow-lg ring-1 ring-gray-200/10 p-1 overflow-hidden"
         @click.stop
       >
         <UButton
